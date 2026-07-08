@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->timestamps();
-            $table->enum('role', ['admin', 'operator', 'contabil'])->default('operator');
         });
 
 
