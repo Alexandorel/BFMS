@@ -11,13 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('bank_accounts', function (Blueprint $table) {
+        Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
-            $table->string('bank_name', 255);
-            $table->string('iban', 34)->unique();
-            $table->enum('currency', ['RON', 'EUR', 'USD'])->default('RON');
+            $table->string('name', 255);
+            $table->string('sku', 100);
+            $table->string('unit_measure', 50);
+            $table->decimal('unit_price', 10, 2);
+            $table->decimal('vat_rate', 5, 2);
             $table->timestamps();
+
+            $table->unique(['company_id', 'sku']);
         });
     }
 
@@ -26,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('bank_acount');
+        Schema::dropIfExists('product');
     }
 };

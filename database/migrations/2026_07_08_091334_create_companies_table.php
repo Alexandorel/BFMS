@@ -15,13 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('name', 255);
             $table->string('juridical_form', 255);
-            $table->string('cui', 20);
-            $table->string('trade_registry_number', 20);
+            $table->string('cui', 20)->unique();
+            $table->string('trade_registry_number', 20)->unique();
             $table->string('county', 255);
             $table->string('city', 255);
             $table->string('address', 255);
             $table->decimal('social_capital', 15, 2);
-            $table->boolean('tva_payer')->default(false);
+            $table->boolean('vat_payer')->default(false);
             $table->timestamps();
         });
     }
