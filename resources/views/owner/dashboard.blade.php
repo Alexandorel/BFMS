@@ -48,6 +48,9 @@
                         </select>
                         <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </label>
+                    <button type="button" class="p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-700 transition" title="Adaugă firmă">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </button>
                     <span class="hidden sm:inline text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium">Plătitor TVA</span>
                 </div>
 
@@ -62,7 +65,7 @@
             <main class="flex-1 p-4 sm:p-6 space-y-6">
 
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-900">Bună, Alexandru 👋</h1>
+                    <h1 class="text-2xl font-bold text-slate-900">Bună, Alexandru</h1>
                     <p class="text-slate-500 text-sm mt-1">Iată situația firmei tale:</p>
                 </div>
 
