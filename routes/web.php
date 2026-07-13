@@ -11,8 +11,12 @@ Route::get('/dashboard', function () {
 });
 
 Route::get('/dashboard/owner', function () {
-    return view('owner.dashboard');
+    return view('operator.dashboard');
 });
+
+Route::get('/operator/settings/echipa', function () {
+    return view('operator.settings.team');
+})->name('operator.setting.team');
 
 Route::get('/register', function (){
     return view('auth.register');
