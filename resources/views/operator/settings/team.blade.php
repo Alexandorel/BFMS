@@ -9,9 +9,8 @@
 <body class="bg-slate-50 text-slate-800 antialiased">
 
     @php
-        // Contabilul asignat firmei curente. null = niciun contabil (empty state).
+        
         $contabil = null;
-        // $contabil = ['nume' => 'Maria Ionescu', 'email' => 'maria@contabilitate.ro'];
     @endphp
 
     <div class="flex min-h-screen">
@@ -24,7 +23,7 @@
             </div>
 
             <nav class="flex-1 px-3 py-4 space-y-1 text-sm">
-                <a href="{{ url('/dashboard/owner') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50">
+                <a href="{{ url('/dashboard/operator') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50">
                     <span class="w-2 h-2 rounded-full bg-slate-300"></span> Dashboard
                 </a>
             </nav>
@@ -79,9 +78,9 @@
 
                     {{-- Settings sub-nav --}}
                     <nav class="lg:col-span-1 space-y-1 text-sm">
-                        <a href="#" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Profil</a>
+                        <a href="{{ route('operator.settings.profile') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Profil</a>
                         <a href="#" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Firmă</a>
-                        <a href="#" class="block px-3 py-2 rounded-lg bg-white border border-slate-200 text-indigo-700 font-medium">Echipă</a>
+                        <a href="{{ route('operator.settings.team') }}" class="block px-3 py-2 rounded-lg bg-white border border-slate-200 text-indigo-700 font-medium">Echipă</a>
                         <a href="#" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Conturi bancare</a>
                         <a href="#" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Serii documente</a>
                     </nav>
@@ -91,12 +90,11 @@
 
                         <div class="bg-white rounded-xl border border-slate-200">
                             <div class="px-5 py-4 border-b border-slate-200">
-                                <h2 class="font-semibold text-slate-900">Echipă</h2>
-                                <p class="text-xs text-slate-500 mt-0.5">Cine are acces la datele acestei firme</p>
+                                <h2 class="font-semibold text-slate-900">Echipă</h2>    
                             </div>
 
                             <ul class="divide-y divide-slate-100">
-                                {{-- Operatorul: proprietarul firmei, nu poate fi revocat --}}
+                                {{-- Operatorul: proprietarul firmei --}}
                                 <li class="flex items-center justify-between gap-3 px-5 py-4">
                                     <div class="flex items-center gap-3 min-w-0">
                                         <div class="grid place-items-center w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-semibold text-sm shrink-0">AV</div>
@@ -127,14 +125,13 @@
                                 @endif
                             </ul>
 
-                            {{-- Empty state: butonul e proeminent doar cat timp actiunea e necesara --}}
+                            {{-- Empty state (nu exista contabil) --}}
                             @unless ($contabil)
                                 <div class="px-5 py-8 border-t border-slate-100 text-center">
                                     <div class="grid place-items-center w-12 h-12 mx-auto rounded-full bg-slate-100 text-slate-400">
                                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                                     </div>
                                     <p class="mt-3 text-sm font-medium text-slate-900">Niciun contabil asignat</p>
-                                    <p class="mt-1 text-sm text-slate-500">Contabilul poate vedea facturile firmei, dar nu le poate modifica.</p>
                                 </div>
                             @endunless
                         </div>
