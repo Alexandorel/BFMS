@@ -79,7 +79,7 @@
                     {{-- Settings sub-nav --}}
                     <nav class="lg:col-span-1 space-y-1 text-sm">
                         <a href="{{ route('operator.settings.profile') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Profil</a>
-                        <a href="#" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Firmă</a>
+                        <a href="{{ route('operator.settings.company') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Firmă</a>
                         <a href="{{ route('operator.settings.team') }}" class="block px-3 py-2 rounded-lg bg-white border border-slate-200 text-indigo-700 font-medium">Echipă</a>
                         <a href="#" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Conturi bancare</a>
                         <a href="#" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Serii documente</a>

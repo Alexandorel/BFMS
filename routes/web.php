@@ -18,6 +18,10 @@ Route::get('/operator/settings/profil', function () {
     return view('operator.settings.profile');
 })->name('operator.settings.profile');
 
+Route::get('/operator/settings/firma', function () {
+    return view('operator.settings.company');
+})->name('operator.settings.company');
+
 Route::get('/operator/settings/echipa', function () {
     return view('operator.settings.team');
 })->name('operator.settings.team');
