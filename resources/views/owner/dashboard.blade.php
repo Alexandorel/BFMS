@@ -38,7 +38,7 @@
         <div class="flex-1 flex flex-col min-w-0">
 
             {{-- Top Bar --}}
-            <header class="flex items-center justify-between gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
+            <header class="flex items-center gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
                 {{-- Company Select Label --}}
                 <div class="flex items-center gap-3">
                     <label class="relative">
@@ -53,12 +53,6 @@
                     </button>
                     <span class="hidden sm:inline text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium">Plătitor TVA</span>
                 </div>
-
-                {{-- New Invoice --}}
-                <a href="#" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    Factură nouă
-                </a>
             </header>
 
             {{-- Content --}}
@@ -73,7 +67,13 @@
                 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
                     {{-- Recent Invoices --}}
-                    <div class="xl:col-span-2 bg-white rounded-xl border border-slate-200">
+                    <div class="xl:col-span-2 space-y-4">
+                        <a href="#" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Factură nouă
+                        </a>
+
+                        <div class="bg-white rounded-xl border border-slate-200">
                         <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200">
                             <h2 class="font-semibold text-slate-900">Facturi recente</h2>
                             <a href="#" class="text-sm text-indigo-600 hover:underline">Vezi toate</a>
