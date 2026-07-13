@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('bank_acount', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
-            $table->string('banca', 255);
+            $table->string('bank_name', 255);
             $table->string('iban', 34);
-            $table->enum('moneda', ['RON', 'EUR', 'USD'])->default('RON');
+            $table->enum('currency', ['RON', 'EUR', 'USD'])->default('RON');
             $table->timestamps();
         });
     }

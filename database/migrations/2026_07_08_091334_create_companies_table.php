@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('companies', function (Blueprint $table) {
             $table->id();
-            $table->string('denumire', 255);
-            $table->string('forma_juridica', 255);
+            $table->string('name', 255);
+            $table->string('juridical_form', 255);
             $table->string('cui', 20);
-            $table->string('nr_reg_com', 20);
-            $table->string('judet', 255);
-            $table->string('localitate', 255);
-            $table->string('adresa', 255);
-            $table->decimal('capital_social', 15, 2);
-            $table->boolean('platitor_tva')->default(false);
+            $table->string('trade_registry_number', 20);
+            $table->string('county', 255);
+            $table->string('city', 255);
+            $table->string('address', 255);
+            $table->decimal('social_capital', 15, 2);
+            $table->boolean('tva_payer')->default(false);
             $table->timestamps();
         });
     }
