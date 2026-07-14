@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\auth\RegisteredUserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -26,6 +27,5 @@ Route::get('/operator/settings/echipa', function () {
     return view('operator.settings.team');
 })->name('operator.settings.team');
 
-Route::get('/register', function (){
-    return view('auth.register');
-})->name('register');
+Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+Route::post('/register', [RegisteredUserController::class, 'store']);

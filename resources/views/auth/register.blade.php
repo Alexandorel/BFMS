@@ -16,26 +16,26 @@
 
                 {{-- First Name --}}
                 <div class="mb-4">
-                    <label for="first-name" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                    <input id="first-name" type="text" 
-                    name="first-name" value="{{ old('first-name') }}" 
+                    <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                    <input id="first_name" type="text" 
+                    name="first_name" value="{{ old('first_name') }}" 
                     required autofocus
                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring2 focus:ring-blue-500">
                     
-                    @error('name')
+                    @error('first_name')
                     <p class="text-sm text-red-600 mt-1"> {{ $message }} </p>
                     @enderror
                 </div>
 
                 {{-- Last Name --}}
                 <div class="mb-4">
-                    <label for="last-name" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                    <input id="last-name" type="text" 
-                    name="last-name" value="{{ old('last-name') }}" 
+                    <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                    <input id="last_name" type="text" 
+                    name="last_name" value="{{ old('last_name') }}" 
                     required autofocus
                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring2 focus:ring-blue-500">
                     
-                    @error('last-name')
+                    @error('last_name')
                     <p class="text-sm text-red-600 mt-1"> {{ $message }} </p>
                     @enderror
                 </div>
@@ -68,9 +68,9 @@
 
                 {{--Confirm-Password--}}
                 <div class="mb-6">
-                    <label for="password_confirm" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-                    <input id="password_confirm" type="password" 
-                    name="password_confirm"
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                    <input id="password_confirmation" type="password" 
+                    name="password_confirmation"
                     required
                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring2 focus:ring-blue-500">
                 </div>
