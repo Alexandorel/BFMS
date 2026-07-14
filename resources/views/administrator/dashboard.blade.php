@@ -32,10 +32,10 @@
 
             <div class="p-4 border-t border-slate-200">
                 <div class="flex items-center gap-3">
-                    <div class="grid place-items-center w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-semibold text-sm">AV</div>
+                    <div class="grid place-items-center w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-semibold text-sm">{{ Str::substr($user->first_name, 0, 1) }}{{ Str::substr($user->last_name, 0, 1) }}</div>
                     <div class="min-w-0">
-                        <p class="text-sm font-medium truncate">Alexandru V.</p>
-                        <p class="text-xs text-slate-500">Operator</p>
+                        <p class="text-sm font-medium truncate">{{ $user->first_name }} {{ Str::substr($user->last_name, 0, 1) }}.</p>
+                        <p class="text-xs text-slate-500">{{ $user->role }}</p>
                     </div>
                 </div>
             </div>
@@ -66,8 +66,8 @@
             <main class="flex-1 p-4 sm:p-6 space-y-6">
 
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-900">Bună, {{ $user->prenume }}</h1>
-                    <p class="text-slate-500 text-sm mt-1">Iată situația firmei {{ $company->denumire }}:</p>
+                    <h1 class="text-2xl font-bold text-slate-900">Bună, {{ $user->first_name }}</h1>
+                    <p class="text-slate-500 text-sm mt-1">Iată situația firmei {{ $company->name }}:</p>
                 </div>
 
                 {{-- Invoices --}}
