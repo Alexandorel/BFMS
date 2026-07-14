@@ -24,6 +24,7 @@ class User extends Authenticatable
         'last_name',
         'email',
         'password',
+        'role'
     ];
 
     /**
@@ -52,7 +53,6 @@ class User extends Authenticatable
     public function companies(): BelongsToMany
     {
         return $this->belongsToMany(Company::class, 'company_user')
-            ->withPivot('role')
             ->withTimestamps();
     }
 }
