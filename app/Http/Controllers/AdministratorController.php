@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Models\Company;
 use Illuminate\Http\Request;
 
-class OperatorController extends Controller
+class AdministratorController extends Controller
 {
     public function dashboard()
     {
@@ -16,7 +16,7 @@ class OperatorController extends Controller
         // First company of the user
         $company = $user->companies()->first();
 
-        return view('operator.dashboard', [
+        return view('administrator.dashboard', [
             'user' => $user,
             'company' => $company,
         ]);
