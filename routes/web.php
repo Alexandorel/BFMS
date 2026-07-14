@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OperatorController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -10,9 +11,7 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 });
 
-Route::get('/dashboard/operator', function () {
-    return view('operator.dashboard');
-});
+Route::get('/dashboard/operator', [OperatorController::class, 'dashboard']);
 
 Route::get('/operator/settings/profil', function () {
     return view('operator.settings.profile');
