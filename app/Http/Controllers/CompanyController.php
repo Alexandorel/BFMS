@@ -4,12 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CompanyController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+
+    public function getCurrentCompany(){
+        return auth()->user()->companies()->first();
+    }
     public function index()
     {
         //
