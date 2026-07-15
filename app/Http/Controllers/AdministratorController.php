@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\CompanyController;
 
 class AdministratorController extends Controller
@@ -16,7 +17,10 @@ class AdministratorController extends Controller
 
         $companyController = new CompanyController();
         $companies = $companyController->getUserCompanies();
-        $company = $companies->first();
+
+        $activeCompanyId = Session::get('active_company_id');
+        $company = $companies->firstWhere('id', $activeCompanyId) ?? $companies->first();
+
         $companyName = $company?->name ?? " - ";
 
         return view('administrator.dashboard', [
