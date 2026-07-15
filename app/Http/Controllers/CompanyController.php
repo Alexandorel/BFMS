@@ -15,6 +15,11 @@ class CompanyController extends Controller
     public function getCurrentCompany(){
         return auth()->user()->companies()->first();
     }
+    public function getUserCompanies()
+    {
+        return Auth::user()->companies()->get();
+    }
+
     public function index()
     {
         //
