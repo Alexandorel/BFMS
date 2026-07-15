@@ -5,14 +5,14 @@ use App\Http\Controllers\AdministratorController;
 use App\Http\Controllers\AuthController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 
 Route::get('/dashboard', function () {
     return view('dashboard');
 });
 
-Route::get('/dashboard/administrator', [AdministratorController::class, 'dashboard']);
+Route::get('/dashboard/administrator', [AdministratorController::class, 'dashboard'])->name('dashboard.administrator');
 
 Route::get('/administrator/settings/profil', function () {
     return view('administrator.settings.profile');
