@@ -1,8 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\AdministratorController;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\AuthController;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -26,10 +27,8 @@ Route::get('/administrator/settings/echipa', function () {
     return view('administrator.settings.team');
 })->name('administrator.settings.team');
 
-Route::get('/register', function (){
-    return view('auth.register');
-})->name('register');
-
+Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+Route::post('/register', [RegisteredUserController::class, 'store']);
 
 Route::get('/login', function () {
     return view('auth.login');
