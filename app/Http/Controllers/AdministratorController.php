@@ -12,13 +12,13 @@ class AdministratorController extends Controller
     public function dashboard()
     {
         $user = Auth::user();
-
-        // First company of the user
         $company = $user->companies()->first();
+        $companyName = $company?->name ?? " - ";
 
         return view('administrator.dashboard', [
             'user' => $user,
             'company' => $company,
+            'companyName' => $companyName,
         ]);
     }
 }
