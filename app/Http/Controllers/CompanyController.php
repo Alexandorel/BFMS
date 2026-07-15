@@ -4,12 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
 class CompanyController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+
+    public function getCurrentCompany(){
+        return auth()->user()->companies()->first();
+    }
+    public function getUserCompanies()
+    {
+        return Auth::user()->companies()->get();
+    }
+
+    public function switchCompany($id)
+    {
+        Session::put('active_company_id', $id);
+        return redirect()->route('dashboard.administrator');
+    }
+
     public function index()
     {
         //
