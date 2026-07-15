@@ -5,20 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AdministratorController extends Controller
 {
     public function dashboard()
     {
-        // User with ID = 1, untill login is done
-        $user = User::find(1);
-
-        // First company of the user
+        $user = Auth::user();
         $company = $user->companies()->first();
+        $companyName = $company?->name ?? " - ";
 
         return view('administrator.dashboard', [
             'user' => $user,
             'company' => $company,
+            'companyName' => $companyName,
         ]);
     }
 }
