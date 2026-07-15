@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\AdministratorController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\CompanyController;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -37,6 +38,8 @@ Route::get('/login', function () {
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/company/switch/{id}', [CompanyController::class, 'switchCompany'])->middleware('auth');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {

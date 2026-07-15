@@ -138,5 +138,11 @@
         </div>
     </div>
 
+<script>
+    document.getElementById('companySelect').addEventListener('change', function() {
+        const companyId = this.value;
+        window.location.href = `/company/switch/${companyId}`;
+    });
+</script>
 </body>
 </html>
