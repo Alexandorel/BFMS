@@ -30,6 +30,6 @@ class RegisteredUserController extends Controller
             'role' => 'administrator',
         ]);
 
-        /*return redirect()->route('login')->with('status', 'Account created successfully. You can now log in.');*/ 
+        return redirect()->route('login')->with('status', 'Account created successfully. You can now log in.');
     }
 }

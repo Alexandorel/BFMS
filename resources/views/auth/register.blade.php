@@ -83,7 +83,7 @@
 
             <p class="text-sm text-center text-gray-500 mt-6">
                 Already have an account?
-                <a {{-- href="{{ route('login') }}"  --}} class="text-blue-600 hover:underline"> Sign In </a>
+                <a href="{{ route('login') }}" class="text-blue-600 hover:underline"> Sign In </a>
             </p>
         </div>
     </body>
