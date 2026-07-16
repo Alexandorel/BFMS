@@ -26,6 +26,10 @@ Route::get('/operator/settings/echipa', function () {
     return view('operator.settings.team');
 })->name('operator.settings.team');
 
+Route:: get('/operator/settings/addfirma', function(){
+    return view ('operator.settings.addcompany');
+})->name('operator.settings.addcompany');
+
 Route::get('/register', function (){
     return view('auth.register');
 })->name('register');
