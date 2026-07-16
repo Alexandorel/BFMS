@@ -1,35 +1,59 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\AdministratorController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\CompanyController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 
 Route::get('/dashboard', function () {
     return view('dashboard');
 });
 
-Route::get('/dashboard/operator', function () {
-    return view('operator.dashboard');
-});
+Route::get('/dashboard/administrator', [AdministratorController::class, 'dashboard'])->name('dashboard.administrator');
 
-Route::get('/operator/settings/profil', function () {
-    return view('operator.settings.profile');
-})->name('operator.settings.profile');
+Route::get('/administrator/settings/profil', function () {
+    return view('administrator.settings.profile');
+})->name('administrator.settings.profile');
 
 Route::get('/operator/settings/firma', function () {
-    return view('operator.settings.company');
-})->name('operator.settings.company');
+    return view('administrator.settings.company');
+})->name('administrator.settings.company');
 
-Route::get('/operator/settings/echipa', function () {
-    return view('operator.settings.team');
-})->name('operator.settings.team');
+Route::get('/administrator/settings/echipa', function () {
+    return view('administrator.settings.team');
+})->name('administrator.settings.team');
 
-Route:: get('/operator/settings/addfirma', function(){
-    return view ('operator.settings.addcompany');
-})->name('operator.settings.addcompany');
+Route:: get('/administrator/settings/addfirma', function(){
+    return view ('administrator.settings.addcompany');
+})->name('administrator.settings.addcompany');
 
-Route::get('/register', function (){
-    return view('auth.register');
-})->name('register');
+Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+Route::post('/register', [RegisteredUserController::class, 'store']);
+
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
+
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/company/switch/{id}', [CompanyController::class, 'switchCompany'])->middleware('auth');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+
+    // Exemplu de rută protejată suplimentar prin rol (RBAC — NFR-1)
+    Route::middleware('role:administrator,superadmin')->group(function () {
+        Route::get('/dashboard/owner', function () {
+            return view('owner.dashboard');
+        })->name('dashboard.owner');
+    });
+});
