@@ -34,7 +34,7 @@ Route::middleware('auth')->group(function () {
         return view('administrator.settings.profile', ['user' => auth()->user()]);
     })->name('administrator.settings.profile');
 
-    Route::get('/operator/settings/firma', function () {
+    Route::get('/administrator/settings/firma', function () {
         return view('administrator.settings.company', ['user' => auth()->user()]);
     })->name('administrator.settings.company');
 

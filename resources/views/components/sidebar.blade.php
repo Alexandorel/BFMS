@@ -3,7 +3,7 @@
     $currentUser = $user ?? auth()->user();
 @endphp
 
-<aside class="hidden lg:flex w-64 flex-col border-r border-slate-200 bg-white">
+<aside class="hidden lg:flex w-64 shrink-0 flex-col border-r border-slate-200 bg-white sticky top-0 h-screen self-start overflow-y-auto">
     <div class="flex items-center gap-2 px-6 h-16 border-b border-slate-200">
         <div class="grid place-items-center w-9 h-9 rounded-lg bg-indigo-600 text-white font-bold">B</div>
         <span class="font-semibold text-lg">BFMS</span>
