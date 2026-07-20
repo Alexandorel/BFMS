@@ -6,6 +6,7 @@ use App\Http\Requests\UpdatePasswordRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -15,9 +16,15 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $companies = $request->user()->companies()->orderBy('name')->get();
+
+        $activeCompany = $companies->firstWhere('id', Session::get('active_company_id'))
+            ?? $companies->first();
+
         return view('administrator.settings.profile', [
             'user' => $request->user(),
-            'companies' => $request->user()->companies()->orderBy('name')->get(),
+            'companies' => $companies,
+            'activeCompany' => $activeCompany,
         ]);
     }
 
