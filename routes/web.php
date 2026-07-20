@@ -16,22 +16,6 @@ Route::get('/dashboard', function () {
 
 Route::get('/dashboard/administrator', [AdministratorController::class, 'dashboard'])->name('dashboard.administrator');
 
-Route::get('/administrator/settings/profil', function () {
-    return view('administrator.settings.profile');
-})->name('administrator.settings.profile');
-
-Route::get('/operator/settings/firma', function () {
-    return view('administrator.settings.company');
-})->name('administrator.settings.company');
-
-Route::get('/administrator/settings/echipa', function () {
-    return view('administrator.settings.team');
-})->name('administrator.settings.team');
-
-Route:: get('/administrator/settings/addfirma', function(){
-    return view ('administrator.settings.addcompany');
-})->name('administrator.settings.addcompany');
-
 Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
 Route::post('/register', [RegisteredUserController::class, 'store']);
 
@@ -46,6 +30,18 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/company/switch/{id}', [CompanyController::class, 'switchCompany'])->middleware('auth');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/administrator/settings/profil', function () {
+        return view('administrator.settings.profile', ['user' => auth()->user()]);
+    })->name('administrator.settings.profile');
+
+    Route::get('/operator/settings/firma', function () {
+        return view('administrator.settings.company', ['user' => auth()->user()]);
+    })->name('administrator.settings.company');
+
+    Route::get('/administrator/settings/echipa', function () {
+        return view('administrator.settings.team', ['user' => auth()->user()]);
+    })->name('administrator.settings.team');
+
     Route::get('/administrator/settings/addfirma', [CompanyController::class, 'create'])
         ->name('administrator.settings.addcompany');
 
