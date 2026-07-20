@@ -109,7 +109,7 @@
                                     <h2 class="font-semibold text-slate-900">Date de identificare</h2>
                                     <p class="text-xs text-slate-500 mt-0.5">Apar pe fiecare factură emisă de această firmă</p>
                                 </div>
-                                <form action="{{ route('administrator.companies.update', $company) }}" method="POST" class="px-5 py-5 space-y-5">
+                                <form action="{{ route('administrator.companies.update', $company) }}" method="POST" class="px-5 py-5 space-y-5" data-partial>
                                     @csrf
                                     @method('PUT')
 
@@ -171,7 +171,7 @@
                                 <div class="px-5 py-4 border-b border-slate-200">
                                     <h2 class="font-semibold text-slate-900">Sediu social</h2>
                                 </div>
-                                <form action="{{ route('administrator.companies.update', $company) }}" method="POST" class="px-5 py-5 space-y-5">
+                                <form action="{{ route('administrator.companies.update', $company) }}" method="POST" class="px-5 py-5 space-y-5" data-partial>
                                     @csrf
                                     @method('PUT')
 
@@ -214,12 +214,12 @@
                                     <h2 class="font-semibold text-slate-900">TVA</h2>
                                     <p class="text-xs text-slate-500 mt-0.5">Determină dacă facturile noi se emit cu TVA</p>
                                 </div>
-                                <form action="{{ route('administrator.companies.update', $company) }}" method="POST" class="px-5 py-5 space-y-4">
+                                <form action="{{ route('administrator.companies.update', $company) }}" method="POST" class="px-5 py-5 space-y-4" data-partial>
                                     @csrf
                                     @method('PUT')
 
                                     {{-- Checkbox-ul nedebifat nu se trimite; hidden-ul asigura valoarea 0 --}}
-                                    <input type="hidden" name="vat_payer" value="0">
+                                    <input type="hidden" name="vat_payer" value="0" data-pair-for="vat_payer">
 
                                     <label class="flex items-start gap-3">
                                         <input type="checkbox" name="vat_payer" value="1" @checked(old('vat_payer', $company->vat_payer))
@@ -257,6 +257,60 @@
         if (this.value) {
             window.location.href = `/company/switch/${this.value}`;
         }
+    });
+
+    /*
+     * Trimite catre server doar campurile modificate.
+     * Campurile neatinse sunt dezactivate inainte de submit, deci nu ajung in
+     * request; backend-ul le trateaza ca absente si le lasa nemodificate.
+     */
+    document.querySelectorAll('form[data-partial]').forEach(function (form) {
+        const fields = Array.from(
+            form.querySelectorAll('input[name], select[name], textarea[name]')
+        ).filter(function (field) {
+            // _token si _method trebuie sa plece mereu
+            return field.type !== 'hidden';
+        });
+
+        const initial = new Map();
+        fields.forEach(function (field) {
+            initial.set(field, field.type === 'checkbox' ? String(field.checked) : field.value);
+        });
+
+        form.addEventListener('submit', function (event) {
+            let modificate = 0;
+
+            fields.forEach(function (field) {
+                const acum = field.type === 'checkbox' ? String(field.checked) : field.value;
+
+                if (acum === initial.get(field)) {
+                    field.disabled = true;
+                } else {
+                    modificate++;
+                }
+            });
+
+            // Hidden-ul pereche al unui checkbox are sens doar daca checkbox-ul s-a schimbat
+            form.querySelectorAll('input[data-pair-for]').forEach(function (hidden) {
+                const pereche = form.querySelector(
+                    'input[type="checkbox"][name="' + hidden.dataset.pairFor + '"]'
+                );
+                hidden.disabled = !pereche || pereche.disabled;
+            });
+
+            if (modificate === 0) {
+                event.preventDefault();
+                fields.forEach(function (field) { field.disabled = false; });
+                form.querySelectorAll('input[data-pair-for]').forEach(function (hidden) {
+                    hidden.disabled = false;
+                });
+
+                const buton = form.querySelector('button[type="submit"]');
+                const textInitial = buton.textContent;
+                buton.textContent = 'Nimic de salvat';
+                setTimeout(function () { buton.textContent = textInitial; }, 1500);
+            }
+        });
     });
 </script>
 </body>

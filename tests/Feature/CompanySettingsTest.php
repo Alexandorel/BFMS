@@ -49,6 +49,8 @@ class CompanySettingsTest extends TestCase
         $response->assertOk();
         $response->assertSee('Alfa Test SRL');
         $response->assertSee('RO14837428');
+        // formularele sunt marcate pentru trimiterea doar a campurilor modificate
+        $response->assertSee('data-partial', false);
         // placeholderele vechi nu mai trebuie sa apara nicaieri
         $response->assertDontSee('SC Exemplu SRL');
         $response->assertDontSee('Demo Consulting SRL');
@@ -97,6 +99,30 @@ class CompanySettingsTest extends TestCase
             'cui' => 'RO10000008',
             'social_capital' => '5000.50',
         ]);
+    }
+
+    public function test_un_singur_camp_trimis_lasa_restul_neatinse(): void
+    {
+        $user = $this->user();
+        $company = $this->company();
+        $user->companies()->attach($company->id);
+
+        // exact ce trimite formularul cand ai modificat doar denumirea
+        $this->actingAs($user)
+            ->put(route('administrator.companies.update', $company), ['name' => 'Doar Numele SRL'])
+            ->assertRedirect();
+
+        $proaspat = $company->fresh();
+
+        $this->assertSame('Doar Numele SRL', $proaspat->name);
+        $this->assertSame('RO14837428', $proaspat->cui);
+        $this->assertSame('SRL', $proaspat->juridical_form);
+        $this->assertSame('J12/100/2024', $proaspat->trade_registry_number);
+        $this->assertSame('Cluj', $proaspat->county);
+        $this->assertSame('Cluj-Napoca', $proaspat->city);
+        $this->assertSame('Str. Test nr. 1', $proaspat->address);
+        $this->assertSame('200.00', $proaspat->social_capital);
+        $this->assertFalse($proaspat->vat_payer);
     }
 
     public function test_tva_poate_fi_debifat(): void
