@@ -34,9 +34,11 @@ Route::middleware('auth')->group(function () {
         return view('administrator.settings.profile', ['user' => auth()->user()]);
     })->name('administrator.settings.profile');
 
-    Route::get('/administrator/settings/firma', function () {
-        return view('administrator.settings.company', ['user' => auth()->user()]);
-    })->name('administrator.settings.company');
+    Route::get('/administrator/settings/firma', [CompanyController::class, 'edit'])
+        ->name('administrator.settings.company');
+
+    Route::put('/administrator/settings/firma/{company}', [CompanyController::class, 'update'])
+        ->name('administrator.companies.update');
 
     Route::get('/administrator/settings/echipa', function () {
         return view('administrator.settings.team', ['user' => auth()->user()]);
