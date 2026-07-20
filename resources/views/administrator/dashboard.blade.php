@@ -24,13 +24,13 @@
             </nav>
 
             <div class="px-3 pb-2">
-                <a href="{{ route('administrator.settings.team') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 text-sm hover:bg-slate-50">
+                <a href="{{ route('administrator.settings.profile') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 text-sm hover:bg-slate-50">
                     <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     Setări
                 </a>
             </div>
 
-            <div class="p-4 border-t border-slate-200">
+            <div class="p-4 border-t border-slate-200 space-y-3">
                 <div class="flex items-center gap-3">
                     <div class="grid place-items-center w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-semibold text-sm">{{ Str::substr($user->first_name, 0, 1) }}{{ Str::substr($user->last_name, 0, 1) }}</div>
                     <div class="min-w-0">
@@ -38,6 +38,12 @@
                         <p class="text-xs text-slate-500">{{ $user->role }}</p>
                     </div>
                 </div>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="w-full px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition text-left">
+                        Deconectare
+                    </button>
+                </form>
             </div>
         </aside>
 
@@ -49,15 +55,18 @@
                 {{-- Company Select Label --}}
                 <div class="flex items-center gap-3">
                     <label class="relative">
-                        <select class="appearance-none pl-3 pr-9 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option>SC Exemplu SRL</option>
-                            <option>Demo Consulting SRL</option>
+                        <select id="companySelect" class="appearance-none pl-3 pr-9 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            @foreach ($companies as $c)
+                                <option value="{{ $c->id }}" {{ $company?->id === $c->id ? 'selected' : '' }}>
+                                    {{ $c->name }}
+                                </option>
+                            @endforeach
                         </select>
                         <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </label>
-                    <button type="button" class="p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-700 transition" title="Adaugă firmă">
+                    <a href="{{ route('administrator.settings.addcompany') }}" class="inline-flex items-center p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-700 transition" title="Adaugă firmă">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    </button>
+                    </a>
                     <span class="hidden sm:inline text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium">Plătitor TVA</span>
                 </div>
             </header>
@@ -67,7 +76,7 @@
 
                 <div>
                     <h1 class="text-2xl font-bold text-slate-900">Bună, {{ $user->first_name }}</h1>
-                    <p class="text-slate-500 text-sm mt-1">Iată situația firmei {{ $company->name }}:</p>
+                    <p class="text-slate-500 text-sm mt-1">Iată situația firmei {{ $companyName }}:</p>
                 </div>
 
                 {{-- Invoices --}}
@@ -135,5 +144,11 @@
         </div>
     </div>
 
+<script>
+    document.getElementById('companySelect').addEventListener('change', function() {
+        const companyId = this.value;
+        window.location.href = `/company/switch/${companyId}`;
+    });
+</script>
 </body>
 </html>

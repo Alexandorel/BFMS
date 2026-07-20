@@ -5,20 +5,29 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\CompanyController;
 
 class AdministratorController extends Controller
 {
     public function dashboard()
     {
-        // User with ID = 1, untill login is done
-        $user = User::find(1);
+        $user = Auth::user();
 
-        // First company of the user
-        $company = $user->companies()->first();
+        $companyController = new CompanyController();
+        $companies = $companyController->getUserCompanies();
+
+        $activeCompanyId = Session::get('active_company_id');
+        $company = $companies->firstWhere('id', $activeCompanyId) ?? $companies->first();
+
+        $companyName = $company?->name ?? " - ";
 
         return view('administrator.dashboard', [
             'user' => $user,
             'company' => $company,
+            'companies' => $companies,
+            'companyName' => $companyName,
         ]);
     }
 }
