@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCompanyRequest;
+use App\Http\Requests\UpdateCompanyRequest;
 use App\Models\Company;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -104,19 +105,34 @@ class CompanyController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Pagina de setari a firmei. Firma editata vine din ?firma=,
+     * cu fallback pe firma activa din sesiune, apoi pe prima firma a userului.
      */
-    public function edit(Company $company)
+    public function edit(Request $request): View
     {
-        //
+        $companies = $request->user()->companies()->orderBy('name')->get();
+
+        $requestedId = $request->integer('firma') ?: Session::get('active_company_id');
+
+        $company = $companies->firstWhere('id', $requestedId) ?? $companies->first();
+
+        return view('administrator.settings.company', [
+            'user' => $request->user(),
+            'companies' => $companies,
+            'company' => $company,
+        ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Salveaza modificarile venite din oricare dintre cele trei formulare
+     * ale paginii (identificare, sediu, TVA).
      */
-    public function update(Request $request, Company $company)
+    public function update(UpdateCompanyRequest $request, Company $company): RedirectResponse
     {
-        //
+        $company->update($request->validated());
+
+        return to_route('administrator.settings.company', ['firma' => $company->id])
+            ->with('success', 'Datele firmei au fost actualizate.');
     }
 
     /**
