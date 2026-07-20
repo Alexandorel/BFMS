@@ -9,7 +9,7 @@
 <body class="bg-slate-50 text-slate-800 antialiased">
  <div class = "max-w-3xl mx-auto p-6">
     <div class ="bg-white border border-slate-200 p-5">
-     <form action="#" method="POST" class="space-y-6">
+     <form action="{{ route('administrator.companies.store') }}" method="POST" class="space-y-6">
         @csrf
         
          {{-- Date Firma --}}
