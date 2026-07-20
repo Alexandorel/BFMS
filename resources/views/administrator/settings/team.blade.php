@@ -23,7 +23,7 @@
             </div>
 
             <nav class="flex-1 px-3 py-4 space-y-1 text-sm">
-                <a href="{{ url('/dashboard/operator') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50">
+                <a href="{{ url('/dashboard/administrator') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50">
                     <span class="w-2 h-2 rounded-full bg-slate-300"></span> Dashboard
                 </a>
             </nav>
@@ -78,9 +78,9 @@
 
                     {{-- Settings sub-nav --}}
                     <nav class="lg:col-span-1 space-y-1 text-sm">
-                        <a href="{{ route('operator.settings.profile') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Profil</a>
-                        <a href="{{ route('operator.settings.company') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Firmă</a>
-                        <a href="{{ route('operator.settings.team') }}" class="block px-3 py-2 rounded-lg bg-white border border-slate-200 text-indigo-700 font-medium">Echipă</a>
+                        <a href="{{ route('administrator.settings.profile') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Profil</a>
+                        <a href="{{ route('administrator.settings.company') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Firmă</a>
+                        <a href="{{ route('administrator.settings.team') }}" class="block px-3 py-2 rounded-lg bg-white border border-slate-200 text-indigo-700 font-medium">Echipă</a>
                         <a href="#" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Conturi bancare</a>
                         <a href="#" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Serii documente</a>
                     </nav>
