@@ -11,6 +11,7 @@ class BankAccount extends Model
     use HasFactory;
 
     protected $fillable = [
+        'company_id',
         'bank_name',
         'iban',
         'currency',

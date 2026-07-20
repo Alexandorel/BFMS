@@ -7,14 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Invoice extends Model
+class InvoiceLine extends Model
 {
     use HasFactory;
 
-    /**
-     * Câmpurile care pot fi completate în masă (Mass Assignment).
-     * Punem aici tot ce vine din formular sau din logica de salvare.
-     */
+    protected $table = 'invoice_lines';
+
     protected $fillable = [
         'invoice_id',
         'product_id',
@@ -30,9 +28,6 @@ class Invoice extends Model
         'position',
     ];
 
-    /**
-     * Cast-uri pentru tipuri de date specifice.
-     */
     protected function casts(): array
     {
         return [
@@ -46,17 +41,11 @@ class Invoice extends Model
         ];
     }
 
-    /**
-     * Relația cu Compania emitentă.
-     */
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
     }
 
-    /**
-     * Relația cu Clientul.
-     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
