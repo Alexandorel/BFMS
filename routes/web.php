@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\AdministratorController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -30,9 +31,14 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/company/switch/{id}', [CompanyController::class, 'switchCompany'])->middleware('auth');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/administrator/settings/profil', function () {
-        return view('administrator.settings.profile', ['user' => auth()->user()]);
-    })->name('administrator.settings.profile');
+    Route::get('/administrator/settings/profil', [ProfileController::class, 'edit'])
+        ->name('administrator.settings.profile');
+
+    Route::put('/administrator/settings/profil', [ProfileController::class, 'update'])
+        ->name('administrator.profile.update');
+
+    Route::put('/administrator/settings/profil/parola', [ProfileController::class, 'updatePassword'])
+        ->name('administrator.profile.password');
 
     Route::get('/administrator/settings/firma', [CompanyController::class, 'edit'])
         ->name('administrator.settings.company');
