@@ -9,7 +9,7 @@
 <body class="bg-slate-50 text-slate-800 antialiased">
  <div class = "max-w-3xl mx-auto p-6">
     <div class ="bg-white border border-slate-200 p-5">
-     <form action="#" method="POST" class="space-y-6">
+     <form action="{{ route('administrator.companies.store') }}" method="POST" class="space-y-6">
         @csrf
         
          {{-- Date Firma --}}
@@ -121,7 +121,7 @@
         </div>
      </div>
      <div class="flex justify-end gap-3 pt-2">
-        <a href="{{ route('administrator.settings.company') }}"  class="form-btn-secondary">Anuleaza</a>
+        <a href="{{ route('dashboard.administrator') }}"  class="form-btn-secondary">Anuleaza</a>
         <button type="submit"  class="form-btn-primary">Add firma</button>
      </div>
      </form>
