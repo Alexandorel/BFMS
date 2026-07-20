@@ -15,11 +15,9 @@ class Product extends Model
         'company_id',
         'name',
         'sku',
-        'description',
         'unit_measure',
         'unit_price',
         'vat_rate',
-        'is_active',
     ];
 
     protected function casts(): array
@@ -27,7 +25,6 @@ class Product extends Model
         return [
             'unit_price' => 'decimal:2',
             'vat_rate' => 'decimal:2',
-            'is_active' => 'boolean',
         ];
     }
 
