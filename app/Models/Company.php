@@ -41,4 +41,24 @@ class Company extends Model
     {
         return $this->hasMany(BankAccount::class);
     }
+
+    public function clients(): HasMany
+    {
+        return $this->hasMany(Client::class);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    public function documentSeries(): HasMany
+    {
+        return $this->hasMany(DocumentSeries::class);
+    }
 }
