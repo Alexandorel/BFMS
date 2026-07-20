@@ -28,6 +28,10 @@ Route::get('/administrator/settings/echipa', function () {
     return view('administrator.settings.team');
 })->name('administrator.settings.team');
 
+Route:: get('/administrator/settings/addfirma', function(){
+    return view ('administrator.settings.addcompany');
+})->name('administrator.settings.addcompany');
+
 Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
 Route::post('/register', [RegisteredUserController::class, 'store']);
 
