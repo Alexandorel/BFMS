@@ -42,6 +42,12 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/company/switch/{id}', [CompanyController::class, 'switchCompany'])->middleware('auth');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/administrator/settings/addfirma', [CompanyController::class, 'create'])
+        ->name('administrator.settings.addcompany');
+
+    Route::post('/administrator/settings/firme', [CompanyController::class, 'store'])
+        ->name('administrator.companies.store');
+
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
