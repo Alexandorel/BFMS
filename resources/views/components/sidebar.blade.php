@@ -1,4 +1,8 @@
 {{-- Sidebar vertical refolosibil pentru admin pages --}}
+@php
+    $currentUser = $user ?? auth()->user();
+@endphp
+
 <aside class="hidden lg:flex w-64 flex-col border-r border-slate-200 bg-white">
     <div class="flex items-center gap-2 px-6 h-16 border-b border-slate-200">
         <div class="grid place-items-center w-9 h-9 rounded-lg bg-indigo-600 text-white font-bold">B</div>
@@ -18,12 +22,13 @@
         </a>
     </div>
 
+    @if ($currentUser)
     <div class="p-4 border-t border-slate-200 space-y-3">
         <div class="flex items-center gap-3">
-            <div class="grid place-items-center w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-semibold text-sm">{{ Str::substr(auth()->user()->first_name, 0, 1) }}{{ Str::substr(auth()->user()->last_name, 0, 1) }}</div>
+            <div class="grid place-items-center w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-semibold text-sm">{{ Str::substr($currentUser->first_name ?? $currentUser['first_name'] ?? 'U', 0, 1) }}{{ Str::substr($currentUser->last_name ?? $currentUser['last_name'] ?? 'N', 0, 1) }}</div>
             <div class="min-w-0">
-                <p class="text-sm font-medium truncate">{{ auth()->user()->first_name }} {{ Str::substr(auth()->user()->last_name, 0, 1) }}.</p>
-                <p class="text-xs text-slate-500">{{ auth()->user()->role }}</p>
+                <p class="text-sm font-medium truncate">{{ $currentUser->first_name ?? $currentUser['first_name'] ?? 'User' }} {{ Str::substr($currentUser->last_name ?? $currentUser['last_name'] ?? 'Name', 0, 1) }}.</p>
+                <p class="text-xs text-slate-500">{{ $currentUser->role ?? $currentUser['role'] ?? 'Operator' }}</p>
             </div>
         </div>
         <form method="POST" action="{{ route('logout') }}">
@@ -33,4 +38,5 @@
             </button>
         </form>
     </div>
+    @endif
 </aside>
