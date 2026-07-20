@@ -18,27 +18,27 @@ class RomanianIbanRule implements ValidationRule
         $iban = strtoupper(preg_replace('/\s+/', '', (string)$value));
 
         if($iban===''){
-            $fail('IBAN is required');
+            $fail('IBAN-ul este necesar!');
             return;
         }
 
         if(strlen($iban) !== 24){
-            $fail('IBAN must be 24 characters long');
+            $fail('IBAN-ul trebuie să aibă 24 de caractere');
             return;
         }
 
         if(!str_starts_with($iban, 'RO')){
-            $fail('IBAN must start with RO');
+            $fail('IBAN-ul trebuie să înceapă cu RO');
             return;
         }
 
         if(!preg_match('/^[A-Z0-9]+$/', $iban)){
-            $fail('IBAN must contain only letters and digits');
+            $fail('IBAN-ul trebuie să conțină doar litere și cifre');
             return;
         }
 
         if(!$this->passesMod97($iban)){
-            $fail('IBAN is invalid');
+            $fail('IBAN-ul este invalid');
             return;
         }
     }
