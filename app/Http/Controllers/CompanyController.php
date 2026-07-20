@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCompanyRequest;
 use App\Models\Company;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
+
 
 class CompanyController extends Controller
 {
@@ -35,17 +41,58 @@ class CompanyController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): View
     {
-        //
+        return view('administrator.settings.addcompany');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreCompanyRequest $request): RedirectResponse
     {
-        //
+        $validated = $request->validated();
+
+        $company = DB::transaction(function () use ($request, $validated) {
+            $company = Company::create(Arr::only($validated, [
+                'name',
+                'juridical_form',
+                'cui',
+                'trade_registry_number',
+                'county',
+                'city',
+                'address',
+                'social_capital',
+                'vat_payer',
+            ]));
+
+            $company->users()->attach($request->user()->id);
+
+            $ibans = $validated['iban'] ?? [];
+            $bankNames = $validated['bank_name'] ?? [];
+
+            foreach ($ibans as $index => $iban) {
+                $bankName = $bankNames[$index] ?? null;
+
+                //formularul afiseaza implicit un rand gol
+                if (blank($iban) && blank($bankName)) {
+                    continue;
+                }
+
+                $company->bankAccounts()->create([
+                    'iban' => $iban,
+                    'bank_name' => $bankName,
+                    'currency' => 'RON',
+                ]);
+            }
+
+            return $company;
+        });
+
+        $request->session()->put('active_company_id', $company->id);
+
+        return to_route('administrator.settings.company')
+            ->with('success', 'Firma a fost adaugata cu succes.');
     }
 
     /**
