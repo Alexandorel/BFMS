@@ -6,19 +6,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class BankAccount extends Model
+class ClientContact extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'company_id',
-        'bank_name',
-        'iban',
-        'currency',
+        'client_id',
+        'name',
+        'role',
+        'email',
+        'phone',
     ];
 
-    public function company(): BelongsTo
+    public function client(): BelongsTo
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(Client::class);
     }
 }
