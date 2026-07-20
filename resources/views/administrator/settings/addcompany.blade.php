@@ -121,7 +121,7 @@
         </div>
      </div>
      <div class="flex justify-end gap-3 pt-2">
-        <a href="{{ route('administrator.settings.company') }}"  class="form-btn-secondary">Anuleaza</a>
+        <a href="{{ route('dashboard.administrator') }}"  class="form-btn-secondary">Anuleaza</a>
         <button type="submit"  class="form-btn-primary">Add firma</button>
      </div>
      </form>
