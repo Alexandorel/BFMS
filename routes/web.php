@@ -36,6 +36,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/company/switch/{id}', [CompanyController::class, 'switchCompany'])->middleware('auth');
 
+Route::get('/administrator/dashboard', [AdministratorController::class, 'dashboard'])->name('dashboard.administrator');
+Route::get('/contabil/dashboard', [ContabilController::class, 'dashboard'])->name('dashboard.contabil');
+Route::get('/operator/dashboard', [OperatorController::class, 'dashboard'])->name('dashboard.operator');
+
 Route::middleware('auth')->group(function () {
     Route::get('/administrator/settings/profil', [ProfileController::class, 'edit'])
         ->name('administrator.settings.profile');

@@ -37,5 +37,25 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $company->users()->attach($user->id);
+
+        $user = User::create([
+            'first_name' => 'operator',
+            'last_name' => 'test',
+            'email' => 'operator@example.com',
+            'password' => bcrypt('operator123'),
+            'role' => 'operator',
+        ]);
+
+        $company->users()->attach($user->id);
+
+        $user = User::create([
+            'first_name' => 'contabil',
+            'last_name' => 'test',
+            'email' => 'contabil@example.com',
+            'password' => bcrypt('contabil123'),
+            'role' => 'contabil',
+        ]);
+
+        $company->users()->attach($user->id);
     }
 }
