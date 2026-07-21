@@ -18,6 +18,7 @@ class Product extends Model
         'unit_measure',
         'unit_price',
         'vat_rate',
+        'is_vat_exempt',
     ];
 
     protected function casts(): array
@@ -25,6 +26,7 @@ class Product extends Model
         return [
             'unit_price' => 'decimal:2',
             'vat_rate' => 'decimal:2',
+            'is_vat_exempt' => 'boolean',
         ];
     }
 
