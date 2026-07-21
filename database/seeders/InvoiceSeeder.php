@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\Client;
 use App\Models\DocumentSeries;
 use App\Models\Invoice;
-use App\Models\InvoiceLine;
+use App\Models\InvoiceLines;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\User;
@@ -139,7 +139,7 @@ class InvoiceSeeder extends Seeder
                     $lineVat = round($lineSubtotal * $product->vat_rate / 100, 2);
                     $lineTotal = round($lineSubtotal + $lineVat, 2);
 
-                    InvoiceLine::create([
+                    InvoiceLines::create([
                         'invoice_id' => $invoice->id,
                         'product_id' => $product->id,
                         'product_name_snapshot' => $product->name,
