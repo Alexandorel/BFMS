@@ -13,6 +13,9 @@
         <a href="{{ url('/dashboard/administrator') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50">
             <span class="w-2 h-2 rounded-full bg-slate-300"></span> Dashboard
         </a>
+        <a href="{{ route('products.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 font-medium">
+            <span class="w-2 h-2 rounded-full bg-indigo-600"></span> Produse
+        </a>
     </nav>
 
     <div class="px-3 pb-2">

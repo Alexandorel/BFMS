@@ -5,17 +5,27 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Session;
 use Illuminate\View\View;
 
 class ProductController extends Controller
 {
+    private function activeCompanyId(): int
+    {
+        $companyController = new CompanyController();
+        $companies = $companyController->getUserCompanies();
+        $activeCompanyId = Session::get('active_company_id');
+        $company = $companies->firstWhere('id', $activeCompanyId) ?? $companies->first();
+
+        return $company->id;
+    }
     /**
-     * Display a listing of the resource.
+     * //Display a listing of the resource.
      */
     public function index(): View
     {
-        $products = Product::where('company_id', auth()->user()->companies->first()->id)->get();
-        return view('products_index', compact('products'));
+        $products = Product::where('company_id', $this->activeCompanyId())->get();
+        return view('products.index', compact('products'));
     }
 
     /**
@@ -40,7 +50,7 @@ class ProductController extends Controller
             'is_vat_exempt' => 'nullable|boolean',
         ]);
 
-        $validated['company_id'] = auth()->user()->companies->first()->id;
+        $validated['company_id'] = $this->activeCompanyId();
         $validated['is_vat_exempt'] = $request->has('is_vat_exempt');
 
         Product::create($validated);
