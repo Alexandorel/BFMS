@@ -3,10 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\AdministratorController;
+use App\Http\Controllers\ContabilController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
+
 
 
 Route::get('/', function () {
@@ -16,6 +18,8 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 });
+
+Route::get('/dashboard/contabil', [ContabilController::class, 'dashboard'])->name('dashboard.contabil');
 
 Route::get('/dashboard/administrator', [AdministratorController::class, 'dashboard'])->name('dashboard.administrator');
 
