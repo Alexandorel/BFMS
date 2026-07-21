@@ -3,10 +3,14 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\AdministratorController;
-use App\Http\Controllers\ContabilController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ContabilController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\InvoiceController;
+
 
 
 Route::get('/', function () {
@@ -17,7 +21,26 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 });
 
-Route::get('/dashboard/contabil', [ContabilController::class, 'dashboard'])->name('dashboard.contabil');
+
+
+Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
+
+    Route::get('/contabil', [ContabilController::class, 'dashboard'])
+        ->name('contabil');
+
+    Route::get('/contabil/reports', [ReportController::class, 'index'])
+        ->name('contabil.reports.index');
+    Route::get('/contabil/reports/client-sheet', [ReportController::class, 'clientSheet'])
+        ->name('contabil.reports.client-sheet');
+    Route::get('/contabil/reports/month-close', [ReportController::class, 'monthClose'])
+        ->name('contabil.reports.month-close');
+
+    Route::get('/contabil/facturi', [InvoiceController::class, 'index'])
+        ->name('contabil.invoices');
+
+    Route::get('/contabil/audit-log', [AuditLogController::class, 'index'])
+        ->name('contabil.audit-log.index');
+});
 
 Route::get('/dashboard/administrator', [AdministratorController::class, 'dashboard'])->name('dashboard.administrator');
 
