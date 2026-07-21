@@ -43,11 +43,11 @@
                                 </p>
                             </div>
                             <div class="flex items-center gap-3">
-                                <a href="{{ route('products.edit', $product) }}" class="text-xs text-indigo-600 hover:underline">Edit</a>
+                                <a href="{{ route('products.edit', $product) }}" class="text-xs text-indigo-600 hover:underline">Editeaza</a>
                                 <form method="POST" action="{{ route('products.destroy', $product) }}" onsubmit="return confirm('Sigur stergi acest produs?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-xs text-rose-600 hover:underline">Delete</button>
+                                    <button type="submit" class="text-xs text-rose-600 hover:underline">Sterge</button>
                                 </form>
                             </div>
                         </div>

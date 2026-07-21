@@ -10,6 +10,7 @@ use Illuminate\View\View;
 
 class ProductController extends Controller
 {
+    //Get the id of the company active in the current session. If no company is active -> uses the 1'st company of the user
     private function activeCompanyId(): int
     {
         $companyController = new CompanyController();
@@ -57,14 +58,6 @@ class ProductController extends Controller
 
         return redirect()->route('products.index')->with('status', 'Produs adaugat cu succes.');
 
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Product $product)
-    {
-        //
     }
 
     /**
