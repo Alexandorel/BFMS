@@ -57,5 +57,11 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $company->users()->attach($user->id);
+
+        $this->call([
+            ClientSeeder::class,
+            ProductSeeder::class,
+            InvoiceSeeder::class,
+        ]);
     }
 }
