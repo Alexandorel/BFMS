@@ -7,6 +7,8 @@ use App\Http\Controllers\ContabilController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProductController;
+
 
 
 Route::get('/', function () {
@@ -63,6 +65,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    Route::resource('products', ProductController::class);
 
     // Exemplu de rută protejată suplimentar prin rol (RBAC — NFR-1)
     Route::middleware('role:administrator,superadmin')->group(function () {

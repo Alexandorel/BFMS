@@ -1,0 +1,100 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Product;
+use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Session;
+use Illuminate\View\View;
+
+class ProductController extends Controller
+{
+    //Get the id of the company active in the current session. If no company is active -> uses the 1'st company of the user
+    private function activeCompanyId(): int
+    {
+        $companyController = new CompanyController();
+        $companies = $companyController->getUserCompanies();
+        $activeCompanyId = Session::get('active_company_id');
+        $company = $companies->firstWhere('id', $activeCompanyId) ?? $companies->first();
+
+        return $company->id;
+    }
+    /**
+     * //Display a listing of the resource.
+     */
+    public function index(): View
+    {
+        $products = Product::where('company_id', $this->activeCompanyId())->get();
+        return view('products.index', compact('products'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(): View
+    {
+        return view('products.create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'sku' => 'required|string|max:100',
+            'unit_measure' => 'required|string|max:50',
+            'unit_price' => 'required|numeric|min:0',
+            'vat_rate' => 'required|numeric|min:0|max:100',
+            'is_vat_exempt' => 'nullable|boolean',
+        ]);
+
+        $validated['company_id'] = $this->activeCompanyId();
+        $validated['is_vat_exempt'] = $request->has('is_vat_exempt');
+
+        Product::create($validated);
+
+        return redirect()->route('products.index')->with('status', 'Produs adaugat cu succes.');
+
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Product $product): View
+    {
+        return view('products.edit', compact('product'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Product $product): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'sku' => 'required|string|max:100',
+            'unit_measure' => 'required|string|max:50',
+            'unit_price' => 'required|numeric|min:0',
+            'vat_rate' => 'required|numeric|min:0|max:100',
+            'is_vat_exempt' => 'nullable|boolean',
+        ]);
+
+        $validated['is_vat_exempt'] = $request->has('is_vat_exempt');
+
+        $product->update($validated);
+
+        return redirect()->route('products.index')->with('status', 'Produs actualizat cu succes.');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Product $product)
+    {
+        $product->delete();
+        return redirect()->route('products.index')->with('status', 'Produs sters cu succes.');
+    }
+}
