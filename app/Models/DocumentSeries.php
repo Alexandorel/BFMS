@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DocumentType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,6 +21,13 @@ class DocumentSeries extends Model
         'start_number',
         'current_number',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'document_type' => DocumentType::class,
+        ];
+    }
 
     public function company(): BelongsTo
     {
