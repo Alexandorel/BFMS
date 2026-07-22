@@ -7,18 +7,25 @@ use App\Models\Company;
 use Illuminate\Http\Request;
 
 class ContabilController extends Controller
-{
-    public function dashboard()
+{   
+    public function dashboard(Request $request)
     {
-        // User with ID = 1, untill login is done
+        // User with ID = 1, until login is done
         $user = User::find(1);
 
-        // First company of the user
-        $company = $user->companies()->first();
+        // All companies of the user
+        $companies = $user->companies()->get();
 
-        return view('contabil.dashboard', [
-            'user' => $user,
-            'company' => $company,
-        ]);
+        // First company of the user
+        $company = $companies->first();
+
+        $companyName = $company ? $company->name : 'N/A';
+
+        return view('contabil.dashboard', compact(
+            'user',
+            'companies',
+            'company',
+            'companyName'
+        ));
     }
 }
