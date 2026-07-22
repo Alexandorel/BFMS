@@ -62,6 +62,7 @@ class InvoiceSeeder extends Seeder
                 [
                     'start_number' => 1,
                     'current_number' => 0,
+                    'is_default' => true,
                 ]
             );
 

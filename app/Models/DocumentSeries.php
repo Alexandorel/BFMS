@@ -20,12 +20,16 @@ class DocumentSeries extends Model
         'prefix',
         'start_number',
         'current_number',
+        'is_default',
+        'is_active',
     ];
 
     protected function casts(): array
     {
         return [
             'document_type' => DocumentType::class,
+            'is_default' => 'boolean',
+            'is_active' => 'boolean',
         ];
     }
 
