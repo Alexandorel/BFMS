@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\DocumentType;
 use App\Models\Client;
 use App\Models\DocumentSeries;
 use App\Models\Invoice;
@@ -55,7 +56,7 @@ class InvoiceSeeder extends Seeder
             $series = DocumentSeries::firstOrCreate(
                 [
                     'company_id' => $company->id,
-                    'document_type' => 'invoice',
+                    'document_type' => DocumentType::Invoice,
                     'prefix' => 'BFMS',
                 ],
                 [
@@ -116,7 +117,7 @@ class InvoiceSeeder extends Seeder
                     'company_id' => $company->id,
                     'client_id' => $data['client']->id,
                     'document_series_id' => $series->id,
-                    'document_type' => 'factura',
+                    'document_type' => DocumentType::Invoice,
                     'series' => $series->prefix,
                     'number' => $number,
                     'status' => $data['status'],
