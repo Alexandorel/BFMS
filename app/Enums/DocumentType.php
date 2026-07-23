@@ -9,7 +9,7 @@ enum DocumentType: string
     case Receipt = 'receipt';
 
     /**
-     * Eticheta afișată în interfață.
+     * Tag showing in interface
      */
     public function label(): string
     {

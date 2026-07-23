@@ -10,8 +10,7 @@ use RuntimeException;
 class DocumentSeriesService
 {
     /**
-     * Seria pe care o folosește firma pentru un tip de document.
-     * Preferă seria marcată ca implicită; altfel prima serie activă.
+     * default serie for company
      */
     public function defaultFor(int $companyId, DocumentType $documentType): ?DocumentSeries
     {
@@ -23,10 +22,8 @@ class DocumentSeriesService
     }
 
     /**
-     * Alocă următorul număr din serie și avansează contorul.
-     *
-     * Trebuie apelată din interiorul unei tranzacții, altfel lock-ul pe rândul
-     * seriei se eliberează imediat și doi utilizatori pot primi același număr.
+     * transactionLevel() = 0 means you are not into a transaction.
+     * lockforUpdate() blocks the row untill the transaction ends.
      */
     public function allocateNumber(DocumentSeries $series): int
     {
@@ -36,7 +33,6 @@ class DocumentSeriesService
             );
         }
 
-        // Recitim seria sub lock: instanța primită poate fi învechită.
         $locked = DocumentSeries::whereKey($series->getKey())->lockForUpdate()->firstOrFail();
 
         if (! $locked->is_active) {
@@ -45,7 +41,7 @@ class DocumentSeriesService
             );
         }
 
-        // O serie nefolosită pornește de la start_number, nu de la 1.
+        // unused serie starts from current_number
         $next = $locked->current_number < $locked->start_number
             ? $locked->start_number
             : $locked->current_number + 1;

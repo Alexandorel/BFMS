@@ -49,9 +49,7 @@ class CompanySettingsTest extends TestCase
         $response->assertOk();
         $response->assertSee('Alfa Test SRL');
         $response->assertSee('RO14837428');
-        // formularele sunt marcate pentru trimiterea doar a campurilor modificate
         $response->assertSee('data-partial', false);
-        // placeholderele vechi nu mai trebuie sa apara nicaieri
         $response->assertDontSee('SC Exemplu SRL');
         $response->assertDontSee('Demo Consulting SRL');
     }
@@ -73,7 +71,6 @@ class CompanySettingsTest extends TestCase
             'county' => 'Bihor',
             'city' => 'Oradea',
             'address' => 'Str. Republicii nr. 5',
-            // campurile netrimise raman neatinse
             'name' => 'Alfa Test SRL',
         ]);
     }
@@ -107,7 +104,6 @@ class CompanySettingsTest extends TestCase
         $company = $this->company();
         $user->companies()->attach($company->id);
 
-        // exact ce trimite formularul cand ai modificat doar denumirea
         $this->actingAs($user)
             ->put(route('administrator.companies.update', $company), ['name' => 'Doar Numele SRL'])
             ->assertRedirect();
@@ -131,7 +127,6 @@ class CompanySettingsTest extends TestCase
         $company = $this->company(['vat_payer' => true]);
         $user->companies()->attach($company->id);
 
-        // checkbox nebifat => browserul trimite doar hidden-ul cu 0
         $this->actingAs($user)
             ->put(route('administrator.companies.update', $company), ['vat_payer' => '0'])
             ->assertRedirect();
@@ -143,7 +138,6 @@ class CompanySettingsTest extends TestCase
     {
         $user = $this->user();
         $altaFirma = $this->company(['cui' => 'RO10000016', 'trade_registry_number' => 'J12/777/2024']);
-        // deliberat: nu o atasam userului
 
         $this->actingAs($user)
             ->put(route('administrator.companies.update', $altaFirma), ['city' => 'Hacked'])
