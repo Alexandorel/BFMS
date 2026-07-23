@@ -70,32 +70,37 @@
                                     </thead>
                                     <tbody class="divide-y divide-slate-100">
                                         @php
-                                            $facturi = [
-                                                ['nr' => 'F-0142', 'client' => 'Alpha Tech SRL',   'val' => '4.760 RON', 'status' => 'platita'],
-                                                ['nr' => 'F-0141', 'client' => 'Beta Media SA',    'val' => '2.100 RON', 'status' => 'trimisa'],
-                                                ['nr' => 'F-0140', 'client' => 'Gamma Retail SRL', 'val' => '8.900 RON', 'status' => 'restanta'],
-                                                ['nr' => 'F-0139', 'client' => 'Delta Prod SRL',   'val' => '1.250 RON', 'status' => 'ciorna'],
-                                                ['nr' => 'F-0138', 'client' => 'Omega Design',     'val' => '3.400 RON', 'status' => 'platita'],
-                                            ];
                                             $badge = [
-                                                'platita'  => ['Plătită',  'bg-emerald-50 text-emerald-700'],
-                                                'trimisa'  => ['Trimisă',  'bg-sky-50 text-sky-700'],
-                                                'restanta' => ['Restantă', 'bg-rose-50 text-rose-700'],
-                                                'ciorna'   => ['Ciornă',   'bg-slate-100 text-slate-600'],
+                                                'draft'          => ['Ciornă',            'bg-slate-100 text-slate-600'],
+                                                'issued'         => ['Emisă',             'bg-sky-50 text-sky-700'],
+                                                'partially_paid' => ['Încasată parțial',  'bg-amber-50 text-amber-700'],
+                                                'fully_paid'     => ['Încasată total',    'bg-emerald-50 text-emerald-700'],
+                                                'cancelled'      => ['Anulată',           'bg-rose-50 text-rose-700'],
+                                                'credited'       => ['Stornată',          'bg-slate-100 text-slate-600'],
                                             ];
                                         @endphp
-                                        @foreach (array_slice($facturi, 0, 5) as $f)
+                                        @forelse ($invoices as $inv)
                                             <tr class="hover:bg-slate-50">
-                                                <td class="px-5 py-3 font-medium text-slate-900">{{ $f['nr'] }}</td>
-                                                <td class="px-5 py-3 text-slate-600">{{ $f['client'] }}</td>
-                                                <td class="px-5 py-3 text-slate-900">{{ $f['val'] }}</td>
+                                                <td class="px-5 py-3 font-medium text-slate-900">
+                                                    {{ $inv->number ? $inv->series . '-' . $inv->number : '—' }}
+                                                </td>
+                                                <td class="px-5 py-3 text-slate-600">{{ $inv->client?->full_name ?? '—' }}</td>
+                                                <td class="px-5 py-3 text-slate-900">
+                                                    {{ number_format($inv->total, 2, ',', '.') }} {{ $inv->currency }}
+                                                </td>
                                                 <td class="px-5 py-3">
-                                                    <span class="text-xs px-2 py-1 rounded-full font-medium {{ $badge[$f['status']][1] }}">
-                                                        {{ $badge[$f['status']][0] }}
+                                                    <span class="text-xs px-2 py-1 rounded-full font-medium {{ $badge[$inv->status][1] ?? 'bg-slate-100 text-slate-600' }}">
+                                                        {{ $badge[$inv->status][0] ?? $inv->status }}
                                                     </span>
                                                 </td>
                                             </tr>
-                                        @endforeach
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="px-5 py-8 text-center text-slate-400">
+                                                    Nicio factură înregistrată.
+                                                </td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>
