@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Enums\DocumentType;
 use App\Models\Client;
 use App\Models\DocumentSeries;
+use App\Services\DocumentSeriesService;
 use App\Models\Invoice;
 use App\Models\InvoiceLines;
 use App\Models\Payment;
@@ -16,10 +17,7 @@ use Illuminate\Support\Facades\DB;
 class InvoiceSeeder extends Seeder
 {
     /**
-     * 5 facturi pentru compania
-     * user-ului user@example.com. 
-     * Necesită ClientSeeder și
-     * ProductSeeder rulate în prealabil.
+     * 5 invoices for user@example.com
      */
     public function run(): void
     {
@@ -37,11 +35,11 @@ class InvoiceSeeder extends Seeder
             return;
         }
 
-        // Clienții creați de ClientSeeder
+        // Clients 
         $clientCompany = Client::where('company_id', $company->id)->where('cui', 'RO45678901')->first();
         $clientIndividual = Client::where('company_id', $company->id)->where('cnp', '1900101223344')->first();
 
-        // Produsele create de ProductSeeder
+        // Products
         $consultanta = Product::where('company_id', $company->id)->where('sku', 'SRV-CONS')->first();
         $dezvoltare = Product::where('company_id', $company->id)->where('sku', 'SRV-DEV')->first();
         $licenta = Product::where('company_id', $company->id)->where('sku', 'PRD-LIC')->first();
@@ -52,7 +50,7 @@ class InvoiceSeeder extends Seeder
         }
 
         DB::transaction(function () use ($user, $company, $clientCompany, $clientIndividual, $consultanta, $dezvoltare, $licenta) {
-            // Seria de documente pentru facturi
+            // Document Serie for invoices
             $series = DocumentSeries::firstOrCreate(
                 [
                     'company_id' => $company->id,
@@ -60,13 +58,13 @@ class InvoiceSeeder extends Seeder
                     'prefix' => 'BFMS',
                 ],
                 [
-                    'start_number' => 1,
+                    'start_number' => 1001,
                     'current_number' => 0,
                     'is_default' => true,
                 ]
             );
 
-            // Definirea celor 5 facturi
+            // Invoices
             $invoicesData = [
                 [
                     'client' => $clientCompany,
@@ -111,15 +109,16 @@ class InvoiceSeeder extends Seeder
             ];
 
             foreach ($invoicesData as $data) {
-                $series->increment('current_number');
-                $number = $series->current_number;
+                $number = $data['status'] === 'draft'
+                    ? null
+                    : app(DocumentSeriesService::class)->allocateNumber($series);
 
                 $invoice = Invoice::create([
                     'company_id' => $company->id,
                     'client_id' => $data['client']->id,
                     'document_series_id' => $series->id,
                     'document_type' => DocumentType::Invoice,
-                    'series' => $series->prefix,
+                    'series' => $number === null ? null : $series->prefix,
                     'number' => $number,
                     'status' => $data['status'],
                     'issue_date' => $data['issue_date'],
@@ -168,7 +167,7 @@ class InvoiceSeeder extends Seeder
                     'total' => $total,
                 ]);
 
-                // Plăți pentru facturile marcate ca încasate
+                // Paymanents for invoices
                 if ($data['paid'] === 'full') {
                     $this->createPayment($invoice, $company->id, $user->id, $total, $data['issue_date']);
                 } elseif ($data['paid'] === 'partial') {
