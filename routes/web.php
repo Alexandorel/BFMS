@@ -24,7 +24,7 @@ Route::get('/dashboard', function () {
 
 
 
-Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
+Route::middleware(['auth', 'role:contabil'])->prefix('dashboard')->name('dashboard.')->group(function () {
 
     Route::get('/contabil', [ContabilController::class, 'dashboard'])
         ->name('contabil');
