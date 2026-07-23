@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('prefix', 10);
             $table->unsignedInteger('start_number');
             $table->unsignedInteger('current_number')->default(0);
+            $table->boolean('is_default')->default(false);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
 
             $table->unique(['company_id', 'document_type', 'prefix']);

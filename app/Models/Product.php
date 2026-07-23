@@ -37,6 +37,6 @@ class Product extends Model
 
     public function invoiceLines(): HasMany
     {
-        return $this->hasMany(InvoiceLine::class);
+        return $this->hasMany(InvoiceLines::class);
     }
 }

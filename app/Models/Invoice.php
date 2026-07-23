@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DocumentType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -40,6 +41,7 @@ class Invoice extends Model
     protected function casts(): array
     {
         return [
+            'document_type' => DocumentType::class,
             'issue_date' => 'date',
             'due_date' => 'date',
             'exchange_rate' => 'decimal:4',
@@ -94,7 +96,7 @@ class Invoice extends Model
      */
     public function lines(): HasMany
     {
-        return $this->hasMany(InvoiceLine::class);
+        return $this->hasMany(InvoiceLines::class);
     }
 
     public function payments(): HasMany
