@@ -10,14 +10,14 @@
     </div>
 
     <nav class="flex-1 px-3 py-4 space-y-1 text-sm">
-        <a href="{{ url('/dashboard/administrator') }}"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->routeIs('dashboard.administrator') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-slate-600 hover:bg-slate-50' }}">
-            <span class="w-2 h-2 rounded-full {{ request()->routeIs('dashboard.administrator') ? 'bg-indigo-600' : 'bg-slate-300' }}"></span>
+        <a href="{{ url('/administrator/dashboard') }}"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->routeIs('administrator.dashboard') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-slate-600 hover:bg-slate-50' }}">
+            <span class="w-2 h-2 rounded-full {{ request()->routeIs('administrator.dashboard') ? 'bg-indigo-600' : 'bg-slate-300' }}"></span>
             Dashboard
         </a>
-        <a href="{{ route('products.index') }}"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->routeIs('products.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-slate-600 hover:bg-slate-50' }}">
-            <span class="w-2 h-2 rounded-full {{ request()->routeIs('products.*') ? 'bg-indigo-600' : 'bg-slate-300' }}"></span>
+        <a href="{{ route('produse.index') }}"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->routeIs('produse.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-slate-600 hover:bg-slate-50' }}">
+            <span class="w-2 h-2 rounded-full {{ request()->routeIs('produse.*') ? 'bg-indigo-600' : 'bg-slate-300' }}"></span>
             Produse
         </a>
     </nav>

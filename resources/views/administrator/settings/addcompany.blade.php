@@ -352,7 +352,7 @@
             </div>
 
             <div class="flex justify-end gap-3 pt-2">
-                <a href="{{ route('dashboard.administrator') }}"
+                <a href="{{ route('administrator.dashboard') }}"
                    class="form-btn-secondary">
                     Anulează
                 </a>

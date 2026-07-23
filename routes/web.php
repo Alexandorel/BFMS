@@ -22,8 +22,6 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 });
 
-
-
 Route::middleware(['auth', 'role:contabil'])->prefix('dashboard')->name('dashboard.')->group(function () {
 
     Route::get('/contabil', [ContabilController::class, 'dashboard'])
@@ -43,8 +41,6 @@ Route::middleware(['auth', 'role:contabil'])->prefix('dashboard')->name('dashboa
         ->name('contabil.audit-log.index');
 });
 
-Route::get('/dashboard/administrator', [AdministratorController::class, 'dashboard'])->name('dashboard.administrator');
-
 Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
 Route::post('/register', [RegisteredUserController::class, 'store']);
 
@@ -57,42 +53,42 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/company/switch/{id}', [CompanyController::class, 'switchCompany'])->middleware('auth');
-
-Route::get('/administrator/dashboard', [AdministratorController::class, 'dashboard'])->name('dashboard.administrator');
-Route::get('/contabil/dashboard', [ContabilController::class, 'dashboard'])->name('dashboard.contabil');
 Route::get('/operator/dashboard', [OperatorController::class, 'dashboard'])->name('dashboard.operator');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/administrator/settings/profil', [ProfileController::class, 'edit'])
+Route::middleware(['auth', 'role:administrator'])->group(function () {
+    Route::get('/administrator/dashboard', [AdministratorController::class, 'dashboard'])
+        ->name('administrator.dashboard');
+
+    Route::get('/administrator/setari/profil', [ProfileController::class, 'edit'])
         ->name('administrator.settings.profile');
 
-    Route::put('/administrator/settings/profil', [ProfileController::class, 'update'])
+    Route::put('/administrator/setari/profil', [ProfileController::class, 'update'])
         ->name('administrator.profile.update');
 
-    Route::put('/administrator/settings/profil/parola', [ProfileController::class, 'updatePassword'])
+    Route::put('/administrator/setari/profil/parola', [ProfileController::class, 'updatePassword'])
         ->name('administrator.profile.password');
 
-    Route::get('/administrator/settings/firma', [CompanyController::class, 'edit'])
+    Route::get('/administrator/setari/firma', [CompanyController::class, 'edit'])
         ->name('administrator.settings.company');
 
-    Route::put('/administrator/settings/firma/{company}', [CompanyController::class, 'update'])
+    Route::put('/administrator/setari/firma/{company}', [CompanyController::class, 'update'])
         ->name('administrator.companies.update');
 
-    Route::get('/administrator/settings/echipa', function () {
+    Route::get('/administrator/setari/echipa', function () {
         return view('administrator.settings.team', ['user' => auth()->user()]);
     })->name('administrator.settings.team');
 
-    Route::get('/administrator/settings/addfirma', [CompanyController::class, 'create'])
+    Route::get('/administrator/setari/addfirma', [CompanyController::class, 'create'])
         ->name('administrator.settings.addcompany');
 
-    Route::post('/administrator/settings/firme', [CompanyController::class, 'store'])
+    Route::post('/administrator/setari/firme', [CompanyController::class, 'store'])
         ->name('administrator.companies.store');
 
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
 
-    Route::resource('products', ProductController::class);
+    Route::resource('produse', ProductController::class);
 
     // Exemplu de rută protejată suplimentar prin rol (RBAC — NFR-1)
     Route::middleware('role:administrator,superadmin')->group(function () {

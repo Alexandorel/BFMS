@@ -16,7 +16,7 @@
                 <div class="max-w-lg mx-auto">
                     <h1 class="text-2xl font-bold text-slate-900 mb-6">Adauga produs</h1>
 
-                    <form method="POST" action="{{ route('products.store') }}" class="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+                    <form method="POST" action="{{ route('produse.store') }}" class="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
                         @csrf
                         @include('products.form')
                         <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-semibold">

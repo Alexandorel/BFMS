@@ -15,7 +15,7 @@
             <main class="flex-1 p-4 sm:p-6">
                 <div class="max-w-lg mx-auto">
                     <h1 class="text-2xl font-bold text-slate-900 mb-6">Editeaza Produs</h1>
-                    <form method="POST" action="{{ route('products.update', $product) }}" class="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+                    <form method="POST" action="{{ route('produse.update', $product) }}" class="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
                         @csrf
                         @method('PUT')
                         @include('products.form')
