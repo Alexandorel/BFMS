@@ -15,7 +15,6 @@
         <form action="#" method="POST" class="space-y-6">
             @csrf
             <div class="space-y-4">
-                <h2 class="form-section-title">Client</h2>
                 <div>
                     <label for="client_id" class="form-label">Client</label>
                     <select id="client_id" name="client_id" required class="form-input">
