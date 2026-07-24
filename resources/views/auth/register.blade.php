@@ -4,19 +4,19 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>{{ config('app.name', 'Laravel') }} - Register </title>
+        <title>{{ config('app.name', 'Laravel') }} - Înregistrare </title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="min-h-screen flex items center justify-center bg-gray-50">
         <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
-            <h1 class="text-2xl font-semibold text-center mb-6">Register</h1>
+            <h1 class="text-2xl font-semibold text-center mb-6">Creeaza Cont</h1>
 
             <form method="POST" action="{{ route('register') }}">
                 @csrf 
 
                 {{-- First Name --}}
                 <div class="mb-4">
-                    <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                    <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">Nume</label>
                     <input id="first_name" type="text" 
                     name="first_name" value="{{ old('first_name') }}" 
                     required autofocus
@@ -29,7 +29,7 @@
 
                 {{-- Last Name --}}
                 <div class="mb-4">
-                    <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                    <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Prenume</label>
                     <input id="last_name" type="text" 
                     name="last_name" value="{{ old('last_name') }}" 
                     required autofocus
@@ -55,7 +55,7 @@
 
                 {{--Password--}}
                 <div class="mb-4">
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Parolă</label>
                     <input id="password" type="password" 
                     name="password"
                     required
@@ -68,7 +68,7 @@
 
                 {{--Confirm-Password--}}
                 <div class="mb-6">
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmă parola</label>
                     <input id="password_confirmation" type="password" 
                     name="password_confirmation"
                     required
@@ -76,14 +76,14 @@
                 </div>
 
                 <button type="submit" 
-                class="w-full bg-blue-600 text-white font-medium py-2 rounded-md hover:bg-blue-700 transition">
-                Register
+                class="w-full bg-indigo-600 text-white font-medium py-2 rounded-md hover:bg-indigo-700 transition">
+                Înregistrează-te
                 </button>
             </form>
 
             <p class="text-sm text-center text-gray-500 mt-6">
-                Already have an account?
-                <a href="{{ route('login') }}" class="text-blue-600 hover:underline"> Sign In </a>
+                Ai deja cont?
+                <a href="{{ route('login') }}" class="text-blue-600 hover:underline"> Autentifică-te </a>
             </p>
         </div>
     </body>
