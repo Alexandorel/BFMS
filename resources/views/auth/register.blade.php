@@ -20,7 +20,7 @@
                     <input id="first_name" type="text" 
                     name="first_name" value="{{ old('first_name') }}" 
                     required autofocus
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring2 focus:ring-blue-500">
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     
                     @error('first_name')
                     <p class="text-sm text-red-600 mt-1"> {{ $message }} </p>
@@ -33,7 +33,7 @@
                     <input id="last_name" type="text" 
                     name="last_name" value="{{ old('last_name') }}" 
                     required autofocus
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring2 focus:ring-blue-500">
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     
                     @error('last_name')
                     <p class="text-sm text-red-600 mt-1"> {{ $message }} </p>
@@ -46,7 +46,7 @@
                     <input id="email" type="email" 
                     name="email" value="{{ old('email') }}" 
                     required
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring2 focus:ring-blue-500">
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
 
                     @error('email')
                         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
@@ -59,7 +59,7 @@
                     <input id="password" type="password" 
                     name="password"
                     required
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring2 focus:ring-blue-500">
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
 
                     @error('password')
                         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
@@ -72,7 +72,7 @@
                     <input id="password_confirmation" type="password" 
                     name="password_confirmation"
                     required
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring2 focus:ring-blue-500">
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
 
                 <button type="submit" 
