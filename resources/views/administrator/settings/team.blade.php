@@ -146,5 +146,12 @@
         </div>
     </div>
 
+<script>
+    document.getElementById('companySelect')?.addEventListener('change', function () {
+        if (this.value) {
+            window.location.href = `/company/switch/${this.value}`;
+        }
+    });
+</script>
 </body>
 </html>
