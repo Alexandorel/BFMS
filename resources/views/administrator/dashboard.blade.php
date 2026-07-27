@@ -66,19 +66,10 @@
                                             <th class="px-5 py-3 font-medium">Client</th>
                                             <th class="px-5 py-3 font-medium">Valoare</th>
                                             <th class="px-5 py-3 font-medium">Status</th>
+                                            <th class="px-5 py-3 font-medium text-right">Detalii</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100">
-                                        @php
-                                            $badge = [
-                                                'draft'          => ['Ciornă',            'bg-slate-100 text-slate-600'],
-                                                'issued'         => ['Emisă',             'bg-sky-50 text-sky-700'],
-                                                'partially_paid' => ['Încasată parțial',  'bg-amber-50 text-amber-700'],
-                                                'fully_paid'     => ['Încasată total',    'bg-emerald-50 text-emerald-700'],
-                                                'cancelled'      => ['Anulată',           'bg-rose-50 text-rose-700'],
-                                                'credited'       => ['Stornată',          'bg-slate-100 text-slate-600'],
-                                            ];
-                                        @endphp
                                         @forelse ($invoices as $inv)
                                             <tr class="hover:bg-slate-50">
                                                 <td class="px-5 py-3 font-medium text-slate-900">
@@ -89,14 +80,16 @@
                                                     {{ number_format($inv->total, 2, ',', '.') }} {{ $inv->currency }}
                                                 </td>
                                                 <td class="px-5 py-3">
-                                                    <span class="text-xs px-2 py-1 rounded-full font-medium {{ $badge[$inv->status][1] ?? 'bg-slate-100 text-slate-600' }}">
-                                                        {{ $badge[$inv->status][0] ?? $inv->status }}
-                                                    </span>
+                                                    <x-invoice-status-badge :status="$inv->status" />
+                                                </td>
+                                                <td class="px-5 py-3 text-right">
+                                                    <a href="{{ route('invoices.show', $inv) }}"
+                                                        class="text-indigo-600 hover:underline text-sm">Vezi</a>
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="4" class="px-5 py-8 text-center text-slate-400">
+                                                <td colspan="5" class="px-5 py-8 text-center text-slate-400">
                                                     Nicio factură înregistrată.
                                                 </td>
                                             </tr>

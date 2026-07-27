@@ -71,6 +71,12 @@ Route::middleware(['auth', 'role:administrator,operator'])->prefix('facturi')->n
 
 });
 
+// Read-only invoice for administrator and accountant
+Route::middleware(['auth', 'role:administrator,contabil'])->group(function () {
+    Route::get('/facturi/{invoice}', [InvoiceController::class, 'show'])
+        ->name('invoices.show');
+});
+
 Route::get('/administrator/dashboard', [AdministratorController::class, 'dashboard'])->name('dashboard.administrator');
 Route::get('/contabil/dashboard', [ContabilController::class, 'dashboard'])->name('dashboard.contabil');
 Route::get('/operator/dashboard', [OperatorController::class, 'dashboard'])->name('dashboard.operator');
@@ -92,7 +98,14 @@ Route::middleware('auth')->group(function () {
         ->name('administrator.companies.update');
 
     Route::get('/administrator/settings/echipa', function () {
-        return view('administrator.settings.team', ['user' => auth()->user()]);
+        $companies = auth()->user()->companies()->orderBy('name')->get();
+        $company = $companies->firstWhere('id', session('active_company_id')) ?? $companies->first();
+
+        return view('administrator.settings.team', [
+            'user' => auth()->user(),
+            'companies' => $companies,
+            'company' => $company,
+        ]);
     })->name('administrator.settings.team');
 
     Route::get('/administrator/settings/addfirma', [CompanyController::class, 'create'])

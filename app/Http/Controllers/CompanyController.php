@@ -31,7 +31,13 @@ class CompanyController extends Controller
     public function switchCompany($id)
     {
         Session::put('active_company_id', $id);
-        return redirect()->route('dashboard.administrator');
+
+        // Fallback for the right roll
+        $fallback = Auth::user()?->role === 'contabil'
+            ? route('dashboard.contabil')
+            : route('dashboard.administrator');
+
+        return back(fallback: $fallback);
     }
 
     public function index()
