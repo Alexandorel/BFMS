@@ -38,9 +38,15 @@ Route::middleware(['auth', 'role:contabil'])->prefix('dashboard')->name('dashboa
 
     Route::get('/contabil/facturi', [InvoiceController::class, 'index'])
         ->name('contabil.invoices');
-    Route::get('/contabil/facturi/adauga', function () {
-    return view('contabil.create-invoice');
-})      ->name('contabil.invoices.create');
+
+    Route::post('/contabil/facturi', [InvoiceController::class, 'store'])
+    ->name('contabil.invoices.store');
+
+    Route::get('/contabil/facturi/adauga', [InvoiceController::class, 'create'])
+    ->name('contabil.invoices.create');
+    
+    Route::get('/contabil/facturi/curs-valutar', [InvoiceController::class, 'exchangeRate'])
+    ->name('contabil.invoices.exchange-rate');
 
     Route::get('/contabil/audit-log', [AuditLogController::class, 'index'])
         ->name('contabil.audit-log.index');
