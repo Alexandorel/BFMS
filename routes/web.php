@@ -36,18 +36,6 @@ Route::middleware(['auth', 'role:contabil'])->prefix('dashboard')->name('dashboa
     Route::get('/contabil/reports/month-close', [ReportController::class, 'monthClose'])
         ->name('contabil.reports.month-close');
 
-    Route::get('/contabil/facturi', [InvoiceController::class, 'index'])
-        ->name('contabil.invoices');
-
-    Route::post('/contabil/facturi', [InvoiceController::class, 'store'])
-    ->name('contabil.invoices.store');
-
-    Route::get('/contabil/facturi/adauga', [InvoiceController::class, 'create'])
-    ->name('contabil.invoices.create');
-    
-    Route::get('/contabil/facturi/curs-valutar', [InvoiceController::class, 'exchangeRate'])
-    ->name('contabil.invoices.exchange-rate');
-
     Route::get('/contabil/audit-log', [AuditLogController::class, 'index'])
         ->name('contabil.audit-log.index');
 });
@@ -66,6 +54,22 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/company/switch/{id}', [CompanyController::class, 'switchCompany'])->middleware('auth');
+
+Route::middleware(['auth', 'role:administrator,operator'])->prefix('facturi')->name('invoices.')->group(function () {
+
+    Route::get('/', [InvoiceController::class, 'index'])
+        ->name('index');
+
+    Route::get('/adauga', [InvoiceController::class, 'create'])
+        ->name('create');
+
+    Route::post('/', [InvoiceController::class, 'store'])
+        ->name('store');
+
+    Route::get('/curs-valutar', [InvoiceController::class, 'exchangeRate'])
+        ->name('exchange-rate');
+
+});
 
 Route::get('/administrator/dashboard', [AdministratorController::class, 'dashboard'])->name('dashboard.administrator');
 Route::get('/contabil/dashboard', [ContabilController::class, 'dashboard'])->name('dashboard.contabil');

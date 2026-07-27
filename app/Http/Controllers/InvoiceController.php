@@ -53,7 +53,7 @@ class InvoiceController extends Controller
     {
         $companyId = session('active_company_id');
         $clients = Client::where('company_id', $companyId)->get();
-        return view ('contabil.create-invoice',compact('clients'));
+        return view('contabil.create-invoice', compact('clients'));
     }
     public function store(Request $request, DocumentSeriesService $seriesService)
     {
@@ -125,9 +125,9 @@ class InvoiceController extends Controller
             $invoice->lines()->createMany($lines);
             return $invoice;
         });
-        return redirect()
-        ->route('dashboard.contabil.invoices')
-        ->with('success', "Factura {$invoice->series}-{$invoice->number} a fost creată.");
+       return redirect()
+    ->route('invoices.index')
+    ->with('success', "Factura {$invoice->series}-{$invoice->number} a fost creată.");
     }
     public function exchangeRate(Request $request, BNRExchange $bnrService){
         $currency = $request->query('currency');

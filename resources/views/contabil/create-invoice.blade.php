@@ -12,7 +12,7 @@
 
         <h1 class="text-2xl font-bold text-slate-900 mb-1">Factura noua</h1>
 
-        <form action="{{ route('dashboard.contabil.invoices.store') }}" method="POST" class="space-y-6">
+        <form action="{{ route('invoices.store') }}" method="POST" class="space-y-6">
             @csrf
             <div class="space-y-4">
                 <div>
@@ -118,7 +118,7 @@
             <input type="hidden" name="vat_total" id="vat-total-input">
             <input type="hidden" name="total" id="total-input">
             <div class="flex justify-end gap-3 pt-2">
-                <a href="{{ route('dashboard.contabil.invoices') }}" class="form-btn-secondary">Anuleaza</a>
+                <a href="{{ route('invoices.index') }}" class="form-btn-secondary">Anuleaza</a>
                 <button type="submit" class="form-btn-primary">Salveaza</button>
             </div>
         </form>
@@ -223,7 +223,7 @@
         return;
     }
     exchangeRateWrapper.classList.remove('hidden');
-    fetch(`{{ route('dashboard.contabil.invoices.exchange-rate') }}?currency=${this.value}`)
+    fetch(`{{ route('invoices.exchange-rate') }}?currency=${this.value}`)
     .then(response=>response.json())
     .then(data=> {
         if(data.rate){
