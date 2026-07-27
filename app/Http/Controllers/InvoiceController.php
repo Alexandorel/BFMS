@@ -49,6 +49,29 @@ class InvoiceController extends Controller
 
     return view('contabil.invoices', compact('facturi'));
     }
+    public function show(Invoice $invoice)
+    {
+        // The invoice must be issued to a company.
+        abort_unless(
+            Auth::user()->companies()->whereKey($invoice->company_id)->exists(),
+            403
+        );
+
+        $invoice->load([
+            'client',
+            'company',
+            'lines' => fn ($q) => $q->orderBy('position'),
+            'payments',
+            'creator',
+            'creditedInvoice',
+        ]);
+
+        $paid = $invoice->payments->sum('amount');
+        $balance = $invoice->total - $paid;
+
+        return view('invoices.show', compact('invoice', 'paid', 'balance'));
+    }
+
     public function create()
     {
         $companyId = session('active_company_id');
