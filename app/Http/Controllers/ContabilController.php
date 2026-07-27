@@ -14,14 +14,14 @@ class ContabilController extends Controller
     {
         $user = Auth::user();
 
-        // Toate firmele userului + firma activă din sesiune (fallback pe prima).
+        // All user's businesses
         $companies = $user->companies()->get();
         $activeCompanyId = Session::get('active_company_id');
         $company = $companies->firstWhere('id', $activeCompanyId) ?? $companies->first();
 
         $companyName = $company?->name ?? 'N/A';
 
-        // Ultimele 5 facturi reale ale firmei active + clienții (pentru cardurile de rapoarte).
+        // Last 5 active invoices
         $invoices = $company
             ? Invoice::with('client')
                 ->where('company_id', $company->id)
