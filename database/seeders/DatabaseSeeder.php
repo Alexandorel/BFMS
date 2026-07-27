@@ -38,6 +38,20 @@ class DatabaseSeeder extends Seeder
 
         $company->users()->attach($user->id);
 
+        $secondCompany = Company::create([
+            'name' => 'Second Company',
+            'juridical_form' => 'SA',
+            'cui' => '87654321',
+            'trade_registry_number' => 'J40/4321/2021',
+            'county' => 'Second County',
+            'city' => 'Second City',
+            'address' => '456 Second Street',
+            'social_capital' => 25000.00,
+            'vat_payer' => false,
+        ]);
+
+        $secondCompany->users()->attach($user->id);
+
         $user = User::create([
             'first_name' => 'operator',
             'last_name' => 'test',
