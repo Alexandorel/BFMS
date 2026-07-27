@@ -68,6 +68,9 @@ Route::middleware(['auth', 'role:administrator,operator'])->prefix('facturi')->n
 
     Route::get('/curs-valutar', [InvoiceController::class, 'exchangeRate'])
         ->name('exchange-rate');
+    
+    Route::get('/clienti', [InvoiceController::class, 'searchClients'])
+    ->name('search-clients');
 
 });
 

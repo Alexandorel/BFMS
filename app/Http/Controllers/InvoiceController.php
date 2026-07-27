@@ -134,4 +134,25 @@ class InvoiceController extends Controller
         $rate = $bnrService->getRate($currency);
         return response()->json(['rate'=>$rate]);
     }
+    public function searchClients(Request $request){
+        $companyId = session('active_company_id');
+        $query = $request->query('q', '');
+        $clients = Client::where('company_id', $companyId)
+        ->where('name', 'like', "%{$query}%")
+        ->orWhere(function($q) use ($companyId, $query) {
+            $q->where('company_id', $companyId)
+            -> where('first_name', 'like', "%{$query}%");
+        })
+        ->orWhere(function($q) use ($companyId, $query) {
+            $q->where('company_id',$companyId)
+            ->where('last_name', 'like', "%{$query}%");
+        })
+        ->limit(10)
+        ->get(['id', 'name', 'first_name', 'last_name', 'client_type']);
+        return response()->json(
+            $clients->map(fn($c) => [
+                'id' => $c->id, 'name'=> $c->full_name,
+            ])
+        );
+    }
 }
