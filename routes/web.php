@@ -94,7 +94,14 @@ Route::middleware('auth')->group(function () {
         ->name('administrator.companies.update');
 
     Route::get('/administrator/settings/echipa', function () {
-        return view('administrator.settings.team', ['user' => auth()->user()]);
+        $companies = auth()->user()->companies()->orderBy('name')->get();
+        $company = $companies->firstWhere('id', session('active_company_id')) ?? $companies->first();
+
+        return view('administrator.settings.team', [
+            'user' => auth()->user(),
+            'companies' => $companies,
+            'company' => $company,
+        ]);
     })->name('administrator.settings.team');
 
     Route::get('/administrator/settings/addfirma', [CompanyController::class, 'create'])
