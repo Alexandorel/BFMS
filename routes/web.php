@@ -67,6 +67,12 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/company/switch/{id}', [CompanyController::class, 'switchCompany'])->middleware('auth');
 
+// Read-only invoice for administrator and accountant
+Route::middleware(['auth', 'role:administrator,contabil'])->group(function () {
+    Route::get('/facturi/{invoice}', [InvoiceController::class, 'show'])
+        ->name('invoices.show');
+});
+
 Route::get('/administrator/dashboard', [AdministratorController::class, 'dashboard'])->name('dashboard.administrator');
 Route::get('/contabil/dashboard', [ContabilController::class, 'dashboard'])->name('dashboard.contabil');
 Route::get('/operator/dashboard', [OperatorController::class, 'dashboard'])->name('dashboard.operator');
