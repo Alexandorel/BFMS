@@ -13,6 +13,23 @@
         <x-sidebar />
 
         <div class="flex-1 flex flex-col min-w-0">
+
+            {{-- Top Bar --}}
+            <header class="flex items-center gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
+                <div class="flex items-center gap-3">
+                    <label class="relative">
+                        <select id="companySelect" class="appearance-none pl-3 pr-9 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            @forelse ($companies as $c)
+                                <option value="{{ $c->id }}" @selected($company?->id === $c->id)>{{ $c->name }}</option>
+                            @empty
+                                <option value="">Nicio firmă</option>
+                            @endforelse
+                        </select>
+                        <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </label>
+                </div>
+            </header>
+
             <main class="flex-1 p-4 sm:p-6 space-y-6">
 
                 <div class="flex justify-between items-center">
@@ -59,5 +76,13 @@
             </main>
         </div>
     </div>
+
+<script>
+    document.getElementById('companySelect')?.addEventListener('change', function () {
+        if (this.value) {
+            window.location.href = `/company/switch/${this.value}`;
+        }
+    });
+</script>
 </body>
 </html>
