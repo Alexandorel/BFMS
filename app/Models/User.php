@@ -76,8 +76,4 @@ class User extends Authenticatable implements Auditable
         return $this->role === 'contabil';
     }
 
-    public function isSuperadmin(): bool
-    {
-        return $this->role === 'superadmin';
-    }
 }
