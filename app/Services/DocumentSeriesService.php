@@ -3,12 +3,40 @@
 namespace App\Services;
 
 use App\Enums\DocumentType;
+use App\Models\Company;
 use App\Models\DocumentSeries;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class DocumentSeriesService
 {
+    /**
+     * Default series for a new company, one per document type.
+     * Skips a type that already has a series, so it is safe to re-run.
+     */
+    public function ensureDefaultsFor(Company $company): void
+    {
+        foreach (DocumentType::cases() as $documentType) {
+            $alreadyHasSeries = DocumentSeries::where('company_id', $company->id)
+                ->where('document_type', $documentType)
+                ->exists();
+
+            if ($alreadyHasSeries) {
+                continue;
+            }
+
+            DocumentSeries::create([
+                'company_id' => $company->id,
+                'document_type' => $documentType,
+                'prefix' => $documentType->defaultPrefix(),
+                'start_number' => 1,
+                'current_number' => 0,
+                'is_default' => true,
+                'is_active' => true,
+            ]);
+        }
+    }
+
     /**
      * default serie for company
      */

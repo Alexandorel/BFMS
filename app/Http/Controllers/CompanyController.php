@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreCompanyRequest;
 use App\Http\Requests\UpdateCompanyRequest;
 use App\Models\Company;
+use App\Services\DocumentSeriesService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -56,11 +57,11 @@ class CompanyController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCompanyRequest $request): RedirectResponse
+    public function store(StoreCompanyRequest $request, DocumentSeriesService $seriesService): RedirectResponse
     {
         $validated = $request->validated();
 
-        $company = DB::transaction(function () use ($request, $validated) {
+        $company = DB::transaction(function () use ($request, $validated, $seriesService) {
             $company = Company::create(Arr::only($validated, [
                 'name',
                 'juridical_form',
@@ -92,6 +93,9 @@ class CompanyController extends Controller
                     'currency' => 'RON',
                 ]);
             }
+
+            // serii implicite, ca firma sa poata emite documente imediat
+            $seriesService->ensureDefaultsFor($company);
 
             return $company;
         });
