@@ -35,6 +35,14 @@
                         </select>
                     </div>
                     <div>
+                        <label for="document_series_id" class="form-label">Serie</label>
+                        <select id="document_series_id" name="document_series_id" required class="form-input">
+                            @foreach ($seriesByType['invoice'] ?? [] as $s)
+                                <option value="{{ $s['id'] }}">{{ $s['label'] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
                         <label for="currency" class="form-label">Moneda</label>
                         <select id="currency" name="currency" required class="form-input">
                             <option value="RON" selected>RON</option>
@@ -131,6 +139,21 @@
     const clientIdInput = document.getElementById('client_id');
     const clientSuggestions = document.getElementById('client-suggestions');
     let searchTimeout;
+
+    // seriile disponibile depind de tipul documentului ales
+    const seriesByType = @json($seriesByType);
+    const documentTypeSelect = document.getElementById('document_type');
+    const seriesSelect = document.getElementById('document_series_id');
+
+    function refreshSeriesOptions(){
+        const options = seriesByType[documentTypeSelect.value] || [];
+
+        seriesSelect.innerHTML = options.length
+            ? options.map(s => `<option value="${s.id}">${s.label}</option>`).join('')
+            : '<option value="">Nicio serie activa pentru acest tip</option>';
+    }
+
+    documentTypeSelect.addEventListener('change', refreshSeriesOptions);
     function lineRow(){
         return `
             <div class="invoice-line-row grid grid-cols-1 sm:grid-cols-12 gap-3">

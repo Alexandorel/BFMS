@@ -43,4 +43,24 @@ class DocumentSeries extends Model implements Auditable
     {
         return $this->hasMany(Invoice::class);
     }
+
+    /**
+     * Numarul pe care seria il va emite la urmatoarea alocare.
+     * O serie nefolosita porneste de la start_number, nu de la start_number + 1.
+     */
+    public function getNextNumberAttribute(): int
+    {
+        return $this->current_number < $this->start_number
+            ? $this->start_number
+            : $this->current_number + 1;
+    }
+
+    /**
+     * O serie cu documente emise nu-si mai poate schimba prefixul
+     * sau numarul de pornire.
+     */
+    public function getIsUsedAttribute(): bool
+    {
+        return $this->current_number > 0;
+    }
 }

@@ -62,7 +62,7 @@ class UpdateDocumentSeriesRequest extends FormRequest
             function (Validator $validator): void {
                 $series = $this->series();
 
-                if ($series->current_number === 0) {
+                if (! $series->is_used) {
                     return;
                 }
 

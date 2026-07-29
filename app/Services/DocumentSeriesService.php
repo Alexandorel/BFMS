@@ -43,19 +43,24 @@ class DocumentSeriesService
      */
     public function makeDefault(DocumentSeries $series): void
     {
-        if (! $series->is_active) {
-            throw new RuntimeException(
-                "Seria {$series->prefix} este inactivă și nu poate deveni serie implicită."
-            );
-        }
-
         DB::transaction(function () use ($series) {
-            DocumentSeries::where('company_id', $series->company_id)
-                ->where('document_type', $series->document_type)
-                ->whereKeyNot($series->getKey())
+            //starea reala vine din baza de date, nu din instanta primita
+            $locked = DocumentSeries::whereKey($series->getKey())->lockForUpdate()->firstOrFail();
+
+            if (! $locked->is_active) {
+                throw new RuntimeException(
+                    "Seria {$locked->prefix} este inactivă și nu poate deveni serie implicită."
+                );
+            }
+
+            DocumentSeries::where('company_id', $locked->company_id)
+                ->where('document_type', $locked->document_type)
+                ->whereKeyNot($locked->getKey())
                 ->update(['is_default' => false]);
 
-            $series->update(['is_default' => true]);
+            $locked->update(['is_default' => true]);
+
+            $series->refresh();
         });
     }
 
@@ -91,10 +96,7 @@ class DocumentSeriesService
             );
         }
 
-        // unused serie starts from current_number
-        $next = $locked->current_number < $locked->start_number
-            ? $locked->start_number
-            : $locked->current_number + 1;
+        $next = $locked->next_number;
 
         $locked->update(['current_number' => $next]);
 
