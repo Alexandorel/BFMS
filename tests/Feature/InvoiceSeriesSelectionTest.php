@@ -89,6 +89,7 @@ class InvoiceSeriesSelectionTest extends TestCase
             'quantity' => [2],
             'unit_price' => [100],
             'vat_rate' => [19],
+            'action' => 'issue',
         ], $overrides);
     }
 
