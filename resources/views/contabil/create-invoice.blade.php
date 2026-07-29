@@ -139,6 +139,21 @@
     const clientIdInput = document.getElementById('client_id');
     const clientSuggestions = document.getElementById('client-suggestions');
     let searchTimeout;
+
+    // seriile disponibile depind de tipul documentului ales
+    const seriesByType = @json($seriesByType);
+    const documentTypeSelect = document.getElementById('document_type');
+    const seriesSelect = document.getElementById('document_series_id');
+
+    function refreshSeriesOptions(){
+        const options = seriesByType[documentTypeSelect.value] || [];
+
+        seriesSelect.innerHTML = options.length
+            ? options.map(s => `<option value="${s.id}">${s.label}</option>`).join('')
+            : '<option value="">Nicio serie activa pentru acest tip</option>';
+    }
+
+    documentTypeSelect.addEventListener('change', refreshSeriesOptions);
     function lineRow(){
         return `
             <div class="invoice-line-row grid grid-cols-1 sm:grid-cols-12 gap-3">
