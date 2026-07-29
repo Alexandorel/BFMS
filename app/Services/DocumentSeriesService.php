@@ -38,6 +38,28 @@ class DocumentSeriesService
     }
 
     /**
+     * Marks a series as default and clears the previous one of the same type,
+     * so defaultFor() always has a single unambiguous answer.
+     */
+    public function makeDefault(DocumentSeries $series): void
+    {
+        if (! $series->is_active) {
+            throw new RuntimeException(
+                "Seria {$series->prefix} este inactivă și nu poate deveni serie implicită."
+            );
+        }
+
+        DB::transaction(function () use ($series) {
+            DocumentSeries::where('company_id', $series->company_id)
+                ->where('document_type', $series->document_type)
+                ->whereKeyNot($series->getKey())
+                ->update(['is_default' => false]);
+
+            $series->update(['is_default' => true]);
+        });
+    }
+
+    /**
      * default serie for company
      */
     public function defaultFor(int $companyId, DocumentType $documentType): ?DocumentSeries
