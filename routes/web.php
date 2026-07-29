@@ -112,34 +112,37 @@ Route::middleware('auth')->group(function () {
     });
 
 
-    // Setări Administrator — profil, firmă, echipă
-    Route::get('/administrator/settings/profil', [ProfileController::class, 'edit'])
-        ->name('administrator.settings.profile');
-    Route::put('/administrator/settings/profil', [ProfileController::class, 'update'])
-        ->name('administrator.profile.update');
-    Route::put('/administrator/settings/profil/parola', [ProfileController::class, 'updatePassword'])
-        ->name('administrator.profile.password');
+    // Setări Administrator — profil, firmă, echipă (NFR-1)
+    Route::middleware('role:administrator')->group(function () {
 
-    Route::get('/administrator/settings/firma', [CompanyController::class, 'edit'])
-        ->name('administrator.settings.company');
-    Route::put('/administrator/settings/firma/{company}', [CompanyController::class, 'update'])
-        ->name('administrator.companies.update');
+        Route::get('/administrator/settings/profil', [ProfileController::class, 'edit'])
+            ->name('administrator.settings.profile');
+        Route::put('/administrator/settings/profil', [ProfileController::class, 'update'])
+            ->name('administrator.profile.update');
+        Route::put('/administrator/settings/profil/parola', [ProfileController::class, 'updatePassword'])
+            ->name('administrator.profile.password');
 
-    Route::get('/administrator/settings/addfirma', [CompanyController::class, 'create'])
-        ->name('administrator.settings.addcompany');
-    Route::post('/administrator/settings/firme', [CompanyController::class, 'store'])
-        ->name('administrator.companies.store');
+        Route::get('/administrator/settings/firma', [CompanyController::class, 'edit'])
+            ->name('administrator.settings.company');
+        Route::put('/administrator/settings/firma/{company}', [CompanyController::class, 'update'])
+            ->name('administrator.companies.update');
 
-    Route::get('/administrator/settings/echipa', function () {
-        $companies = auth()->user()->companies()->orderBy('name')->get();
-        $company = $companies->firstWhere('id', session('active_company_id')) ?? $companies->first();
+        Route::get('/administrator/settings/addfirma', [CompanyController::class, 'create'])
+            ->name('administrator.settings.addcompany');
+        Route::post('/administrator/settings/firme', [CompanyController::class, 'store'])
+            ->name('administrator.companies.store');
 
-        return view('administrator.settings.team', [
-            'user'      => auth()->user(),
-            'companies' => $companies,
-            'company'   => $company,
-        ]);
-    })->name('administrator.settings.team');
+        Route::get('/administrator/settings/echipa', function () {
+            $companies = auth()->user()->companies()->orderBy('name')->get();
+            $company = $companies->firstWhere('id', session('active_company_id')) ?? $companies->first();
+
+            return view('administrator.settings.team', [
+                'user'      => auth()->user(),
+                'companies' => $companies,
+                'company'   => $company,
+            ]);
+        })->name('administrator.settings.team');
+    });
 
     // Serii documente — configurare rezervata administratorului (NFR-1)
     Route::middleware('role:administrator')
