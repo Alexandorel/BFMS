@@ -104,6 +104,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [InvoiceController::class, 'store'])
             ->name('store');
 
+        // ciorna -> emisa, aici se aloca numarul fiscal
+        Route::post('/{invoice}/emitere', [InvoiceController::class, 'issue'])
+            ->whereNumber('invoice')
+            ->name('issue');
+
         Route::get('/curs-valutar', [InvoiceController::class, 'exchangeRate'])
             ->name('exchange-rate');
 

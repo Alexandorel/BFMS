@@ -9,6 +9,8 @@ use App\Enums\InvoiceStatus;
 use App\Models\Client;
 use App\Models\DocumentSeries;
 use App\Services\BNRExchange;
+use App\Services\InvoiceService;
+use RuntimeException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -162,6 +164,27 @@ class InvoiceController extends Controller
             ->route(Auth::user()->dashboardRoute())
             ->with('success', $message);
     }
+    /**
+     * Emiterea unei ciorne: aloca numarul si trece factura in starea Emisa.
+     */
+    public function issue(Invoice $invoice, InvoiceService $invoiceService)
+    {
+        abort_unless(
+            Auth::user()->companies()->whereKey($invoice->company_id)->exists(),
+            403
+        );
+
+        try {
+            $invoiceService->issue($invoice);
+        } catch (RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return redirect()
+            ->route('invoices.show', $invoice)
+            ->with('success', "Documentul {$invoice->series}-{$invoice->number} a fost emis.");
+    }
+
     public function exchangeRate(Request $request, BNRExchange $bnrService){
         $currency = $request->query('currency');
         $rate = $bnrService->getRate($currency);
