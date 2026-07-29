@@ -143,6 +143,6 @@ class DocumentSeriesController extends Controller
 
     private function backToSeries(DocumentSeries $series): RedirectResponse
     {
-        return to_route('administrator.settings.series', ['firma' => $series->company_id]);
+        return to_route('administrator.series.index', ['firma' => $series->company_id]);
     }
 }

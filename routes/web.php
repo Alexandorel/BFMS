@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContabilController;
+use App\Http\Controllers\DocumentSeriesController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OperatorController;
 use App\Http\Controllers\ProductController;
@@ -139,6 +140,28 @@ Route::middleware('auth')->group(function () {
             'company'   => $company,
         ]);
     })->name('administrator.settings.team');
+
+    // Serii documente — configurare rezervata administratorului (NFR-1)
+    Route::middleware('role:administrator')
+        ->prefix('administrator/settings/serii')
+        ->name('administrator.series.')
+        ->group(function () {
+
+            Route::get('/', [DocumentSeriesController::class, 'index'])
+                ->name('index');
+
+            Route::post('/', [DocumentSeriesController::class, 'store'])
+                ->name('store');
+
+            Route::put('/{series}', [DocumentSeriesController::class, 'update'])
+                ->name('update');
+
+            Route::patch('/{series}/implicita', [DocumentSeriesController::class, 'setDefault'])
+                ->name('default');
+
+            Route::patch('/{series}/status', [DocumentSeriesController::class, 'toggleActive'])
+                ->name('status');
+        });
 
     // Produse
     Route::resource('products', ProductController::class);
