@@ -123,6 +123,27 @@
         const companyId = this.value;
         window.location.href = `/company/switch/${companyId}`;
     });
+
+    // extend/ shorten invoices list
+    const invoicesToggle = document.getElementById('invoices-toggle');
+    const invoicesScroll = document.getElementById('invoices-scroll');
+
+    if (invoicesToggle && invoicesScroll) {
+        const COLLAPSED = '17rem';
+        const EXPANDED = '32rem';
+
+        invoicesToggle.addEventListener('click', function() {
+            const expanded = invoicesScroll.style.maxHeight === EXPANDED;
+
+            invoicesScroll.style.maxHeight = expanded ? COLLAPSED : EXPANDED;
+            invoicesToggle.textContent = expanded ? 'Vezi toate' : 'Vezi mai putine';
+            invoicesToggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+
+            if (expanded) {
+                invoicesScroll.scrollTop = 0;
+            }
+        });
+    }
 </script>
 </body>
 </html>
