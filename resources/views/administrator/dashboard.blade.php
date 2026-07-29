@@ -55,12 +55,18 @@
                         </a>
 
                         <div class="bg-white rounded-xl border border-slate-200">
-                            <div class="px-5 py-4 border-b border-slate-200">
+                            <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
                                 <h2 class="font-semibold text-slate-900">Facturi recente</h2>
+                                @if ($invoices->isNotEmpty())
+                                    <span class="text-xs text-slate-400">{{ $invoices->count() }}
+                                        {{ $invoices->count() === 1 ? 'factură' : 'facturi' }}</span>
+                                @endif
                             </div>
-                            <div class="overflow-x-auto">
+                            <div id="invoices-scroll"
+                                class="overflow-x-auto overflow-y-auto transition-[max-height] duration-300 ease-out"
+                                style="max-height: 17rem;">
                                 <table class="w-full text-sm">
-                                    <thead>
+                                    <thead class="sticky top-0 z-10 bg-white">
                                         <tr class="text-left text-slate-500 border-b border-slate-100">
                                             <th class="px-5 py-3 font-medium">Nr.</th>
                                             <th class="px-5 py-3 font-medium">Client</th>
@@ -97,9 +103,13 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="px-5 py-4 border-t border-slate-200">
-                                <a href="{{ route('invoices.index') }}" class="text-sm text-indigo-600 hover:underline">Vezi toate</a>
-                            </div>
+                            @if ($invoices->count() > 5)
+                                <div class="px-5 py-4 border-t border-slate-200">
+                                    <button type="button" id="invoices-toggle"
+                                        class="text-sm text-indigo-600 hover:underline" aria-expanded="false"
+                                        aria-controls="invoices-scroll">Vezi toate</button>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
