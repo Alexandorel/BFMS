@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\DocumentType;
+use App\Enums\InvoiceStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -43,6 +44,7 @@ class Invoice extends Model implements Auditable
     {
         return [
             'document_type' => DocumentType::class,
+            'status' => InvoiceStatus::class,
             'issue_date' => 'date',
             'due_date' => 'date',
             'exchange_rate' => 'decimal:4',
