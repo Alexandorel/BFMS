@@ -91,10 +91,7 @@ class DocumentSeriesService
             );
         }
 
-        // unused serie starts from current_number
-        $next = $locked->current_number < $locked->start_number
-            ? $locked->start_number
-            : $locked->current_number + 1;
+        $next = $locked->next_number;
 
         $locked->update(['current_number' => $next]);
 
