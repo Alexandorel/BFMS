@@ -10,13 +10,13 @@ use App\Http\Controllers\CompanyController;
 class OperatorController extends Controller
 {
     public function dashboard(){
-        $user = Ath::user();
+        $user = Auth::user();
 
         $companyController = new CompanyController();
-        $companis = $companyController->getUserCompanies();
+        $companies = $companyController->getUserCompanies();
 
         $activeCompanyId = Session::get('active_company_id');
-        $compny = $companies->firstWhere('id',$activeCompanyId) ?? $companies->first();
+        $company = $companies->firstWhere('id',$activeCompanyId) ?? $companies->first();
 
         $companyName = $company?->name ?? '-';
 
@@ -24,7 +24,7 @@ class OperatorController extends Controller
             'user' => $user,
             'company' => $company,
             'companies' => $companies,
-            'companyName' => companyName,
+            'companyName' => $companyName,
         ]);
     }
 }
