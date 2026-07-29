@@ -77,6 +77,7 @@ class DatabaseSeeder extends Seeder
             ClientSeeder::class,
             ProductSeeder::class,
             InvoiceSeeder::class,
+            DocumentSeriesSeeder::class,
         ]);
     }
 }
