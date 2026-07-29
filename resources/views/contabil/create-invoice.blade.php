@@ -124,7 +124,8 @@
             <input type="hidden" name="total" id="total-input">
             <div class="flex justify-end gap-3 pt-2">
                 <a href="{{ route(auth()->user()->dashboardRoute()) }}" class="form-btn-secondary">Anuleaza</a>
-                <button type="submit" class="form-btn-primary">Salveaza</button>
+                <button type="submit" name="action" value="draft" class="form-btn-secondary">Salveaza ca ciorna</button>
+                <button type="submit" name="action" value="issue" class="form-btn-primary">Emite</button>
             </div>
         </form>
     </div>

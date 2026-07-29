@@ -81,8 +81,8 @@ Route::middleware('auth')->group(function () {
             ->name('contabil.audit-log.index');
     });
 
-    // Factură — vizualizare read-only pentru Administrator și Contabil
-    Route::middleware('role:administrator,contabil')->group(function () {
+    // Factură — vizualizare. Operatorul emite facturi, deci trebuie sa le si vada.
+    Route::middleware('role:administrator,contabil,operator')->group(function () {
         Route::get('/facturi/{invoice}', [InvoiceController::class, 'show'])
             ->whereNumber('invoice')
             ->name('invoices.show');
@@ -103,6 +103,11 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/', [InvoiceController::class, 'store'])
             ->name('store');
+
+        // ciorna -> emisa, aici se aloca numarul fiscal
+        Route::post('/{invoice}/emitere', [InvoiceController::class, 'issue'])
+            ->whereNumber('invoice')
+            ->name('issue');
 
         Route::get('/curs-valutar', [InvoiceController::class, 'exchangeRate'])
             ->name('exchange-rate');
