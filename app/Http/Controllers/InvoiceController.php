@@ -53,7 +53,7 @@ class InvoiceController extends Controller
     {
         $companyId = session('active_company_id');
         $clients = Client::where('company_id', $companyId)->get();
-        return view ('contabil.create-invoice',compact('clients'));
+        return view('contabil.create-invoice', compact('clients'));
     }
     public function store(Request $request, DocumentSeriesService $seriesService)
     {
@@ -125,13 +125,34 @@ class InvoiceController extends Controller
             $invoice->lines()->createMany($lines);
             return $invoice;
         });
-        return redirect()
-        ->route('dashboard.contabil.invoices')
-        ->with('success', "Factura {$invoice->series}-{$invoice->number} a fost creată.");
+       return redirect()
+    ->route('invoices.index')
+    ->with('success', "Factura {$invoice->series}-{$invoice->number} a fost creată.");
     }
     public function exchangeRate(Request $request, BNRExchange $bnrService){
         $currency = $request->query('currency');
         $rate = $bnrService->getRate($currency);
         return response()->json(['rate'=>$rate]);
+    }
+    public function searchClients(Request $request){
+        $companyId = session('active_company_id');
+        $query = $request->query('q', '');
+        $clients = Client::where('company_id', $companyId)
+        ->where('name', 'like', "%{$query}%")
+        ->orWhere(function($q) use ($companyId, $query) {
+            $q->where('company_id', $companyId)
+            -> where('first_name', 'like', "%{$query}%");
+        })
+        ->orWhere(function($q) use ($companyId, $query) {
+            $q->where('company_id',$companyId)
+            ->where('last_name', 'like', "%{$query}%");
+        })
+        ->limit(10)
+        ->get(['id', 'name', 'first_name', 'last_name', 'client_type']);
+        return response()->json(
+            $clients->map(fn($c) => [
+                'id' => $c->id, 'name'=> $c->full_name,
+            ])
+        );
     }
 }

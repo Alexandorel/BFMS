@@ -73,15 +73,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/contabil/reports/month-close', [ReportController::class, 'monthClose'])
             ->name('contabil.reports.month-close');
 
-        Route::get('/contabil/facturi', [InvoiceController::class, 'index'])
-            ->name('contabil.invoices');
-        Route::post('/contabil/facturi', [InvoiceController::class, 'store'])
-            ->name('contabil.invoices.store');
-        Route::get('/contabil/facturi/adauga', [InvoiceController::class, 'create'])
-            ->name('contabil.invoices.create');
-        Route::get('/contabil/facturi/curs-valutar', [InvoiceController::class, 'exchangeRate'])
-            ->name('contabil.invoices.exchange-rate');
-
         Route::get('/contabil/audit-log', [AuditLogController::class, 'index'])
             ->name('contabil.audit-log.index');
     });
@@ -96,12 +87,33 @@ Route::middleware('auth')->group(function () {
     // Factură — vizualizare read-only pentru Administrator și Contabil
     Route::middleware('role:administrator,contabil')->group(function () {
         Route::get('/facturi/{invoice}', [InvoiceController::class, 'show'])
+            ->whereNumber('invoice')
             ->name('invoices.show');
     });
 
     // Schimbare companie activă (multi-profil)
     Route::get('/company/switch/{id}', [CompanyController::class, 'switchCompany'])
         ->name('company.switch');
+
+    // Gestionare Factura
+    Route::middleware(['auth', 'role:administrator,operator'])->prefix('facturi')->name('invoices.')->group(function () {
+
+        Route::get('/', [InvoiceController::class, 'index'])
+            ->name('index');
+
+        Route::get('/adauga', [InvoiceController::class, 'create'])
+            ->name('create');
+
+        Route::post('/', [InvoiceController::class, 'store'])
+            ->name('store');
+
+        Route::get('/curs-valutar', [InvoiceController::class, 'exchangeRate'])
+            ->name('exchange-rate');
+
+        Route::get('/cauta-clienti', [InvoiceController::class, 'searchClients'])
+            ->name('search-clients');
+    });
+
 
     // Setări Administrator — profil, firmă, echipă
     Route::get('/administrator/settings/profil', [ProfileController::class, 'edit'])

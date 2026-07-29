@@ -50,7 +50,7 @@
 
                     {{-- Recent Invoices --}}
                     <div class="xl:col-span-2 space-y-4">
-                        <a href="#" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                        <a href="{{ route('invoices.create') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
                             Factură nouă
                         </a>
 
@@ -98,7 +98,7 @@
                                 </table>
                             </div>
                             <div class="px-5 py-4 border-t border-slate-200">
-                                <a href="#" class="text-sm text-indigo-600 hover:underline">Vezi toate</a>
+                                <a href="{{ route('invoices.index') }}" class="text-sm text-indigo-600 hover:underline">Vezi toate</a>
                             </div>
                         </div>
                     </div>
