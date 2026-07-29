@@ -115,7 +115,7 @@
             <input type="hidden" name="vat_total" id="vat-total-input">
             <input type="hidden" name="total" id="total-input">
             <div class="flex justify-end gap-3 pt-2">
-                <a href="{{ route('invoices.index') }}" class="form-btn-secondary">Anuleaza</a>
+                <a href="{{ route(auth()->user()->dashboardRoute()) }}" class="form-btn-secondary">Anuleaza</a>
                 <button type="submit" class="form-btn-primary">Salveaza</button>
             </div>
         </form>

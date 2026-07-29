@@ -66,6 +66,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/contabil', [ContabilController::class, 'dashboard'])
             ->name('contabil');
 
+        Route::get('/contabil/facturi', [InvoiceController::class, 'index'])
+            ->name('contabil.invoices');
+
         Route::get('/contabil/reports', [ReportController::class, 'index'])
             ->name('contabil.reports.index');
         Route::get('/contabil/reports/client-sheet', [ReportController::class, 'clientSheet'])
@@ -75,13 +78,6 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/contabil/audit-log', [AuditLogController::class, 'index'])
             ->name('contabil.audit-log.index');
-    });
-
-    // Dashboard Owner (Administrator sau Superadmin)
-    Route::middleware('role:administrator,superadmin')->group(function () {
-        Route::get('/dashboard/owner', function () {
-            return view('owner.dashboard');
-        })->name('dashboard.owner');
     });
 
     // Factură — vizualizare read-only pentru Administrator și Contabil
