@@ -76,8 +76,17 @@ class User extends Authenticatable implements Auditable
         return $this->role === 'contabil';
     }
 
-    public function isSuperadmin(): bool
+    /**
+     * Numele rutei către dashboard-ul corespunzător rolului.
+     */
+    public function dashboardRoute(): string
     {
-        return $this->role === 'superadmin';
+        return match ($this->role) {
+            'administrator' => 'dashboard.administrator',
+            'contabil'      => 'dashboard.contabil',
+            'operator'      => 'dashboard.operator',
+            default         => 'dashboard',
+        };
     }
+
 }

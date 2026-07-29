@@ -22,6 +22,8 @@
         </a>
     </nav>
 
+    {{-- setarile sunt rezervate administratorului, restul ar primi 403 --}}
+    @if (($currentUser->role ?? null) === 'administrator')
     <div class="px-3 pb-2">
     <a href="{{ route('administrator.settings.company') }}"
        class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm {{ request()->routeIs('administrator.settings.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-slate-600 hover:bg-slate-50' }}">
@@ -29,6 +31,7 @@
         Setări
     </a>
 </div>
+    @endif
 
     @if ($currentUser)
     <div class="p-4 border-t border-slate-200 space-y-3">

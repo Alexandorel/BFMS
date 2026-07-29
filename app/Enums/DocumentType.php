@@ -19,4 +19,16 @@ enum DocumentType: string
             self::Receipt => 'Chitanță',
         };
     }
+
+    /**
+     * Prefixes for company 
+     */
+    public function defaultPrefix(): string
+    {
+        return match ($this) {
+            self::Invoice => 'FCT',
+            self::Proforma => 'PRF',
+            self::Receipt => 'CHT',
+        };
+    }
 }
