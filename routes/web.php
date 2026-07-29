@@ -44,11 +44,6 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Dashboard generic (fallback)
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
     // Dashboard Administrator
     Route::middleware('role:administrator')->group(function () {
         Route::get('/dashboard/administrator', [AdministratorController::class, 'dashboard'])
