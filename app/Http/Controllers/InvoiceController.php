@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use App\Services\DocumentSeriesService;
 use App\Enums\DocumentType;
+use App\Enums\InvoiceStatus;
 use App\Models\Client;
 use App\Models\DocumentSeries;
 use App\Services\BNRExchange;
@@ -98,13 +99,18 @@ class InvoiceController extends Controller
             'unit_price.*'=>['required', 'numeric', 'min:0'],
             'vat_rate'=>['required', 'array'],
             'vat_rate.*'=>['required', 'numeric', 'min:0', 'max:100'],
+            // butonul apasat: ciorna sau emitere
+            'action'=>['required', 'in:draft,issue'],
         ]);
-        $invoice = DB::transaction(function () use($validated,$companyId,$seriesService) 
+        $isDraft = $validated['action'] === 'draft';
+
+        $invoice = DB::transaction(function () use($validated,$companyId,$seriesService,$isDraft)
         {
             $documentType = DocumentType::from($validated['document_type']);
             // validarea a confirmat deja firma, tipul si starea activa
             $series = DocumentSeries::findOrFail($validated['document_series_id']);
-            $number = $seriesService->allocateNumber($series);
+            // ciorna nu consuma numar din serie, altfel raman gauri in numerotare
+            $number = $isDraft ? null : $seriesService->allocateNumber($series);
             $lines = [];
             $subtotal = 0;
             $vattotal = 0;
@@ -133,9 +139,9 @@ class InvoiceController extends Controller
                 'client_id'=>$validated['client_id'],
                 'document_series_id'=>$series->id,
                 'document_type'=>$documentType,
-                'series'=> $series->prefix,
+                'series'=> $isDraft ? null : $series->prefix,
                 'number'=>$number,
-                'status'=>'issued',
+                'status'=>$isDraft ? InvoiceStatus::Draft : InvoiceStatus::Issued,
                 'issue_date'=> $validated['issue_date'],
                 'due_date'=>$validated['due_date'],
                 'currency'=> $validated['currency'],
@@ -148,9 +154,13 @@ class InvoiceController extends Controller
             $invoice->lines()->createMany($lines);
             return $invoice;
         });
-       return redirect()
-    ->route(Auth::user()->dashboardRoute())
-    ->with('success', "Factura {$invoice->series}-{$invoice->number} a fost creată.");
+        $message = $isDraft
+            ? 'Ciorna a fost salvată. Nu are încă număr de document.'
+            : "Factura {$invoice->series}-{$invoice->number} a fost creată.";
+
+        return redirect()
+            ->route(Auth::user()->dashboardRoute())
+            ->with('success', $message);
     }
     public function exchangeRate(Request $request, BNRExchange $bnrService){
         $currency = $request->query('currency');
