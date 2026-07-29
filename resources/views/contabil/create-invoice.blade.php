@@ -35,6 +35,14 @@
                         </select>
                     </div>
                     <div>
+                        <label for="document_series_id" class="form-label">Serie</label>
+                        <select id="document_series_id" name="document_series_id" required class="form-input">
+                            @foreach ($seriesByType['invoice'] ?? [] as $s)
+                                <option value="{{ $s['id'] }}">{{ $s['label'] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
                         <label for="currency" class="form-label">Moneda</label>
                         <select id="currency" name="currency" required class="form-input">
                             <option value="RON" selected>RON</option>
