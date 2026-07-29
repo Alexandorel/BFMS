@@ -8,11 +8,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements Auditable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, HasApiTokens, Notifiable, \OwenIt\Auditing\Auditable;
 
     /**
      * The attributes that are mass assignable.
@@ -55,4 +57,23 @@ class User extends Authenticatable
         return $this->belongsToMany(Company::class, 'company_user')
             ->withTimestamps();
     }
+
+     /**
+     * Verificări rapide de rol, utile în controllere/policies (RBAC — NFR-1).
+     */
+    public function isAdministrator(): bool
+    {
+        return $this->role === 'administrator';
+    }
+
+    public function isOperator(): bool
+    {
+        return $this->role === 'operator';
+    }
+
+    public function isContabil(): bool
+    {
+        return $this->role === 'contabil';
+    }
+
 }
