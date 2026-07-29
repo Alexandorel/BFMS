@@ -30,6 +30,18 @@
             {{-- Content --}}
             <main class="flex-1 p-4 sm:p-6 space-y-6 max-w-5xl w-full">
 
+                @if (session('success'))
+                    <div class="px-4 py-3 rounded-lg bg-emerald-50 text-emerald-800 text-sm">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="px-4 py-3 rounded-lg bg-rose-50 text-rose-800 text-sm">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 {{-- Antet --}}
                 <div class="bg-white rounded-xl border border-slate-200 p-5 sm:p-6">
                     <div class="flex flex-wrap items-start justify-between gap-4">
@@ -47,6 +59,17 @@
                                 {{ $invoice->issue_date?->format('d.m.Y') ?? '—' }}</p>
                             <p><span class="text-slate-400">Scadență:</span>
                                 {{ $invoice->due_date?->format('d.m.Y') ?? '—' }}</p>
+
+                            {{-- doar administratorul si operatorul emit; contabilul e read-only --}}
+                            @if ($invoice->status->isDraft() && in_array(auth()->user()->role, ['administrator', 'operator'], true))
+                                <form action="{{ route('invoices.issue', $invoice) }}" method="POST" class="pt-2">
+                                    @csrf
+                                    <button type="submit"
+                                            class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                                        Emite documentul
+                                    </button>
+                                </form>
+                            @endif
                         </div>
                     </div>
 
