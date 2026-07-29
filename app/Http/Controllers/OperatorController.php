@@ -3,8 +3,28 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\CompanyController;
 
 class OperatorController extends Controller
 {
-    //
+    public function dashboard(){
+        $user = Ath::user();
+
+        $companyController = new CompanyController();
+        $companis = $companyController->getUserCompanies();
+
+        $activeCompanyId = Session::get('active_company_id');
+        $compny = $companies->firstWhere('id',$activeCompanyId) ?? $companies->first();
+
+        $companyName = $company?->name ?? '-';
+
+        return view('operator.dashboard', [
+            'user' => $user,
+            'company' => $company,
+            'companies' => $companies,
+            'companyName' => companyName,
+        ]);
+    }
 }
