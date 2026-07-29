@@ -6,10 +6,12 @@ use App\Models\Invoice;
 use App\Services\DocumentSeriesService;
 use App\Enums\DocumentType;
 use App\Models\Client;
+use App\Models\DocumentSeries;
 use App\Services\BNRExchange;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class InvoiceController extends Controller
 {
@@ -74,6 +76,16 @@ class InvoiceController extends Controller
         $validated = $request->validate([
             'client_id' =>['required', 'exists:clients,id'],
             'document_type'=>['required', 'in:invoice,proforma,receipt'],
+            // validation : series must belong to the active company
+            'document_series_id'=>[
+                'required',
+                Rule::exists('document_series', 'id')->where(
+                    fn ($query) => $query
+                        ->where('company_id', $companyId)
+                        ->where('document_type', $request->input('document_type'))
+                        ->where('is_active', true)
+                ),
+            ],
             'issue_date'=>['required', 'date'],
             'due_date'=>['required', 'date', 'after_or_equal:issue_date'],
             'currency'=>['required', 'in:RON,EUR,USD'],
@@ -90,10 +102,8 @@ class InvoiceController extends Controller
         $invoice = DB::transaction(function () use($validated,$companyId,$seriesService) 
         {
             $documentType = DocumentType::from($validated['document_type']);
-            $series = $seriesService-> defaultFor($companyId, $documentType);
-            if(! $series){
-                abort(422, 'Nu exista serie.');
-            }
+            // validarea a confirmat deja firma, tipul si starea activa
+            $series = DocumentSeries::findOrFail($validated['document_series_id']);
             $number = $seriesService->allocateNumber($series);
             $lines = [];
             $subtotal = 0;
