@@ -45,6 +45,12 @@
                     <p class="text-slate-500 text-sm mt-1">Iată situația firmei {{ $companyName }}:</p>
                 </div>
 
+                @if (session('success'))
+                    <div class="px-4 py-3 rounded-lg bg-emerald-50 text-emerald-800 text-sm">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
                 {{-- Invoices --}}
                 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 

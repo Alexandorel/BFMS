@@ -149,7 +149,7 @@ class InvoiceController extends Controller
             return $invoice;
         });
        return redirect()
-    ->route('invoices.index')
+    ->route(Auth::user()->dashboardRoute())
     ->with('success', "Factura {$invoice->series}-{$invoice->number} a fost creată.");
     }
     public function exchangeRate(Request $request, BNRExchange $bnrService){
