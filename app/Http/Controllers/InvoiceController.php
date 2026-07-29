@@ -53,7 +53,20 @@ class InvoiceController extends Controller
     {
         $companyId = session('active_company_id');
         $clients = Client::where('company_id', $companyId)->get();
-        return view('contabil.create-invoice', compact('clients'));
+
+        // active series
+        $seriesByType = DocumentSeries::where('company_id', $companyId)
+            ->where('is_active', true)
+            ->orderByDesc('is_default')
+            ->orderBy('prefix')
+            ->get()
+            ->groupBy(fn (DocumentSeries $s) => $s->document_type->value)
+            ->map(fn ($group) => $group->map(fn (DocumentSeries $s) => [
+                'id' => $s->id,
+                'label' => "{$s->prefix} · următorul: {$s->prefix}-{$s->next_number}",
+            ])->values());
+
+        return view('contabil.create-invoice', compact('clients', 'seriesByType'));
     }
     public function store(Request $request, DocumentSeriesService $seriesService)
     {
