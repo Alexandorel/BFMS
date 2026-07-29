@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContabilController;
+use App\Http\Controllers\DocumentSeriesController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OperatorController;
 use App\Http\Controllers\ProductController;
@@ -111,34 +112,59 @@ Route::middleware('auth')->group(function () {
     });
 
 
-    // Setări Administrator — profil, firmă, echipă
-    Route::get('/administrator/settings/profil', [ProfileController::class, 'edit'])
-        ->name('administrator.settings.profile');
-    Route::put('/administrator/settings/profil', [ProfileController::class, 'update'])
-        ->name('administrator.profile.update');
-    Route::put('/administrator/settings/profil/parola', [ProfileController::class, 'updatePassword'])
-        ->name('administrator.profile.password');
+    // Setări Administrator — profil, firmă, echipă (NFR-1)
+    Route::middleware('role:administrator')->group(function () {
 
-    Route::get('/administrator/settings/firma', [CompanyController::class, 'edit'])
-        ->name('administrator.settings.company');
-    Route::put('/administrator/settings/firma/{company}', [CompanyController::class, 'update'])
-        ->name('administrator.companies.update');
+        Route::get('/administrator/settings/profil', [ProfileController::class, 'edit'])
+            ->name('administrator.settings.profile');
+        Route::put('/administrator/settings/profil', [ProfileController::class, 'update'])
+            ->name('administrator.profile.update');
+        Route::put('/administrator/settings/profil/parola', [ProfileController::class, 'updatePassword'])
+            ->name('administrator.profile.password');
 
-    Route::get('/administrator/settings/addfirma', [CompanyController::class, 'create'])
-        ->name('administrator.settings.addcompany');
-    Route::post('/administrator/settings/firme', [CompanyController::class, 'store'])
-        ->name('administrator.companies.store');
+        Route::get('/administrator/settings/firma', [CompanyController::class, 'edit'])
+            ->name('administrator.settings.company');
+        Route::put('/administrator/settings/firma/{company}', [CompanyController::class, 'update'])
+            ->name('administrator.companies.update');
 
-    Route::get('/administrator/settings/echipa', function () {
-        $companies = auth()->user()->companies()->orderBy('name')->get();
-        $company = $companies->firstWhere('id', session('active_company_id')) ?? $companies->first();
+        Route::get('/administrator/settings/addfirma', [CompanyController::class, 'create'])
+            ->name('administrator.settings.addcompany');
+        Route::post('/administrator/settings/firme', [CompanyController::class, 'store'])
+            ->name('administrator.companies.store');
 
-        return view('administrator.settings.team', [
-            'user'      => auth()->user(),
-            'companies' => $companies,
-            'company'   => $company,
-        ]);
-    })->name('administrator.settings.team');
+        Route::get('/administrator/settings/echipa', function () {
+            $companies = auth()->user()->companies()->orderBy('name')->get();
+            $company = $companies->firstWhere('id', session('active_company_id')) ?? $companies->first();
+
+            return view('administrator.settings.team', [
+                'user'      => auth()->user(),
+                'companies' => $companies,
+                'company'   => $company,
+            ]);
+        })->name('administrator.settings.team');
+    });
+
+    // Serii documente — configurare rezervata administratorului (NFR-1)
+    Route::middleware('role:administrator')
+        ->prefix('administrator/settings/serii')
+        ->name('administrator.series.')
+        ->group(function () {
+
+            Route::get('/', [DocumentSeriesController::class, 'index'])
+                ->name('index');
+
+            Route::post('/', [DocumentSeriesController::class, 'store'])
+                ->name('store');
+
+            Route::put('/{series}', [DocumentSeriesController::class, 'update'])
+                ->name('update');
+
+            Route::patch('/{series}/implicita', [DocumentSeriesController::class, 'setDefault'])
+                ->name('default');
+
+            Route::patch('/{series}/status', [DocumentSeriesController::class, 'toggleActive'])
+                ->name('status');
+        });
 
     // Produse
     Route::resource('products', ProductController::class);
