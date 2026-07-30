@@ -20,7 +20,7 @@
 
             {{-- Top Bar --}}
             <header class="flex items-center gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
-                <a href="{{ url()->previous() }}" class="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900">
+                <a href="{{ route(auth()->user()->dashboardRoute()) }}" class="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                     Înapoi
                 </a>
