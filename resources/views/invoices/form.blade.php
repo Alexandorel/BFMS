@@ -7,18 +7,65 @@
     @vite(['resources/css/app.css'])
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
+
+@php
+    // acelasi formular serveste crearea si editarea unei ciorne
+    $isEdit = ($invoice ?? null) !== null;
+
+    $currentType = old('document_type', $isEdit ? $invoice->document_type->value : 'invoice');
+    $currentCurrency = old('currency', $isEdit ? $invoice->currency : 'RON');
+    $currentSeriesId = old('document_series_id', $isEdit ? $invoice->document_series_id : null);
+
+    // liniile vin din inputul respins de validare, din ciorna, sau un rand gol la creare
+    if (old('product_name')) {
+        $lineRows = collect(old('product_name'))->map(fn ($name, $i) => [
+            'name' => $name,
+            'quantity' => old('quantity')[$i] ?? '',
+            'unit_price' => old('unit_price')[$i] ?? '',
+            'vat_rate' => old('vat_rate')[$i] ?? 19,
+        ])->all();
+    } elseif ($isEdit) {
+        $lineRows = $invoice->lines->map(fn ($line) => [
+            'name' => $line->product_name_snapshot,
+            'quantity' => $line->quantity,
+            'unit_price' => $line->unit_price_snapshot,
+            'vat_rate' => $line->vat_rate_snapshot,
+        ])->all();
+    } else {
+        $lineRows = [['name' => '', 'quantity' => '', 'unit_price' => '', 'vat_rate' => 19]];
+    }
+@endphp
+
  <div class="max-w-5xl mx-auto p-6">
     <div class="bg-white border border-slate-200 p-5">
 
-        <h1 class="text-2xl font-bold text-slate-900 mb-1">Factura noua</h1>
+        <h1 class="text-2xl font-bold text-slate-900 mb-1">
+            {{ $isEdit ? 'Editare ciornă' : 'Factura noua' }}
+        </h1>
 
-        <form action="{{ route('invoices.store') }}" method="POST" class="space-y-6">
+        @if ($errors->any())
+            <div class="mb-4 px-4 py-3 rounded-lg bg-rose-50 text-rose-800 text-sm">
+                <ul class="list-disc list-inside space-y-1">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ $isEdit ? route('invoices.update', $invoice) : route('invoices.store') }}" method="POST" class="space-y-6">
             @csrf
+            @if ($isEdit)
+                @method('PUT')
+            @endif
             <div class="space-y-4">
                 <div class="relative">
                     <label for="client_search" class="form-label">Client</label>
-                    <input type="text" id="client_search" autocomplete="off" required class="form-input" placeholder="Caută client după nume...">
-                    <input type="hidden" id="client_id" name="client_id">
+                    <input type="text" id="client_search" autocomplete="off" required class="form-input"
+                           value="{{ $isEdit ? $invoice->client?->full_name : '' }}"
+                           placeholder="Caută client după nume...">
+                    <input type="hidden" id="client_id" name="client_id"
+                           value="{{ old('client_id', $isEdit ? $invoice->client_id : '') }}">
                     <div id="client-suggestions" class="hidden absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"></div>
                 </div>
             </div>
@@ -29,40 +76,43 @@
                     <div>
                         <label for="document_type" class="form-label">Tip document</label>
                         <select id="document_type" name="document_type" required class="form-input">
-                            <option value="invoice">Factura</option>
-                            <option value="proforma">Proforma</option>
-                            <option value="receipt">Chitanta</option>
+                            <option value="invoice" @selected($currentType === 'invoice')>Factura</option>
+                            <option value="proforma" @selected($currentType === 'proforma')>Proforma</option>
+                            <option value="receipt" @selected($currentType === 'receipt')>Chitanta</option>
                         </select>
                     </div>
                     <div>
                         <label for="document_series_id" class="form-label">Serie</label>
                         <select id="document_series_id" name="document_series_id" required class="form-input">
-                            @foreach ($seriesByType['invoice'] ?? [] as $s)
-                                <option value="{{ $s['id'] }}">{{ $s['label'] }}</option>
+                            @foreach ($seriesByType[$currentType] ?? [] as $s)
+                                <option value="{{ $s['id'] }}" @selected((int) $currentSeriesId === $s['id'])>{{ $s['label'] }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
                         <label for="currency" class="form-label">Moneda</label>
                         <select id="currency" name="currency" required class="form-input">
-                            <option value="RON" selected>RON</option>
-                            <option value="EUR">EUR</option>
-                            <option value="USD">USD</option>
+                            <option value="RON" @selected($currentCurrency === 'RON')>RON</option>
+                            <option value="EUR" @selected($currentCurrency === 'EUR')>EUR</option>
+                            <option value="USD" @selected($currentCurrency === 'USD')>USD</option>
                         </select>
                     </div>
                 </div>
-                <div id="exchange-rate-wrapper" class="hidden">
+                <div id="exchange-rate-wrapper" class="{{ $currentCurrency === 'RON' ? 'hidden' : '' }}">
                     <label for="exchange_rate" class="form-label">Curs Valutar</label>
-                    <input type="number" id="exchange_rate" name="exchange_rate" step="0.0001" min="0" placeholder="5.1202" class="form-input">
+                    <input type="number" id="exchange_rate" name="exchange_rate" step="0.0001" min="0" placeholder="5.1202" class="form-input"
+                           value="{{ old('exchange_rate', $isEdit ? $invoice->exchange_rate : '') }}">
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label for="issue_date" class="form-label">Data emiterii</label>
-                        <input type="date" id="issue_date" name="issue_date" required value="{{ now()->format('Y-m-d') }}" class="form-input">
+                        <input type="date" id="issue_date" name="issue_date" required class="form-input"
+                               value="{{ old('issue_date', $isEdit ? $invoice->issue_date?->format('Y-m-d') : now()->format('Y-m-d')) }}">
                     </div>
                     <div>
                         <label for="due_date" class="form-label">Data scadenta</label>
-                        <input type="date" id="due_date" name="due_date" required value="{{ now()->addDays(30)->format('Y-m-d') }}" class="form-input">
+                        <input type="date" id="due_date" name="due_date" required class="form-input"
+                               value="{{ old('due_date', $isEdit ? $invoice->due_date?->format('Y-m-d') : now()->addDays(30)->format('Y-m-d')) }}">
                     </div>
                 </div>
             </div>
@@ -73,29 +123,34 @@
                     <button type="button" id="add-line-btn" class="form-btn-link">+</button>
                 </div>
                 <div id="invoice-lines-container" class="space-y-3">
-                    <div class="invoice-line-row grid grid-cols-1 sm:grid-cols-12 gap-3">
-                        <div class="sm:col-span-4">
-                            <input type="text" name="product_name[]" placeholder="..." required class="form-input">
+                    @foreach ($lineRows as $row)
+                        <div class="invoice-line-row grid grid-cols-1 sm:grid-cols-12 gap-3">
+                            <div class="sm:col-span-4">
+                                <input type="text" name="product_name[]" placeholder="..." required class="form-input"
+                                       value="{{ $row['name'] }}">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <input type="number" name="quantity[]" placeholder="Cantitate" step="0.5" min="0" required class="form-input quantity-input"
+                                       value="{{ $row['quantity'] }}">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <input type="number" name="unit_price[]" placeholder="Pret unitar" step="0.01" min="0" required class="form-input price-input"
+                                       value="{{ $row['unit_price'] }}">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <select name="vat_rate[]" required class="form-input vat-input">
+                                    <option value="19" @selected($row['vat_rate'] == 19)>19%</option>
+                                    <option value="9" @selected($row['vat_rate'] == 9)>9%</option>
+                                    <option value="5" @selected($row['vat_rate'] == 5)>5%</option>
+                                    <option value="0" @selected($row['vat_rate'] == 0)>0%</option>
+                                </select>
+                            </div>
+                            <div class="sm:col-span-2 flex gap-2">
+                                <input type="text" class="line-total form-input" placeholder="Total" readonly>
+                                <button type="button" class="remove-line-btn form-btn-del">X</button>
+                            </div>
                         </div>
-                        <div class="sm:col-span-2">
-                            <input type="number" name="quantity[]" placeholder="Cantitate" step="0.5" min="0" required class="form-input quantity-input">
-                        </div>
-                        <div class="sm:col-span-2">
-                            <input type="number" name="unit_price[]" placeholder="Pret unitar" step="0.01" min="0" required class="form-input price-input">
-                        </div>
-                        <div class="sm:col-span-2">
-                            <select name="vat_rate[]" required class="form-input vat-input">
-                            <option value="19">19%</option>
-                            <option value="9">9%</option>
-                            <option value="5">5%</option>
-                            <option value="0">0%</option>
-                            </select>
-                        </div>
-                        <div class="sm:col-span-2 flex gap-2">
-                            <input type="text" class="line-total form-input" placeholder="Total" readonly>
-                            <button type="button" class="remove-line-btn form-btn-del">X</button>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
             </div>
             <hr class="border-slate-200">
@@ -123,8 +178,10 @@
             <input type="hidden" name="vat_total" id="vat-total-input">
             <input type="hidden" name="total" id="total-input">
             <div class="flex justify-end gap-3 pt-2">
-                <a href="{{ route(auth()->user()->dashboardRoute()) }}" class="form-btn-secondary">Anuleaza</a>
-                <button type="submit" name="action" value="draft" class="form-btn-secondary">Salveaza ca ciorna</button>
+                <a href="{{ $isEdit ? route('invoices.show', $invoice) : route(auth()->user()->dashboardRoute()) }}" class="form-btn-secondary">Anuleaza</a>
+                <button type="submit" name="action" value="draft" class="form-btn-secondary">
+                    {{ $isEdit ? 'Salveaza ciorna' : 'Salveaza ca ciorna' }}
+                </button>
                 <button type="submit" name="action" value="issue" class="form-btn-primary">Emite</button>
             </div>
         </form>
@@ -307,6 +364,9 @@
             }
         }
     });
+
+    // la editare liniile vin deja completate, deci totalurile se calculeaza din start
+    calcTotals();
  </script>
 </body>
 </html>

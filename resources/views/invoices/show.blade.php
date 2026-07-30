@@ -20,11 +20,14 @@
 
             {{-- Top Bar --}}
             <header class="flex items-center gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
-                <a href="{{ url()->previous() }}" class="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900">
+                <a href="{{ route(auth()->user()->dashboardRoute()) }}" class="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                     Înapoi
                 </a>
-                <span class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">Doar vizualizare</span>
+                {{-- pe o ciorna editabila eticheta ar contrazice butoanele de mai jos --}}
+                @unless ($invoice->status->isDraft() && in_array(auth()->user()->role, ['administrator', 'operator'], true))
+                    <span class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">Doar vizualizare</span>
+                @endunless
             </header>
 
             {{-- Content --}}
@@ -60,15 +63,32 @@
                             <p><span class="text-slate-400">Scadență:</span>
                                 {{ $invoice->due_date?->format('d.m.Y') ?? '—' }}</p>
 
-                            {{-- doar administratorul si operatorul emit; contabilul e read-only --}}
+                            {{-- ciornele se editeaza si se sterg; contabilul e read-only --}}
                             @if ($invoice->status->isDraft() && in_array(auth()->user()->role, ['administrator', 'operator'], true))
-                                <form action="{{ route('invoices.issue', $invoice) }}" method="POST" class="pt-2">
-                                    @csrf
-                                    <button type="submit"
-                                            class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
-                                        Emite documentul
-                                    </button>
-                                </form>
+                                <div class="flex flex-wrap gap-2 pt-3 sm:justify-end">
+                                    <a href="{{ route('invoices.edit', $invoice) }}"
+                                       class="px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 transition">
+                                        Editează
+                                    </a>
+
+                                    <form action="{{ route('invoices.destroy', $invoice) }}" method="POST"
+                                          onsubmit="return confirm('Ștergi definitiv această ciornă?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                                class="px-4 py-2 rounded-lg border border-slate-200 bg-white text-rose-600 text-sm font-medium hover:bg-rose-50 transition">
+                                            Șterge
+                                        </button>
+                                    </form>
+
+                                    <form action="{{ route('invoices.issue', $invoice) }}" method="POST">
+                                        @csrf
+                                        <button type="submit"
+                                                class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                                            Emite documentul
+                                        </button>
+                                    </form>
+                                </div>
                             @endif
                         </div>
                     </div>

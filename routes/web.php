@@ -104,6 +104,19 @@ Route::middleware('auth')->group(function () {
             ->whereNumber('invoice')
             ->name('issue');
 
+        // editarea si stergerea sunt permise doar pe ciorne (vezi abortUnlessDraft)
+        Route::get('/{invoice}/editare', [InvoiceController::class, 'edit'])
+            ->whereNumber('invoice')
+            ->name('edit');
+
+        Route::put('/{invoice}', [InvoiceController::class, 'update'])
+            ->whereNumber('invoice')
+            ->name('update');
+
+        Route::delete('/{invoice}', [InvoiceController::class, 'destroy'])
+            ->whereNumber('invoice')
+            ->name('destroy');
+
         Route::get('/curs-valutar', [InvoiceController::class, 'exchangeRate'])
             ->name('exchange-rate');
 
