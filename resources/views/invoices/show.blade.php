@@ -60,15 +60,32 @@
                             <p><span class="text-slate-400">Scadență:</span>
                                 {{ $invoice->due_date?->format('d.m.Y') ?? '—' }}</p>
 
-                            {{-- doar administratorul si operatorul emit; contabilul e read-only --}}
+                            {{-- ciornele se editeaza si se sterg; contabilul e read-only --}}
                             @if ($invoice->status->isDraft() && in_array(auth()->user()->role, ['administrator', 'operator'], true))
-                                <form action="{{ route('invoices.issue', $invoice) }}" method="POST" class="pt-2">
-                                    @csrf
-                                    <button type="submit"
-                                            class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
-                                        Emite documentul
-                                    </button>
-                                </form>
+                                <div class="flex flex-wrap gap-2 pt-3 sm:justify-end">
+                                    <a href="{{ route('invoices.edit', $invoice) }}"
+                                       class="px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 transition">
+                                        Editează
+                                    </a>
+
+                                    <form action="{{ route('invoices.destroy', $invoice) }}" method="POST"
+                                          onsubmit="return confirm('Ștergi definitiv această ciornă?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                                class="px-4 py-2 rounded-lg border border-slate-200 bg-white text-rose-600 text-sm font-medium hover:bg-rose-50 transition">
+                                            Șterge
+                                        </button>
+                                    </form>
+
+                                    <form action="{{ route('invoices.issue', $invoice) }}" method="POST">
+                                        @csrf
+                                        <button type="submit"
+                                                class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                                            Emite documentul
+                                        </button>
+                                    </form>
+                                </div>
                             @endif
                         </div>
                     </div>
