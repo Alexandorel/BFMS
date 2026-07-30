@@ -24,7 +24,10 @@
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                     Înapoi
                 </a>
-                <span class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">Doar vizualizare</span>
+                {{-- pe o ciorna editabila eticheta ar contrazice butoanele de mai jos --}}
+                @unless ($invoice->status->isDraft() && in_array(auth()->user()->role, ['administrator', 'operator'], true))
+                    <span class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">Doar vizualizare</span>
+                @endunless
             </header>
 
             {{-- Content --}}
