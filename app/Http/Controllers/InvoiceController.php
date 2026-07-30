@@ -250,6 +250,14 @@ class InvoiceController extends Controller
             'exchange_rate' => ['nullable', 'numeric', 'min:0'],
             'product_name' => ['required', 'array', 'min:1'],
             'product_name.*' => ['required', 'string', 'max:255'],
+            // linia poate veni din catalog sau scrisa liber, deci id-ul e optional
+            'product_id' => ['nullable', 'array'],
+            'product_id.*' => [
+                'nullable',
+                Rule::exists('products', 'id')->where(
+                    fn ($query) => $query->where('company_id', $companyId)
+                ),
+            ],
             'quantity' => ['required', 'array'],
             'quantity.*' => ['required', 'numeric', 'min:0.01'],
             'unit_price' => ['required', 'array'],
