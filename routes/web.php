@@ -13,6 +13,7 @@ use App\Http\Controllers\OperatorController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\BankAccountController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -164,6 +165,27 @@ Route::middleware('auth')->group(function () {
 
             Route::patch('/{series}/status', [DocumentSeriesController::class, 'toggleActive'])
                 ->name('status');
+        });
+
+    Route::middleware('role:administrator')
+        ->prefix('administrator/settings/conturi-bancare')
+        ->name('administrator.bank-accounts.')
+        ->group(function () {
+            // afisarea conturilor bancare
+            Route::get('/', [BankAccountController::class, 'index'])
+                ->name('index');
+
+            //adaugarea unui cont bancar
+            Route::post('/', [BankAccountController::class, 'store'])
+                ->name('store');
+
+            //editarea unui cont bancar
+            Route::put('/{bankAccount}', [BankAccountController::class, 'update'])
+                ->name('update');
+
+            //stergerea unui cont bancar
+            Route::delete('/{bankAccount}', [BankAccountController::class, 'destroy'])
+                ->name('destroy');
         });
 
     // Produse
