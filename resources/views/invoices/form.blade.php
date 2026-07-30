@@ -7,13 +7,57 @@
     @vite(['resources/css/app.css'])
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
+
+@php
+    // acelasi formular serveste crearea si editarea unei ciorne
+    $isEdit = ($invoice ?? null) !== null;
+
+    $currentType = old('document_type', $isEdit ? $invoice->document_type->value : 'invoice');
+    $currentCurrency = old('currency', $isEdit ? $invoice->currency : 'RON');
+    $currentSeriesId = old('document_series_id', $isEdit ? $invoice->document_series_id : null);
+
+    // liniile vin din inputul respins de validare, din ciorna, sau un rand gol la creare
+    if (old('product_name')) {
+        $lineRows = collect(old('product_name'))->map(fn ($name, $i) => [
+            'name' => $name,
+            'quantity' => old('quantity')[$i] ?? '',
+            'unit_price' => old('unit_price')[$i] ?? '',
+            'vat_rate' => old('vat_rate')[$i] ?? 19,
+        ])->all();
+    } elseif ($isEdit) {
+        $lineRows = $invoice->lines->map(fn ($line) => [
+            'name' => $line->product_name_snapshot,
+            'quantity' => $line->quantity,
+            'unit_price' => $line->unit_price_snapshot,
+            'vat_rate' => $line->vat_rate_snapshot,
+        ])->all();
+    } else {
+        $lineRows = [['name' => '', 'quantity' => '', 'unit_price' => '', 'vat_rate' => 19]];
+    }
+@endphp
+
  <div class="max-w-5xl mx-auto p-6">
     <div class="bg-white border border-slate-200 p-5">
 
-        <h1 class="text-2xl font-bold text-slate-900 mb-1">Factura noua</h1>
+        <h1 class="text-2xl font-bold text-slate-900 mb-1">
+            {{ $isEdit ? 'Editare ciornă' : 'Factura noua' }}
+        </h1>
 
-        <form action="{{ route('invoices.store') }}" method="POST" class="space-y-6">
+        @if ($errors->any())
+            <div class="mb-4 px-4 py-3 rounded-lg bg-rose-50 text-rose-800 text-sm">
+                <ul class="list-disc list-inside space-y-1">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ $isEdit ? route('invoices.update', $invoice) : route('invoices.store') }}" method="POST" class="space-y-6">
             @csrf
+            @if ($isEdit)
+                @method('PUT')
+            @endif
             <div class="space-y-4">
                 <div class="relative">
                     <label for="client_search" class="form-label">Client</label>
