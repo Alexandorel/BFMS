@@ -44,11 +44,6 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Dashboard generic (fallback)
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
     // Dashboard Administrator
     Route::middleware('role:administrator')->group(function () {
         Route::get('/dashboard/administrator', [AdministratorController::class, 'dashboard'])
@@ -81,8 +76,8 @@ Route::middleware('auth')->group(function () {
             ->name('contabil.audit-log.index');
     });
 
-    // Factură — vizualizare read-only pentru Administrator și Contabil
-    Route::middleware('role:administrator,contabil')->group(function () {
+    // Factură — vizualizare. Operatorul emite facturi, deci trebuie sa le si vada.
+    Route::middleware('role:administrator,contabil,operator')->group(function () {
         Route::get('/facturi/{invoice}', [InvoiceController::class, 'show'])
             ->whereNumber('invoice')
             ->name('invoices.show');
@@ -103,6 +98,24 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/', [InvoiceController::class, 'store'])
             ->name('store');
+
+        // ciorna -> emisa, aici se aloca numarul fiscal
+        Route::post('/{invoice}/emitere', [InvoiceController::class, 'issue'])
+            ->whereNumber('invoice')
+            ->name('issue');
+
+        // editarea si stergerea sunt permise doar pe ciorne (vezi abortUnlessDraft)
+        Route::get('/{invoice}/editare', [InvoiceController::class, 'edit'])
+            ->whereNumber('invoice')
+            ->name('edit');
+
+        Route::put('/{invoice}', [InvoiceController::class, 'update'])
+            ->whereNumber('invoice')
+            ->name('update');
+
+        Route::delete('/{invoice}', [InvoiceController::class, 'destroy'])
+            ->whereNumber('invoice')
+            ->name('destroy');
 
         Route::get('/curs-valutar', [InvoiceController::class, 'exchangeRate'])
             ->name('exchange-rate');

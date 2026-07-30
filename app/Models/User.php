@@ -85,7 +85,7 @@ class User extends Authenticatable implements Auditable
             'administrator' => 'dashboard.administrator',
             'contabil'      => 'dashboard.contabil',
             'operator'      => 'dashboard.operator',
-            default         => 'dashboard',
+            default         => 'login',
         };
     }
 
