@@ -25,6 +25,47 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
+Route::get('/dashboard', function () {
+    return view('dashboard');
+});
+
+Route::get('/dashboard/administrator', [AdministratorController::class, 'dashboard']);
+
+Route::get('/administrator/settings/profil', function () {
+    return view('administrator.settings.profile');
+})->name('administrator.settings.profile');
+
+Route::get('/operator/settings/firma', function () {
+    return view('administrator.settings.company');
+})->name('administrator.settings.company');
+
+Route::get('/administrator/settings/echipa', function () {
+    return view('administrator.settings.team');
+})->name('administrator.settings.team');
+
+Route::prefix('dashboard/operator')->name('operator.')->group(function () {
+
+    Route::get('/', function () {
+        return view('operator.dashboard');
+    })->name('dashboard');
+
+    Route::get('/clienti', function () {
+        return view('operator.clients.index');
+    })->name('clients.index');
+
+    Route::get('/produse', function () {
+        return view('operator.products.index');
+    })->name('products.index');
+
+    Route::get('/facturi', function () {
+        return view('operator.invoices.index');
+    })->name('invoices.index');
+
+    Route::get('/plati', function () {
+        return view('operator.payments.index');
+    })->name('payments.index');
+});
+
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
