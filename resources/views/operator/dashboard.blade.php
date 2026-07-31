@@ -1,22 +1,3 @@
-@php
-    // TODO: date hardcodate temporar, pana se conecteaza autentificarea si baza de date reala
-    $user = (object) [
-        'first_name' => 'Andrei',
-        'last_name'  => 'Popescu',
-        'role'       => 'Operator',
-    ];
-
-    $company = (object) [
-        'name' => 'SC Exemplu SRL',
-    ];
-
-    $stats = [
-        'invoices_month' => 18,
-        'overdue'        => 3,
-        'clients'        => 42,
-        'products'       => 27,
-    ];
-@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
