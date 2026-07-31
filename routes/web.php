@@ -43,29 +43,6 @@ Route::get('/administrator/settings/echipa', function () {
     return view('administrator.settings.team');
 })->name('administrator.settings.team');
 
-Route::prefix('dashboard/operator')->name('operator.')->group(function () {
-
-    Route::get('/', function () {
-        return view('operator.dashboard');
-    })->name('dashboard');
-
-    Route::get('/clienti', function () {
-        return view('operator.clients.index');
-    })->name('clients.index');
-
-    Route::get('/produse', function () {
-        return view('operator.products.index');
-    })->name('products.index');
-
-    Route::get('/facturi', function () {
-        return view('operator.invoices.index');
-    })->name('invoices.index');
-
-    Route::get('/plati', function () {
-        return view('operator.payments.index');
-    })->name('payments.index');
-});
-
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
@@ -92,9 +69,12 @@ Route::middleware('auth')->group(function () {
     });
 
     // Dashboard Operator
-    Route::middleware('role:operator')->group(function () {
-        Route::get('/dashboard/operator', [OperatorController::class, 'dashboard'])
-            ->name('dashboard.operator');
+    Route::middleware(['auth', 'role:operator'])->prefix('dashboard/operator')->name('operator.')->group(function () {
+        Route::get('/', [OperatorController::class, 'dashboard'])->name('dashboard');
+        Route::get('/clienti', [OperatorController::class, 'clients'])->name('clients.index');
+        Route::get('/produse', [OperatorController::class, 'products'])->name('products.index');
+        Route::get('/facturi', [OperatorController::class, 'invoices'])->name('invoices.index');
+        Route::get('/plati', [OperatorController::class, 'payments'])->name('payments.index');
     });
 
     // Dashboard + rute Contabil
@@ -220,6 +200,23 @@ Route::middleware('auth')->group(function () {
                 ->name('status');
         });
 
-    // Produse
-    Route::resource('products', ProductController::class);
+    // Vizualizare produse - toate rolurile
+    Route::middleware('auth')->group(function () {
+        Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+        Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+    });
+
+    // Adauga/editeaza - Admin + Operator
+    Route::middleware(['auth', 'role:administrator,operator'])->group(function () {
+        Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+        Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+        Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+        Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+    });
+
+    // Sterge - doar Admin
+    Route::middleware(['auth', 'role:administrator'])->group(function () {
+        Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+    });
+    
 });
