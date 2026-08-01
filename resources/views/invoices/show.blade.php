@@ -215,8 +215,8 @@
                         <h2 class="font-semibold text-slate-900">Plăți</h2>
                         <span class="text-sm text-slate-500">
                             Rest de plată:
-                            <span class="font-semibold {{ $balance > 0 ? 'text-amber-700' : 'text-emerald-700' }}">
-                                {{ number_format($balance, 2, ',', '.') }} {{ $invoice->currency }}
+                            <span class="font-semibold {{ $invoice->balance() > 0 ? 'text-amber-700' : 'text-emerald-700' }}">
+                                {{ number_format($invoice->balance(), 2, ',', '.') }} {{ $invoice->currency }}
                             </span>
                         </span>
                     </div>

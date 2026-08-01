@@ -49,10 +49,7 @@ class InvoiceController extends Controller
             'creditedInvoice',
         ]);
 
-        $paid = $invoice->payments->sum('amount');
-        $balance = $invoice->total - $paid;
-
-        return view('invoices.show', compact('invoice', 'paid', 'balance'));
+        return view('invoices.show', compact('invoice'));
     }
 
     public function create()
