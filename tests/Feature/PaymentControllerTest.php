@@ -205,6 +205,99 @@ class PaymentControllerTest extends TestCase
         $this->assertSame(1, Payment::where('invoice_id', $invoice->id)->count());
     }
 
+    public function test_an_operator_sees_the_payment_form_on_an_issued_invoice(): void
+    {
+        [$invoice, $company] = $this->createInvoice(1000.00);
+        $operator = $this->createUser('operator', $company);
+
+        $this->actingAs($operator)
+            ->get(route('invoices.show', $invoice))
+            ->assertOk()
+            ->assertSee('Înregistrează o încasare')
+            ->assertSee(route('invoices.payments.store', $invoice));
+    }
+
+    /**
+     * NFR-1: contabilul are acces exclusiv de vizualizare.
+     */
+    public function test_a_contabil_does_not_see_the_payment_form(): void
+    {
+        [$invoice, $company] = $this->createInvoice(1000.00);
+        $contabil = $this->createUser('contabil', $company);
+
+        $this->actingAs($contabil)
+            ->get(route('invoices.show', $invoice))
+            ->assertOk()
+            ->assertDontSee('Înregistrează o încasare');
+    }
+
+    public function test_the_form_disappears_once_the_invoice_is_fully_paid(): void
+    {
+        [$invoice, $company] = $this->createInvoice(1000.00);
+        $operator = $this->createUser('operator', $company);
+
+        $this->actingAs($operator)
+            ->post(route('invoices.payments.store', $invoice), $this->payload(1000.00));
+
+        $this->actingAs($operator)
+            ->get(route('invoices.show', $invoice))
+            ->assertOk()
+            ->assertDontSee('Înregistrează o încasare');
+    }
+
+    public function test_only_an_administrator_sees_the_delete_control(): void
+    {
+        [$invoice, $company] = $this->createInvoice(1000.00);
+        $operator = $this->createUser('operator', $company);
+        $administrator = $this->createUser('administrator', $company);
+
+        $this->actingAs($operator)
+            ->post(route('invoices.payments.store', $invoice), $this->payload(400.00));
+
+        $payment = Payment::where('invoice_id', $invoice->id)->firstOrFail();
+        $deleteRoute = route('invoices.payments.destroy', $payment);
+
+        $this->actingAs($administrator)
+            ->get(route('invoices.show', $invoice))
+            ->assertSee($deleteRoute);
+
+        $this->actingAs($operator)
+            ->get(route('invoices.show', $invoice))
+            ->assertDontSee($deleteRoute);
+    }
+
+    /**
+     * NFR-3: fara functii native blocante din browser.
+     */
+    public function test_the_page_does_not_use_a_native_confirm_dialog(): void
+    {
+        [$invoice, $company] = $this->createInvoice(1000.00);
+        $administrator = $this->createUser('administrator', $company);
+
+        $this->actingAs($administrator)
+            ->post(route('invoices.payments.store', $invoice), $this->payload(400.00));
+
+        $this->actingAs($administrator)
+            ->get(route('invoices.show', $invoice))
+            ->assertOk()
+            ->assertDontSee('onsubmit="return confirm', false)
+            ->assertDontSee('onclick="return confirm', false);
+    }
+
+    public function test_validation_errors_are_displayed_on_the_page(): void
+    {
+        [$invoice, $company] = $this->createInvoice(1000.00);
+        $operator = $this->createUser('operator', $company);
+
+        $this->actingAs($operator)
+            ->from(route('invoices.show', $invoice))
+            ->post(route('invoices.payments.store', $invoice), $this->payload(1500.00));
+
+        $this->actingAs($operator)
+            ->get(route('invoices.show', $invoice))
+            ->assertSee('Suma depășește restul de plată');
+    }
+
     private function payload(float $amount): array
     {
         return [
