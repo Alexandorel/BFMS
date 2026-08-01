@@ -34,7 +34,7 @@
             'vat_rate' => $line->vat_rate_snapshot,
         ])->all();
     } else {
-        $lineRows = [['name' => '', 'product_id' => '', 'quantity' => '', 'unit_price' => '', 'vat_rate' => 19]];
+        $lineRows = [['name' => '', 'product_id' => '', 'quantity' => 1, 'unit_price' => '', 'vat_rate' => 19]];
     }
 @endphp
 
