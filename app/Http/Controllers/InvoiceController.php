@@ -368,4 +368,21 @@ class InvoiceController extends Controller
             ])
         );
     }
+
+    public function searchProducts(Request $request)
+    {
+        $companyId = session('active_company_id');
+        $query = $request->query('q', '');
+
+        $products = Product::where('company_id', $companyId)
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                    ->orWhere('sku', 'like', "%{$query}%");
+            })
+            ->orderBy('name')
+            ->limit(10)
+            ->get(['id', 'name', 'sku', 'unit_measure', 'unit_price', 'vat_rate', 'is_vat_exempt']);
+
+        return response()->json($products);
+    }
 }
