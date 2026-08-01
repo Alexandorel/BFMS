@@ -136,7 +136,7 @@
                                 <div class="product-suggestions hidden absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"></div>
                             </div>
                             <div class="sm:col-span-2">
-                                <input type="number" name="quantity[]" placeholder="Cantitate" step="0.5" min="0" required class="form-input quantity-input"
+                                <input type="number" name="quantity[]" placeholder="Cantitate" step="0.01" min="0.01" required class="form-input quantity-input"
                                        value="{{ $row['quantity'] }}">
                             </div>
                             <div class="sm:col-span-2">
@@ -229,8 +229,8 @@
                     <div class="product-suggestions hidden absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"></div>
                 </div>
                 <div class="sm:col-span-2">
-                    <input type="number" name="quantity[]" placeholder="Cantitate" step="0.5" min="0" required
-                           class="form-input quantity-input">
+                    <input type="number" name="quantity[]" placeholder="Cantitate" step="0.01" min="0.01" required
+                           value="1" class="form-input quantity-input">
                 </div>
                 <div class="sm:col-span-2">
                     <input type="number" name="unit_price[]" placeholder="Preț unitar" step="0.01" min="0" required
