@@ -35,11 +35,22 @@ return new class extends Migration
             //Numar plata
             $table->string('reference', 100)->nullable();
 
+            // F-401: optional receipt for cash payment
+            // allocated number from company's series (DocumentType::Receipt).
+            $table->string('receipt_series', 10)->nullable();
+            $table->unsignedInteger('receipt_number')->nullable();
+
             $table->foreignId('created_by')->constrained('users')->onDelete('restrict');
             $table->timestamps();
 
             $table->index(['invoice_id']);
             $table->index(['company_id', 'payment_date']);
+
+            // null on both columns if there is no payment
+            $table->unique(
+                ['company_id', 'receipt_series', 'receipt_number'],
+                'payments_receipt_number_unique'
+            );
         });
     }
 
