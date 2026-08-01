@@ -11,7 +11,7 @@
 }
 /* Standard Colors */
 .form-input{
-    @apply w-full h-10 px-3 border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500;
+    @apply w-full h-10 px-3 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500;
 }
 .form-label{
     @apply block text-sm font-medium text-slate-700 mb-1;
@@ -20,14 +20,14 @@
     @apply font-semibold text-sm uppercase tracking-wide text-slate-400;
 }
 .form-btn-primary{
-    @apply px-4 py-2 bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition;
+    @apply px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition;
 }
 .form-btn-secondary{
-    @apply px-4 py-2 border border-slate-200 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 transition;
+    @apply px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 transition;
 }
 .form-btn-link{
     @apply text-sm font-medium text-indigo-600 hover:text-indigo-700;
 }
 .form-btn-del{
-    @apply h-10 w-10 shrink-0 border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-200;
+    @apply h-10 w-10 rounded-lg shrink-0 border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-200;
 }
