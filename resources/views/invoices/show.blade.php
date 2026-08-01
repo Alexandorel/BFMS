@@ -231,17 +231,10 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
-                                @php
-                                    $methodLabels = [
-                                        'cash' => 'Numerar',
-                                        'bank_transfer' => 'Transfer bancar',
-                                        'card' => 'Card',
-                                    ];
-                                @endphp
                                 @forelse ($invoice->payments as $payment)
                                     <tr>
                                         <td class="px-5 py-3 text-slate-600">{{ $payment->payment_date?->format('d.m.Y') }}</td>
-                                        <td class="px-5 py-3 text-slate-600">{{ $methodLabels[$payment->payment_method] ?? $payment->payment_method }}</td>
+                                        <td class="px-5 py-3 text-slate-600">{{ $payment->payment_method->label() }}</td>
                                         <td class="px-5 py-3 text-slate-600">{{ $payment->reference ?? '—' }}</td>
                                         <td class="px-5 py-3 text-right font-medium text-slate-900">
                                             {{ number_format($payment->amount, 2, ',', '.') }} {{ $payment->currency }}
