@@ -106,4 +106,31 @@ class Invoice extends Model implements Auditable
     {
         return $this->hasMany(Payment::class);
     }
+
+    /**
+     * Amount collected untill now
+     * (F-302)
+     * round to two decimal places
+     */
+    public function paidAmount(): float
+    {
+        $sum = $this->relationLoaded('payments')
+            ? $this->payments->sum('amount')
+            : $this->payments()->sum('amount');
+
+        return round((float) $sum, 2);
+    }
+
+    /**
+     * Restul de plata. Pozitiv = mai are de incasat, 0 = achitata integral.
+     */
+    public function balance(): float
+    {
+        return round((float) $this->total - $this->paidAmount(), 2);
+    }
+
+    public function isFullyPaid(): bool
+    {
+        return $this->balance() <= 0;
+    }
 }

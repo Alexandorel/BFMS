@@ -10,6 +10,7 @@ use App\Http\Controllers\ContabilController;
 use App\Http\Controllers\DocumentSeriesController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OperatorController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
@@ -167,6 +168,16 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/cauta-produse', [InvoiceController::class, 'searchProducts'])
             ->name('search-products');
+
+        // Incasari
+        Route::post('/{invoice}/plati', [PaymentController::class, 'store'])
+            ->whereNumber('invoice')
+            ->name('payments.store');
+
+        // NFR-1: Only administrator can delete date
+        Route::delete('/plati/{payment}', [PaymentController::class, 'destroy'])
+            ->whereNumber('payment')
+            ->name('payments.destroy');
     });
 
 

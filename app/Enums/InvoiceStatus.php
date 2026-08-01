@@ -47,4 +47,12 @@ enum InvoiceStatus: string
     {
         return $this === self::Draft;
     }
+
+    /**
+     * Unel an issued or partially paid invoice cand get payments
+     */
+    public function acceptsPayments(): bool
+    {
+        return in_array($this, [self::Issued, self::PartiallyPaid], true);
+    }
 }
