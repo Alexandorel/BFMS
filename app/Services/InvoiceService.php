@@ -42,8 +42,6 @@ class InvoiceService
             return $invoice;
         });
 
-        // Trimitere non-blocanta (F-501): emailul e pus in coada, nu se trimite sincron,
-        // ca sa nu blocheze interfata utilizatorului cat timp factura se emite.
         if($invoice->client?->email){
             Mail::to($invoice->client->email)->queue(new IssuedMail($invoice));
         }
