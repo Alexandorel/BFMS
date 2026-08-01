@@ -386,6 +386,47 @@
             </main>
         </div>
     </div>
+
+    <script>
+        // Confirmare de stergere in doi pasi. NFR-3 interzice confirm() nativ,
+        // deci butonul isi schimba starea in loc sa blocheze firul de executie.
+        document.querySelectorAll('[data-delete-cell]').forEach(function (cell) {
+            const trigger = cell.querySelector('[data-delete-trigger]');
+            const confirm = cell.querySelector('[data-delete-confirm]');
+            const cancel = cell.querySelector('[data-delete-cancel]');
+
+            trigger?.addEventListener('click', function () {
+                trigger.classList.add('hidden');
+                confirm.classList.remove('hidden');
+                confirm.classList.add('inline-flex');
+            });
+
+            cancel?.addEventListener('click', function () {
+                confirm.classList.add('hidden');
+                confirm.classList.remove('inline-flex');
+                trigger.classList.remove('hidden');
+            });
+        });
+
+        // Referinta e obligatorie doar la ordin de plata (vezi StorePaymentRequest).
+        const methodSelect = document.getElementById('payment_method');
+        const referenceInput = document.getElementById('reference');
+        const referenceHint = document.querySelector('[data-reference-hint]');
+
+        function syncReferenceField() {
+            const isBankTransfer = methodSelect.value === 'bank_transfer';
+
+            referenceInput.required = isBankTransfer;
+            referenceHint.textContent = isBankTransfer ? '(obligatorie)' : '(opțional)';
+            referenceHint.classList.toggle('text-rose-500', isBankTransfer);
+            referenceHint.classList.toggle('text-slate-400', !isBankTransfer);
+        }
+
+        if (methodSelect && referenceInput && referenceHint) {
+            methodSelect.addEventListener('change', syncReferenceField);
+            syncReferenceField();
+        }
+    </script>
 </body>
 
 </html>
