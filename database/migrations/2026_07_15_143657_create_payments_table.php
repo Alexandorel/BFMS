@@ -24,10 +24,12 @@ return new class extends Migration
             $table->enum('currency', ['RON', 'EUR', 'USD'])->default('RON');
             $table->decimal('exchange_rate', 10, 4)->default(1);
 
+            // Metodele acceptate sunt fixate de F-401 (etichetele in App\Enums\PaymentMethod)
             $table->enum('payment_method', [
-                'cash',           // Cash / Chitanță
-                'bank_transfer',  // Ordin de plată
-                'card',           // Card online
+                'cash',
+                'bank_transfer',
+                'card',
+                'ramburs',
             ]);
 
             //Numar plata
