@@ -20,6 +20,7 @@
     if (old('product_name')) {
         $lineRows = collect(old('product_name'))->map(fn ($name, $i) => [
             'name' => $name,
+            'product_id' => old('product_id')[$i] ?? '',
             'quantity' => old('quantity')[$i] ?? '',
             'unit_price' => old('unit_price')[$i] ?? '',
             'vat_rate' => old('vat_rate')[$i] ?? 19,
@@ -27,12 +28,13 @@
     } elseif ($isEdit) {
         $lineRows = $invoice->lines->map(fn ($line) => [
             'name' => $line->product_name_snapshot,
+            'product_id' => $line->product_id ?? '',
             'quantity' => $line->quantity,
             'unit_price' => $line->unit_price_snapshot,
             'vat_rate' => $line->vat_rate_snapshot,
         ])->all();
     } else {
-        $lineRows = [['name' => '', 'quantity' => '', 'unit_price' => '', 'vat_rate' => 19]];
+        $lineRows = [['name' => '', 'product_id' => '', 'quantity' => '', 'unit_price' => '', 'vat_rate' => 19]];
     }
 @endphp
 
@@ -125,9 +127,13 @@
                 <div id="invoice-lines-container" class="space-y-3">
                     @foreach ($lineRows as $row)
                         <div class="invoice-line-row grid grid-cols-1 sm:grid-cols-12 gap-3">
-                            <div class="sm:col-span-4">
-                                <input type="text" name="product_name[]" placeholder="..." required class="form-input"
+                            <div class="sm:col-span-4 relative">
+                                <input type="text" name="product_name[]" placeholder="Caută produs sau scrie liber..."
+                                       autocomplete="off" required class="form-input product-input"
                                        value="{{ $row['name'] }}">
+                                <input type="hidden" name="product_id[]" class="product-id"
+                                       value="{{ $row['product_id'] }}">
+                                <div class="product-suggestions hidden absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"></div>
                             </div>
                             <div class="sm:col-span-2">
                                 <input type="number" name="quantity[]" placeholder="Cantitate" step="0.5" min="0" required class="form-input quantity-input"
@@ -215,9 +221,12 @@
     function lineRow(){
         return `
             <div class="invoice-line-row grid grid-cols-1 sm:grid-cols-12 gap-3">
-                <div class="sm:col-span-4">
-                    <input type="text" name="product_name[]" placeholder="..." required
-                           class="form-input">
+                <div class="sm:col-span-4 relative">
+                    <input type="text" name="product_name[]" placeholder="Caută produs sau scrie liber..."
+                           autocomplete="off" required
+                           class="form-input product-input">
+                    <input type="hidden" name="product_id[]" class="product-id">
+                    <div class="product-suggestions hidden absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"></div>
                 </div>
                 <div class="sm:col-span-2">
                     <input type="number" name="quantity[]" placeholder="Cantitate" step="0.5" min="0" required
@@ -362,6 +371,77 @@
                 const newRow = container.lastElementChild;
                 newRow.querySelector('input[name="product_name[]"]').focus();
             }
+        }
+    });
+
+    // ---- nomenclator de produse pe liniile de factura ----
+    // delegare pe container: randurile se adauga si se sterg dinamic
+    let productSearchTimeout;
+
+    function esc(value){
+        return String(value ?? '').replace(/[&<>"']/g, c =>
+            ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function loadProducts(input){
+        const box = input.closest('.relative').querySelector('.product-suggestions');
+
+        fetch(`{{ route('invoices.search-products') }}?q=${encodeURIComponent(input.value.trim())}`)
+            .then(response => response.json())
+            .then(products => {
+                box.innerHTML = products.length
+                    ? products.map(p => `
+                        <div class="product-option px-3 py-2 text-sm hover:bg-indigo-50 cursor-pointer flex justify-between gap-2"
+                             data-id="${p.id}"
+                             data-name="${esc(p.name)}"
+                             data-price="${p.unit_price}"
+                             data-vat="${p.is_vat_exempt ? 0 : parseFloat(p.vat_rate)}">
+                            <span><span class="font-mono text-xs text-slate-400">${esc(p.sku)}</span> ${esc(p.name)}</span>
+                            <span class="text-xs text-slate-400 shrink-0">${p.unit_price} / ${esc(p.unit_measure)}</span>
+                        </div>`).join('')
+                    : '<div class="px-3 py-2 text-sm text-slate-400">Niciun produs găsit</div>';
+
+                box.classList.remove('hidden');
+            });
+    }
+
+    // la focus se deschide tot nomenclatorul
+    container.addEventListener('focusin', function(e){
+        if(e.target.classList.contains('product-input')){
+            loadProducts(e.target);
+        }
+    });
+
+    // tastarea filtreaza si desface legatura cu catalogul: linia redevine text liber
+    container.addEventListener('input', function(e){
+        if(!e.target.classList.contains('product-input')) return;
+
+        e.target.closest('.relative').querySelector('.product-id').value = '';
+
+        clearTimeout(productSearchTimeout);
+        productSearchTimeout = setTimeout(() => loadProducts(e.target), 300);
+    });
+
+    // selectia completeaza randul; pretul si TVA raman editabile
+    container.addEventListener('click', function(e){
+        const option = e.target.closest('.product-option');
+        if(!option) return;
+
+        const cell = option.closest('.relative');
+        const row = option.closest('.invoice-line-row');
+
+        cell.querySelector('.product-input').value = option.dataset.name;
+        cell.querySelector('.product-id').value = option.dataset.id;
+        row.querySelector('.price-input').value = option.dataset.price;
+        row.querySelector('.vat-input').value = option.dataset.vat;
+
+        cell.querySelector('.product-suggestions').classList.add('hidden');
+        calcTotals();
+    });
+
+    document.addEventListener('click', function(e){
+        if(!e.target.closest('.product-suggestions') && !e.target.classList.contains('product-input')){
+            document.querySelectorAll('.product-suggestions').forEach(box => box.classList.add('hidden'));
         }
     });
 
