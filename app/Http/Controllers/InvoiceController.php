@@ -8,6 +8,7 @@ use App\Enums\DocumentType;
 use App\Enums\InvoiceStatus;
 use App\Models\Client;
 use App\Models\DocumentSeries;
+use App\Models\Product;
 use App\Services\BNRExchange;
 use App\Services\InvoiceService;
 use RuntimeException;
@@ -250,6 +251,14 @@ class InvoiceController extends Controller
             'exchange_rate' => ['nullable', 'numeric', 'min:0'],
             'product_name' => ['required', 'array', 'min:1'],
             'product_name.*' => ['required', 'string', 'max:255'],
+            // linia poate veni din catalog sau scrisa liber, deci id-ul e optional
+            'product_id' => ['nullable', 'array'],
+            'product_id.*' => [
+                'nullable',
+                Rule::exists('products', 'id')->where(
+                    fn ($query) => $query->where('company_id', $companyId)
+                ),
+            ],
             'quantity' => ['required', 'array'],
             'quantity.*' => ['required', 'numeric', 'min:0.01'],
             'unit_price' => ['required', 'array'],
@@ -270,6 +279,12 @@ class InvoiceController extends Controller
         $subtotal = 0;
         $vatTotal = 0;
 
+        // produsele din catalog, incarcate o singura data pentru toate liniile
+        $productIds = array_filter($validated['product_id'] ?? []);
+        $products = $productIds
+            ? Product::whereIn('id', $productIds)->get()->keyBy('id')
+            : collect();
+
         foreach ($validated['product_name'] as $i => $name) {
             $qty = (float) $validated['quantity'][$i];
             $price = (float) $validated['unit_price'][$i];
@@ -279,9 +294,16 @@ class InvoiceController extends Controller
             $lineVat = round($lineSubtotal * ($vatRate / 100), 2);
             $lineTotal = round($lineSubtotal + $lineVat, 2);
 
+            $productId = $validated['product_id'][$i] ?? null;
+            $product = $productId ? $products->get((int) $productId) : null;
+
             $lines[] = [
-                'product_id' => null, 'product_name_snapshot' => $name,
-                'sku_snapshot' => null, 'unit_measure_snapshot' => 'buc',
+                // SKU si UM vin din catalog, dar pretul si TVA raman cele de pe linie:
+                // factura retine ce s-a facturat, nu ce scrie azi in catalog
+                'product_id' => $product?->id,
+                'product_name_snapshot' => $name,
+                'sku_snapshot' => $product?->sku,
+                'unit_measure_snapshot' => $product?->unit_measure ?? 'buc',
                 'unit_price_snapshot' => $price, 'vat_rate_snapshot' => $vatRate,
                 'quantity' => $qty, 'line_subtotal' => $lineSubtotal,
                 'line_vat' => $lineVat, 'line_total' => $lineTotal,
@@ -345,5 +367,22 @@ class InvoiceController extends Controller
                 'id' => $c->id, 'name'=> $c->full_name,
             ])
         );
+    }
+
+    public function searchProducts(Request $request)
+    {
+        $companyId = session('active_company_id');
+        $query = $request->query('q', '');
+
+        $products = Product::where('company_id', $companyId)
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                    ->orWhere('sku', 'like', "%{$query}%");
+            })
+            ->orderBy('name')
+            ->limit(10)
+            ->get(['id', 'name', 'sku', 'unit_measure', 'unit_price', 'vat_rate', 'is_vat_exempt']);
+
+        return response()->json($products);
     }
 }

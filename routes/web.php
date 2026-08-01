@@ -163,6 +163,9 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/cauta-clienti', [InvoiceController::class, 'searchClients'])
             ->name('search-clients');
+
+        Route::get('/cauta-produse', [InvoiceController::class, 'searchProducts'])
+            ->name('search-products');
     });
 
 
