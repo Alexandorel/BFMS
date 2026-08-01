@@ -45,6 +45,17 @@
                     </div>
                 @endif
 
+                @if ($errors->any())
+                    <div class="px-4 py-3 rounded-lg bg-rose-50 text-rose-800 text-sm">
+                        <p class="font-medium mb-1">Verifică datele introduse:</p>
+                        <ul class="list-disc list-inside space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 {{-- Antet --}}
                 <div class="bg-white rounded-xl border border-slate-200 p-5 sm:p-6">
                     <div class="flex flex-wrap items-start justify-between gap-4">
