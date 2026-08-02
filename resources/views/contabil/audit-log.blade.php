@@ -31,7 +31,14 @@
     };
 @endphp
 
-<div class="min-h-screen flex flex-col">
+<div class="flex min-h-screen">
+
+    {{-- sidebar-ul trimite la rutele de administrator, contabilul ar primi 403 --}}
+    @if (auth()->user()?->role === 'administrator')
+        <x-sidebar />
+    @endif
+
+    <div class="flex-1 flex flex-col min-w-0">
 
     <header class="flex items-center justify-between gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
         <a href="{{ $backRoute }}" class="text-sm text-indigo-600 hover:underline">
@@ -196,6 +203,7 @@
         @endif
 
     </main>
+    </div>
 </div>
 
 </body>

@@ -189,6 +189,32 @@ class AuditLogAccessTest extends TestCase
             ->assertDontSee('Produs al altei firme');
     }
 
+    public function test_the_sidebar_links_to_the_audit_log_for_an_administrator(): void
+    {
+        [$admin, $company] = $this->userWithCompany('administrator');
+
+        $this->actingAs($admin)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('products.index'))
+            ->assertOk()
+            ->assertSee('Jurnal de audit');
+    }
+
+    /**
+     * The sidebar is shared with the product screens the operator can open,
+     * so the link has to stay hidden there instead of leading to a 403.
+     */
+    public function test_the_sidebar_hides_the_audit_log_from_an_operator(): void
+    {
+        [$operator, $company] = $this->userWithCompany('operator');
+
+        $this->actingAs($operator)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('products.index'))
+            ->assertOk()
+            ->assertDontSee('Jurnal de audit');
+    }
+
     /**
      * @return array{0: User, 1: Company}
      */
