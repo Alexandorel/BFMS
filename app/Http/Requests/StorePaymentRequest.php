@@ -70,6 +70,15 @@ class StorePaymentRequest extends FormRequest
                 'string',
                 'max:100',
             ],
+            // F-401: chitanta insoteste doar incasarile in numerar
+            'issue_receipt' => [
+                'boolean',
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if ($value && $this->input('payment_method') !== PaymentMethod::Cash->value) {
+                        $fail('Chitanța se poate emite doar pentru încasările în numerar.');
+                    }
+                },
+            ],
         ];
     }
 
