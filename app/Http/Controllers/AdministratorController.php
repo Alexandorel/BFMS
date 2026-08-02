@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Audit;
 use App\Models\User;
 use App\Models\Company;
 use App\Models\Invoice;
@@ -34,12 +35,22 @@ class AdministratorController extends Controller
                 ->get()
             : collect();
 
+        // Preview for the audit log card, the full screen lives in AuditLogController
+        $audits = $company
+            ? Audit::forCompany($company->id)
+                ->with(['user', 'auditable'])
+                ->latest()
+                ->take(5)
+                ->get()
+            : collect();
+
         return view('administrator.dashboard', [
             'user' => $user,
             'company' => $company,
             'companies' => $companies,
             'companyName' => $companyName,
             'invoices' => $invoices,
+            'audits' => $audits,
         ]);
     }
 }
