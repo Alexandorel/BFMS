@@ -372,6 +372,22 @@
                                            class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                 </div>
 
+                                {{-- F-401: chitanta insoteste doar incasarile in numerar --}}
+                                <div class="md:col-span-12 hidden" data-receipt-field>
+                                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox"
+                                               id="issue_receipt"
+                                               name="issue_receipt"
+                                               value="1"
+                                               @checked(old('issue_receipt'))
+                                               class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                                        <span class="text-sm text-slate-700">Emite și o chitanță</span>
+                                        <span class="text-xs text-slate-400">
+                                            (primește un număr din seria de chitanțe a firmei)
+                                        </span>
+                                    </label>
+                                </div>
+
                                 <div class="md:col-span-12 flex justify-end">
                                     <button type="submit"
                                             class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
@@ -413,18 +429,30 @@
         const referenceInput = document.getElementById('reference');
         const referenceHint = document.querySelector('[data-reference-hint]');
 
-        function syncReferenceField() {
+        // Chitanta se emite doar la incasarile in numerar (F-401).
+        const receiptField = document.querySelector('[data-receipt-field]');
+        const receiptCheckbox = document.getElementById('issue_receipt');
+
+        function syncMethodDependentFields() {
             const isBankTransfer = methodSelect.value === 'bank_transfer';
+            const isCash = methodSelect.value === 'cash';
 
             referenceInput.required = isBankTransfer;
             referenceHint.textContent = isBankTransfer ? '(obligatorie)' : '(opțional)';
             referenceHint.classList.toggle('text-rose-500', isBankTransfer);
             referenceHint.classList.toggle('text-slate-400', !isBankTransfer);
+
+            receiptField?.classList.toggle('hidden', !isCash);
+
+            // pe alta metoda bifa ar fi respinsa la validare, deci o curatam
+            if (! isCash && receiptCheckbox) {
+                receiptCheckbox.checked = false;
+            }
         }
 
         if (methodSelect && referenceInput && referenceHint) {
-            methodSelect.addEventListener('change', syncReferenceField);
-            syncReferenceField();
+            methodSelect.addEventListener('change', syncMethodDependentFields);
+            syncMethodDependentFields();
         }
     </script>
 </body>
