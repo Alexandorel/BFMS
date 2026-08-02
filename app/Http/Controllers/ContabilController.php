@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Audit;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Services\ActiveCompanyService;
@@ -35,13 +36,23 @@ class ContabilController extends Controller
             ? Client::where('company_id', $company->id)->orderBy('name')->get()
             : collect();
 
+        // Preview for the audit log card, the full screen lives in AuditLogController
+        $audits = $company
+            ? Audit::forCompany($company->id)
+                ->with(['user', 'auditable'])
+                ->latest()
+                ->take(5)
+                ->get()
+            : collect();
+
         return view('contabil.dashboard', compact(
             'user',
             'companies',
             'company',
             'companyName',
             'invoices',
-            'clients'
+            'clients',
+            'audits'
         ));
     }
 }

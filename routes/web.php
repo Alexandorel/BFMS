@@ -102,9 +102,12 @@ Route::middleware('auth')->group(function () {
             ->name('contabil.reports.client-sheet');
         Route::get('/contabil/reports/month-close', [ReportController::class, 'monthClose'])
             ->name('contabil.reports.month-close');
+    });
 
-        Route::get('/contabil/audit-log', [AuditLogController::class, 'index'])
-            ->name('contabil.audit-log.index');
+    // Audit log for administrator/accountant (F-101).
+    Route::middleware('role:administrator,contabil')->group(function () {
+        Route::get('/audit-log', [AuditLogController::class, 'index'])
+            ->name('audit-log.index');
     });
 
     // Factură — vizualizare. Operatorul emite facturi, deci trebuie sa le si vada.
