@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Enums\DocumentType;
 use App\Enums\InvoiceStatus;
+use App\Enums\PaymentMethod;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\User;
@@ -11,6 +13,11 @@ use RuntimeException;
 
 class PaymentService
 {
+    public function __construct(
+        private DocumentSeriesService $seriesService
+    ) {
+    }
+
     /**
      * register a encashment
      * all reviews after block the invocie row
@@ -56,6 +63,17 @@ class PaymentService
                 ));
             }
 
+            // din formular metoda vine ca string, dintr-un apel intern ca enum
+            $method = $data['payment_method'] instanceof PaymentMethod
+                ? $data['payment_method']
+                : PaymentMethod::from($data['payment_method']);
+
+            // Numarul se aloca in aceeasi tranzactie cu plata: daca inserarea
+            // esueaza, numarul nu ramane ars si seria nu capata goluri. (F-103)
+            $receipt = ! empty($data['issue_receipt'])
+                ? $this->allocateReceiptNumber($locked->company_id, $method)
+                : ['series' => null, 'number' => null];
+
             $payment = Payment::create([
                 'invoice_id' => $locked->id,
                 'company_id' => $locked->company_id,
@@ -63,8 +81,10 @@ class PaymentService
                 'amount' => $amount,
                 'currency' => $currency,
                 'exchange_rate' => $data['exchange_rate'] ?? $locked->exchange_rate,
-                'payment_method' => $data['payment_method'],
+                'payment_method' => $method,
                 'reference' => $data['reference'] ?? null,
+                'receipt_series' => $receipt['series'],
+                'receipt_number' => $receipt['number'],
                 'created_by' => $user->id,
             ]);
 
@@ -82,11 +102,23 @@ class PaymentService
      *
      * Statusul poate cobori inapoi (fully_paid -> partially_paid -> issued):
      * starea de incasare e derivata din sume, nu o tranzitie de business.
+     *
+     * O plata cu chitanta emisa NU se sterge: numarul e deja alocat si
+     * documentul a fost predat clientului, deci stergerea ar lasa un gol in
+     * seria de chitante. (F-103)
      */
     public function remove(Payment $payment): void
     {
         DB::transaction(function () use ($payment) {
             $locked = $this->lockInvoice($payment->invoice_id);
+
+            if ($payment->hasReceipt()) {
+                throw new RuntimeException(sprintf(
+                    'Plata are chitanta %s emisa si nu mai poate fi stearsa. '
+                    .'Corectia se face prin stornarea facturii.',
+                    $payment->receipt_label
+                ));
+            }
 
             $payment->delete();
 
@@ -107,6 +139,38 @@ class PaymentService
         }
 
         return Invoice::whereKey($invoiceId)->lockForUpdate()->firstOrFail();
+    }
+
+    /**
+     * Aloca un numar din seria de chitante a firmei (F-401).
+     *
+     * Se apeleaza doar din interiorul tranzactiei lui record(), pentru ca
+     * allocateNumber() incrementeaza current_number: daca plata ar esua dupa
+     * alocare, numarul ar ramane ars si seria ar capata un gol. (F-103)
+     *
+     * @return array{series: ?string, number: ?int}
+     */
+    private function allocateReceiptNumber(int $companyId, PaymentMethod $method): array
+    {
+        if (! $method->canIssueReceipt()) {
+            throw new RuntimeException(
+                'Chitanta se poate emite doar pentru incasarile in numerar.'
+            );
+        }
+
+        $series = $this->seriesService->defaultFor($companyId, DocumentType::Receipt);
+
+        if (! $series) {
+            throw new RuntimeException(
+                'Firma nu are o serie de chitante activa. '
+                .'Configureaz-o din Setari > Serii documente.'
+            );
+        }
+
+        return [
+            'series' => $series->prefix,
+            'number' => $this->seriesService->allocateNumber($series),
+        ];
     }
 
     /**

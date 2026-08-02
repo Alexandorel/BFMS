@@ -36,6 +36,8 @@ class StorePaymentRequest extends FormRequest
             'currency' => $invoice instanceof Invoice ? $invoice->currency : null,
             'payment_date' => $this->input('payment_date') ?: now()->toDateString(),
             'reference' => trim((string) $this->input('reference')) ?: null,
+            // un checkbox nebifat nu se trimite deloc, iar unul bifat trimite "on"
+            'issue_receipt' => $this->boolean('issue_receipt'),
         ]);
     }
 
