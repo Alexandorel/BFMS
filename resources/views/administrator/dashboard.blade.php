@@ -118,6 +118,38 @@
                             @endif
                         </div>
                     </div>
+
+                    {{-- Jurnal de audit — preview, ecranul complet e la audit-log.index (F-101) --}}
+                    <div class="bg-white rounded-xl border border-slate-200 self-start">
+                        <div class="px-5 py-4 border-b border-slate-200">
+                            <h2 class="font-semibold text-slate-900">Activitate recentă</h2>
+                        </div>
+                        <ul class="divide-y divide-slate-100 text-sm">
+                            @forelse ($audits as $entry)
+                                <li class="px-5 py-3">
+                                    <p class="text-slate-800">
+                                        <span class="font-medium">
+                                            {{ $entry->user ? trim($entry->user->first_name . ' ' . $entry->user->last_name) : 'Sistem' }}
+                                        </span>
+                                        {{ mb_strtolower($entry->eventLabel()) }}
+                                        {{ mb_strtolower($entry->entityLabel()) }}
+                                        {{ $entry->entityName() }}
+                                    </p>
+                                    <p class="text-xs text-slate-400 mt-0.5">
+                                        {{ $entry->created_at?->diffForHumans() }}
+                                    </p>
+                                </li>
+                            @empty
+                                <li class="px-5 py-3 text-slate-500">
+                                    Nicio modificare înregistrată încă.
+                                </li>
+                            @endforelse
+                        </ul>
+                        <div class="px-5 py-4 border-t border-slate-200">
+                            <a href="{{ route('audit-log.index') }}"
+                                class="text-sm text-indigo-600 hover:underline">Vezi jurnalul complet</a>
+                        </div>
+                    </div>
                 </div>
 
             </main>

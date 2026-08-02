@@ -10,9 +10,11 @@ use App\Http\Controllers\ContabilController;
 use App\Http\Controllers\DocumentSeriesController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OperatorController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\BankAccountController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -58,7 +60,7 @@ Route::post('/register', [RegisteredUserController::class, 'store']);
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth')->group (function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -69,7 +71,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Dashboard Operator
-    Route::middleware(['auth', 'role:operator'])->prefix('dashboard/operator')->name('operator.')->group(function () {
+    Route::middleware('role:operator')->prefix('dashboard/operator')->name('operator.')->group(function () {
         Route::get('/', [OperatorController::class, 'dashboard'])->name('dashboard');
         Route::get('/clienti', [OperatorController::class, 'clients'])->name('clients.index');
         Route::get('/produse', [OperatorController::class, 'products'])->name('products.index');
@@ -92,9 +94,12 @@ Route::middleware('auth')->group(function () {
             ->name('contabil.reports.client-sheet');
         Route::get('/contabil/reports/month-close', [ReportController::class, 'monthClose'])
             ->name('contabil.reports.month-close');
+    });
 
-        Route::get('/contabil/audit-log', [AuditLogController::class, 'index'])
-            ->name('contabil.audit-log.index');
+    // Audit log for administrator/accountant (F-101).
+    Route::middleware('role:administrator,contabil')->group(function () {
+        Route::get('/audit-log', [AuditLogController::class, 'index'])
+            ->name('audit-log.index');
     });
 
     // Factură — vizualizare. Operatorul emite facturi, deci trebuie sa le si vada.
@@ -109,7 +114,7 @@ Route::middleware('auth')->group(function () {
         ->name('company.switch');
 
     // Gestionare Factura
-    Route::middleware(['auth', 'role:administrator,operator'])->prefix('facturi')->name('invoices.')->group(function () {
+    Route::middleware('role:administrator,operator')->prefix('facturi')->name('invoices.')->group(function () {
 
         Route::get('/', [InvoiceController::class, 'index'])
             ->name('index');
@@ -143,6 +148,19 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/cauta-clienti', [InvoiceController::class, 'searchClients'])
             ->name('search-clients');
+
+        Route::get('/cauta-produse', [InvoiceController::class, 'searchProducts'])
+            ->name('search-products');
+
+        // Incasari
+        Route::post('/{invoice}/plati', [PaymentController::class, 'store'])
+            ->whereNumber('invoice')
+            ->name('payments.store');
+
+        // NFR-1: Only administrator can delete date
+        Route::delete('/plati/{payment}', [PaymentController::class, 'destroy'])
+            ->whereNumber('payment')
+            ->name('payments.destroy');
     });
 
 
@@ -207,7 +225,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Adauga/editeaza - Admin + Operator
-    Route::middleware(['auth', 'role:administrator,operator'])->group(function () {
+    Route::middleware('role:administrator,operator')->group(function () {
         Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
         Route::post('/products', [ProductController::class, 'store'])->name('products.store');
         Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
@@ -215,8 +233,18 @@ Route::middleware('auth')->group(function () {
     });
 
     // Sterge - doar Admin
-    Route::middleware(['auth', 'role:administrator'])->group(function () {
+    Route::middleware('role:administrator')->group(function () {
         Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
     });
-    
+
+    // Conturi bancare - Admin (din varianta colegului)
+    Route::middleware('role:administrator')
+        ->prefix('administrator/settings/conturi-bancare')
+        ->name('administrator.bank-accounts.')
+        ->group(function () {
+            Route::get('/', [BankAccountController::class, 'index'])->name('index');
+            Route::post('/', [BankAccountController::class, 'store'])->name('store');
+            Route::put('/{bankAccount}', [BankAccountController::class, 'update'])->name('update');
+            Route::delete('/{bankAccount}', [BankAccountController::class, 'destroy'])->name('destroy');
+        });
 });

@@ -20,6 +20,15 @@
             <span class="w-2 h-2 rounded-full {{ request()->routeIs('products.*') ? 'bg-indigo-600' : 'bg-slate-300' }}"></span>
             Produse
         </a>
+
+        {{-- jurnalul e deschis administratorului si contabilului, operatorul ar primi 403 --}}
+        @if (in_array($currentUser->role ?? null, ['administrator', 'contabil'], true))
+            <a href="{{ route('audit-log.index') }}"
+                class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->routeIs('audit-log.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-slate-600 hover:bg-slate-50' }}">
+                <span class="w-2 h-2 rounded-full {{ request()->routeIs('audit-log.*') ? 'bg-indigo-600' : 'bg-slate-300' }}"></span>
+                Jurnal de audit
+            </a>
+        @endif
     </nav>
 
     {{-- setarile sunt rezervate administratorului, restul ar primi 403 --}}
