@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreCompanyRequest;
 use App\Http\Requests\UpdateCompanyRequest;
 use App\Models\Company;
+use App\Services\ActiveCompanyService;
 use App\Services\DocumentSeriesService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,16 +30,16 @@ class CompanyController extends Controller
         return Auth::user()->companies()->get();
     }
 
-    public function switchCompany($id)
+    public function switchCompany(
+        Request $request,
+        int $id,
+        ActiveCompanyService $activeCompanyService
+    ): RedirectResponse
     {
-        Session::put('active_company_id', $id);
+        $activeCompanyService->switchTo($request->user(), $request, $id);
 
-        // Fallback for the right roll
-        $fallback = Auth::user()?->role === 'contabil'
-            ? route('dashboard.contabil')
-            : route('dashboard.administrator');
-
-        return back(fallback: $fallback);
+        return back(fallback: route($request->user()->dashboardRoute()))
+            ->with('success', 'Firma activă a fost schimbată.');
     }
 
     public function index()
