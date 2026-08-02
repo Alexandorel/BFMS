@@ -39,7 +39,7 @@
 @endphp
 
  <div class="max-w-5xl mx-auto p-6">
-    <div class="bg-white border border-slate-200 p-5">
+    <div class="bg-white rounded-lg border border-slate-200 p-5">
 
         <h1 class="text-2xl font-bold text-slate-900 mb-1">
             {{ $isEdit ? 'Editare ciornă' : 'Factura noua' }}
