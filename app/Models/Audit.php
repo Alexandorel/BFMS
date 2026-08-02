@@ -108,4 +108,39 @@ class Audit extends BaseAudit
             ->when($filters['from'] ?? null, fn ($q, $v) => $q->whereDate('created_at', '>=', $v))
             ->when($filters['to'] ?? null, fn ($q, $v) => $q->whereDate('created_at', '<=', $v));
     }
+
+    public function entityLabel(): string
+    {
+        return self::ENTITY_LABELS[$this->auditable_type]
+            ?? class_basename($this->auditable_type);
+    }
+
+    public function eventLabel(): string
+    {
+        return self::EVENT_LABELS[$this->event] ?? $this->event;
+    }
+
+    public static function fieldLabel(string $field): string
+    {
+        return self::FIELD_LABELS[$field] ?? Str::headline($field);
+    }
+
+    /**
+     * How the audited record is named on screen. A hard deleted record leaves
+     * the audit row behind with nothing to load, and that row is exactly the
+     * one worth showing, so it degrades to the id instead of being skipped.
+     */
+    public function entityName(): string
+    {
+        $model = $this->auditable;
+
+        if ($model === null) {
+            return '#' . $this->auditable_id . ' (șters)';
+        }
+
+        return match (true) {
+            $model instanceof Invoice => trim($model->series . ' ' . $model->number) ?: '#' . $model->getKey(),
+            default => $model->name ?? '#' . $model->getKey(),
+        };
+    }
 }
