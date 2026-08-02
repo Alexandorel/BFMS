@@ -45,7 +45,7 @@
                     Facturi
                 </a>
 
-                <a href="{{ route('dashboard.contabil.audit-log.index') }}"
+                <a href="{{ route('audit-log.index') }}"
                     class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50">
                     <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -303,7 +303,7 @@
                                 @endforeach
                             </ul>
                             <div class="px-5 py-4 border-t border-slate-200">
-                                <a href="{{ route('dashboard.contabil.audit-log.index') }}"
+                                <a href="{{ route('audit-log.index') }}"
                                     class="text-sm text-indigo-600 hover:underline">Vezi jurnalul complet</a>
                             </div>
                         </div>
