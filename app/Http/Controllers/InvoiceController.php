@@ -9,6 +9,7 @@ use App\Enums\InvoiceStatus;
 use App\Models\Client;
 use App\Models\DocumentSeries;
 use App\Models\Product;
+use App\Services\ActiveCompanyService;
 use App\Services\BNRExchange;
 use App\Services\InvoiceService;
 use RuntimeException;
@@ -19,16 +20,17 @@ use Illuminate\Validation\Rule;
 
 class InvoiceController extends Controller
 {
-    public function index()
+    public function index(Request $request, ActiveCompanyService $activeCompanyService)
     {
-        $companyId = session('active_company_id');
+        $company = $activeCompanyService->require(
+            $request->user(),
+            $request
+        );
 
-        $invoices = $companyId
-            ? Invoice::with('client')
-                ->where('company_id', $companyId)
-                ->latest()
-                ->get()
-            : collect();
+        $invoices = Invoice::with('client')
+            ->where('company_id', $company->id)
+            ->latest()
+            ->get();
 
         return view('contabil.invoices', compact('invoices'));
     }
@@ -52,19 +54,30 @@ class InvoiceController extends Controller
         return view('invoices.show', compact('invoice'));
     }
 
-    public function create()
+    public function create(Request $request, ActiveCompanyService $activeCompanyService)
     {
-        $companyId = session('active_company_id');
+        $company = $activeCompanyService->require(
+            $request->user(),
+            $request
+        );
 
         return view('invoices.form', [
             'invoice' => null,
-            'clients' => Client::where('company_id', $companyId)->get(),
-            'seriesByType' => $this->seriesOptionsFor($companyId),
+            'clients' => Client::where('company_id', $company->id)->get(),
+            'seriesByType' => $this->seriesOptionsFor($company->id),
         ]);
     }
-    public function store(Request $request, DocumentSeriesService $seriesService)
+    public function store(
+        Request $request,
+        DocumentSeriesService $seriesService,
+        ActiveCompanyService $activeCompanyService
+    )
     {
-        $companyId = session('active_company_id');
+        $company = $activeCompanyService->require(
+            $request->user(),
+            $request
+        );
+        $companyId = $company->id;
         $validated = $request->validate($this->invoiceRules($request, $companyId));
 
         $isDraft = $validated['action'] === 'draft';
@@ -230,7 +243,12 @@ class InvoiceController extends Controller
     private function invoiceRules(Request $request, int $companyId): array
     {
         return [
-            'client_id' => ['required', 'exists:clients,id'],
+            'client_id' => [
+                'required',
+                Rule::exists('clients', 'id')->where(
+                    fn ($query) => $query->where('company_id', $companyId)
+                ),
+            ],
             'document_type' => ['required', 'in:invoice,proforma,receipt'],
             // seria trebuie sa fie a firmei active, de tipul ales si inca activa
             'document_series_id' => [
@@ -344,21 +362,26 @@ class InvoiceController extends Controller
         $rate = $bnrService->getRate($currency);
         return response()->json(['rate'=>$rate]);
     }
-    public function searchClients(Request $request){
-        $companyId = session('active_company_id');
+    public function searchClients(
+        Request $request,
+        ActiveCompanyService $activeCompanyService
+    ){
+        $companyId = $activeCompanyService
+            ->require($request->user(), $request)
+            ->id;
         $query = $request->query('q', '');
         $clients = Client::where('company_id', $companyId)
-        ->where('name', 'like', "%{$query}%")
-        ->orWhere(function($q) use ($companyId, $query) {
-            $q->where('company_id', $companyId)
-            -> where('first_name', 'like', "%{$query}%");
-        })
-        ->orWhere(function($q) use ($companyId, $query) {
-            $q->where('company_id',$companyId)
-            ->where('last_name', 'like', "%{$query}%");
-        })
-        ->limit(10)
-        ->get(['id', 'name', 'first_name', 'last_name', 'client_type']);
+            ->where('name', 'like', "%{$query}%")
+            ->orWhere(function($q) use ($companyId, $query) {
+                $q->where('company_id', $companyId)
+                    -> where('first_name', 'like', "%{$query}%");
+            })
+            ->orWhere(function($q) use ($companyId, $query) {
+                $q->where('company_id',$companyId)
+                    ->where('last_name', 'like', "%{$query}%");
+            })
+            ->limit(10)
+            ->get(['id', 'name', 'first_name', 'last_name', 'client_type']);
         return response()->json(
             $clients->map(fn($c) => [
                 'id' => $c->id, 'name'=> $c->full_name,
@@ -366,9 +389,14 @@ class InvoiceController extends Controller
         );
     }
 
-    public function searchProducts(Request $request)
+    public function searchProducts(
+        Request $request,
+        ActiveCompanyService $activeCompanyService
+    )
     {
-        $companyId = session('active_company_id');
+        $companyId = $activeCompanyService
+            ->require($request->user(), $request)
+            ->id;
         $query = $request->query('q', '');
 
         $products = Product::where('company_id', $companyId)

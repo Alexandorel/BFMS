@@ -4,20 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\Invoice;
+use App\Services\ActiveCompanyService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
 
 class ContabilController extends Controller
 {
-    public function dashboard(Request $request)
+    public function dashboard(
+        Request $request,
+        ActiveCompanyService $activeCompanyService
+    )
     {
-        $user = Auth::user();
+        $user = $request->user();
 
         // All user's businesses
         $companies = $user->companies()->get();
-        $activeCompanyId = Session::get('active_company_id');
-        $company = $companies->firstWhere('id', $activeCompanyId) ?? $companies->first();
+        $company = $activeCompanyService->get($user, $request);
 
         $companyName = $company?->name ?? 'N/A';
 

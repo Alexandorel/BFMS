@@ -141,6 +141,27 @@ class InvoiceSeriesSelectionTest extends TestCase
         $this->assertSame(0, Invoice::count());
     }
 
+    public function test_clientul_altei_firme_este_respins(): void
+    {
+        $straina = $this->company('Gamma SRL', 'RO87654321', 'J12/300/2024');
+        $clientStrain = Client::create([
+            'company_id' => $straina->id,
+            'client_type' => 'company',
+            'name' => 'Client Străin SRL',
+            'cui' => 'RO11223344',
+            'county' => 'Bihor',
+            'city' => 'Oradea',
+            'address' => 'Str. Externă nr. 1',
+        ]);
+        $series = $this->series();
+
+        $this->emite($this->payload($series, [
+            'client_id' => $clientStrain->id,
+        ]))->assertSessionHasErrors('client_id');
+
+        $this->assertSame(0, Invoice::count());
+    }
+
     public function test_seria_inactiva_este_respinsa(): void
     {
         $inactiva = $this->series(['prefix' => 'ARHIVATA', 'is_active' => false]);
