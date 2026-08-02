@@ -274,33 +274,25 @@
                                 <h2 class="font-semibold text-slate-900">Jurnal de audit</h2>
                             </div>
                             <ul class="divide-y divide-slate-100 text-sm">
-                                @php
-                                    $audit = [
-                                        [
-                                            'user' => 'M. Ionescu',
-                                            'action' => 'a emis factura F-0142',
-                                            'time' => 'azi, 10:24',
-                                        ],
-                                        [
-                                            'user' => 'A. Radu',
-                                            'action' => 'a înregistrat o plată pe F-0140',
-                                            'time' => 'azi, 09:10',
-                                        ],
-                                        [
-                                            'user' => 'M. Ionescu',
-                                            'action' => 'a stornat factura F-0135',
-                                            'time' => 'ieri, 17:42',
-                                        ],
-                                    ];
-                                @endphp
-                                @foreach ($audit as $entry)
+                                @forelse ($audits as $entry)
                                     <li class="px-5 py-3">
-                                        <p class="text-slate-800"><span
-                                                class="font-medium">{{ $entry['user'] }}</span>
-                                            {{ $entry['action'] }}</p>
-                                        <p class="text-xs text-slate-400 mt-0.5">{{ $entry['time'] }}</p>
+                                        <p class="text-slate-800">
+                                            <span class="font-medium">
+                                                {{ $entry->user ? trim($entry->user->first_name . ' ' . $entry->user->last_name) : 'Sistem' }}
+                                            </span>
+                                            {{ mb_strtolower($entry->eventLabel()) }}
+                                            {{ mb_strtolower($entry->entityLabel()) }}
+                                            {{ $entry->entityName() }}
+                                        </p>
+                                        <p class="text-xs text-slate-400 mt-0.5">
+                                            {{ $entry->created_at?->diffForHumans() }}
+                                        </p>
                                     </li>
-                                @endforeach
+                                @empty
+                                    <li class="px-5 py-3 text-slate-500">
+                                        Nicio modificare înregistrată încă.
+                                    </li>
+                                @endforelse
                             </ul>
                             <div class="px-5 py-4 border-t border-slate-200">
                                 <a href="{{ route('audit-log.index') }}"
