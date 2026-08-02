@@ -101,19 +101,19 @@
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div class="bg-white rounded-xl border border-slate-200 p-4">
                         <p class="text-xs text-slate-500 font-medium">Facturi luna asta</p>
-                        <p class="text-2xl font-bold text-slate-900 mt-1">{{ $stats['invoices_month'] ?? 18 }}</p>
+                        <p class="text-2xl font-bold text-slate-900 mt-1">{{ $stats['invoices_month']}}</p>
                     </div>
                     <div class="bg-white rounded-xl border border-slate-200 p-4">
                         <p class="text-xs text-slate-500 font-medium">Restante</p>
-                        <p class="text-2xl font-bold text-rose-600 mt-1">{{ $stats['overdue'] ?? 3 }}</p>
+                        <p class="text-2xl font-bold text-rose-600 mt-1">{{ $stats['overdue']}}</p>
                     </div>
                     <div class="bg-white rounded-xl border border-slate-200 p-4">
                         <p class="text-xs text-slate-500 font-medium">Clienți activi</p>
-                        <p class="text-2xl font-bold text-slate-900 mt-1">{{ $stats['clients'] ?? 42 }}</p>
+                        <p class="text-2xl font-bold text-slate-900 mt-1">{{ $stats['clients']}}</p>
                     </div>
                     <div class="bg-white rounded-xl border border-slate-200 p-4">
                         <p class="text-xs text-slate-500 font-medium">Produse active</p>
-                        <p class="text-2xl font-bold text-slate-900 mt-1">{{ $stats['products'] ?? 27 }}</p>
+                        <p class="text-2xl font-bold text-slate-900 mt-1">{{ $stats['products']}}</p>
                     </div>
                 </div>
 
