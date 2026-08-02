@@ -70,7 +70,7 @@ class AuditLogAccessTest extends TestCase
     public function test_the_log_is_limited_to_the_active_company(): void
     {
         [$contabil, $companyA] = $this->userWithCompany('contabil');
-        [, $companyB] = $this->userWithCompany('administrator');
+        $companyB = $this->userWithCompany('administrator')[1];
 
         $this->makeProduct($companyA, 'Produs firma A');
         $this->makeProduct($companyB, 'Produs firma B');
@@ -90,7 +90,7 @@ class AuditLogAccessTest extends TestCase
     public function test_a_session_pointing_at_a_foreign_company_is_rejected(): void
     {
         [$contabil] = $this->userWithCompany('contabil');
-        [, $foreign] = $this->userWithCompany('administrator');
+        $foreign = $this->userWithCompany('administrator')[1];
 
         $this->actingAs($contabil)
             ->withSession(['active_company_id' => $foreign->id])
@@ -131,7 +131,7 @@ class AuditLogAccessTest extends TestCase
      */
     public function test_writing_an_audited_model_stamps_the_company(): void
     {
-        [, $company] = $this->userWithCompany('contabil');
+        $company = $this->userWithCompany('contabil')[1];
 
         $product = $this->makeProduct($company, 'Produs auditat');
         $product->update(['unit_price' => 250.00]);
@@ -160,6 +160,33 @@ class AuditLogAccessTest extends TestCase
             ->assertOk()
             ->assertSee('Modificare')
             ->assertSee('Preț unitar');
+    }
+
+    public function test_the_administrator_dashboard_previews_the_audit_log(): void
+    {
+        [$admin, $company] = $this->userWithCompany('administrator');
+        $this->makeProduct($company, 'Produs de pe dashboard');
+
+        $this->actingAs($admin)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('dashboard.administrator'))
+            ->assertOk()
+            ->assertSee('Activitate recentă')
+            ->assertSee('Produs de pe dashboard');
+    }
+
+    public function test_the_administrator_dashboard_preview_stays_inside_the_company(): void
+    {
+        [$admin, $companyA] = $this->userWithCompany('administrator');
+        $companyB = $this->userWithCompany('administrator')[1];
+
+        $this->makeProduct($companyB, 'Produs al altei firme');
+
+        $this->actingAs($admin)
+            ->withSession(['active_company_id' => $companyA->id])
+            ->get(route('dashboard.administrator'))
+            ->assertOk()
+            ->assertDontSee('Produs al altei firme');
     }
 
     /**
