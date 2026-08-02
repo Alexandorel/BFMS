@@ -244,6 +244,14 @@ Route::middleware('auth')->group(function () {
                 ->name('destroy');
         });
 
-    // Produse
-    Route::resource('products', ProductController::class);
+    // (NFR-1: read-only access)
+    Route::get('products', [ProductController::class, 'index'])
+        ->middleware('role:administrator,operator,contabil')
+        ->name('products.index');
+
+    // Managing the catalogue is limited to administrator and operator
+    Route::middleware('role:administrator,operator')->group(function () {
+        Route::resource('products', ProductController::class)
+            ->only(['create', 'store', 'edit', 'update', 'destroy']);
+    });
 });
