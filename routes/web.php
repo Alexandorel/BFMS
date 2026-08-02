@@ -33,18 +33,6 @@ Route::get('/dashboard', function () {
 
 Route::get('/dashboard/administrator', [AdministratorController::class, 'dashboard']);
 
-Route::get('/administrator/settings/profil', function () {
-    return view('administrator.settings.profile');
-})->name('administrator.settings.profile');
-
-Route::get('/operator/settings/firma', function () {
-    return view('administrator.settings.company');
-})->name('administrator.settings.company');
-
-Route::get('/administrator/settings/echipa', function () {
-    return view('administrator.settings.team');
-})->name('administrator.settings.team');
-
 Route::prefix('dashboard/operator')->name('operator.')->group(function () {
 
     Route::get('/', function () {

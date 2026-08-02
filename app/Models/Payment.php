@@ -22,8 +22,25 @@ class Payment extends Model implements Auditable
         'exchange_rate',
         'payment_method',
         'reference',
+        'receipt_series',
+        'receipt_number',
         'created_by',
     ];
+
+    /**
+     * Number of receipt displayable form (ex: CHT-1001)
+     */
+    public function getReceiptLabelAttribute(): ?string
+    {
+        return $this->receipt_number
+            ? $this->receipt_series.'-'.$this->receipt_number
+            : null;
+    }
+
+    public function hasReceipt(): bool
+    {
+        return $this->receipt_number !== null;
+    }
 
     protected function casts(): array
     {

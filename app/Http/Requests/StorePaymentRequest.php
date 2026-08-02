@@ -36,6 +36,8 @@ class StorePaymentRequest extends FormRequest
             'currency' => $invoice instanceof Invoice ? $invoice->currency : null,
             'payment_date' => $this->input('payment_date') ?: now()->toDateString(),
             'reference' => trim((string) $this->input('reference')) ?: null,
+            // un checkbox nebifat nu se trimite deloc, iar unul bifat trimite "on"
+            'issue_receipt' => $this->boolean('issue_receipt'),
         ]);
     }
 
@@ -67,6 +69,15 @@ class StorePaymentRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:100',
+            ],
+            // F-401: chitanta insoteste doar incasarile in numerar
+            'issue_receipt' => [
+                'boolean',
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if ($value && $this->input('payment_method') !== PaymentMethod::Cash->value) {
+                        $fail('Chitanța se poate emite doar pentru încasările în numerar.');
+                    }
+                },
             ],
         ];
     }

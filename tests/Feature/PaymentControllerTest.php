@@ -10,6 +10,7 @@ use App\Models\DocumentSeries;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\User;
+use App\Services\DocumentSeriesService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -298,6 +299,81 @@ class PaymentControllerTest extends TestCase
             ->assertSee('Suma depășește restul de plată');
     }
 
+    public function test_a_cash_payment_can_issue_a_receipt_from_the_form(): void
+    {
+        [$invoice, $company] = $this->createInvoice(1000.00);
+        $operator = $this->createUser('operator', $company);
+
+        $this->actingAs($operator)
+            ->post(route('invoices.payments.store', $invoice), [
+                'payment_date' => '2026-08-01',
+                'amount' => 500.00,
+                'payment_method' => 'cash',
+                'issue_receipt' => 'on', // asa trimite un checkbox HTML
+            ])
+            ->assertSessionHasNoErrors();
+
+        $payment = Payment::where('invoice_id', $invoice->id)->firstOrFail();
+
+        $this->assertSame('CHT', $payment->receipt_series);
+        $this->assertSame(1, $payment->receipt_number);
+    }
+
+    public function test_the_receipt_option_is_rejected_for_a_bank_transfer(): void
+    {
+        [$invoice, $company] = $this->createInvoice(1000.00);
+        $operator = $this->createUser('operator', $company);
+
+        $this->actingAs($operator)
+            ->post(route('invoices.payments.store', $invoice), $this->payload(100.00) + [
+                'issue_receipt' => 'on',
+            ])
+            ->assertSessionHasErrors('issue_receipt');
+
+        $this->assertSame(0, Payment::where('invoice_id', $invoice->id)->count());
+    }
+
+    public function test_the_receipt_number_is_shown_in_the_payments_table(): void
+    {
+        [$invoice, $company] = $this->createInvoice(1000.00);
+        $operator = $this->createUser('operator', $company);
+
+        $this->actingAs($operator)
+            ->post(route('invoices.payments.store', $invoice), [
+                'payment_date' => '2026-08-01',
+                'amount' => 500.00,
+                'payment_method' => 'cash',
+                'issue_receipt' => 'on',
+            ]);
+
+        $this->actingAs($operator)
+            ->get(route('invoices.show', $invoice))
+            ->assertOk()
+            ->assertSee('CHT-1');
+    }
+
+    public function test_a_payment_with_a_receipt_cannot_be_deleted_from_the_ui(): void
+    {
+        [$invoice, $company] = $this->createInvoice(1000.00);
+        $administrator = $this->createUser('administrator', $company);
+
+        $this->actingAs($administrator)
+            ->post(route('invoices.payments.store', $invoice), [
+                'payment_date' => '2026-08-01',
+                'amount' => 500.00,
+                'payment_method' => 'cash',
+                'issue_receipt' => 'on',
+            ]);
+
+        $payment = Payment::where('invoice_id', $invoice->id)->firstOrFail();
+
+        $this->actingAs($administrator)
+            ->delete(route('invoices.payments.destroy', $payment))
+            ->assertSessionHas('error');
+
+        $this->assertSame(1, Payment::where('invoice_id', $invoice->id)->count());
+    }
+
     private function payload(float $amount): array
     {
         return [
@@ -363,15 +439,12 @@ class PaymentControllerTest extends TestCase
             'address' => 'Strada Client nr. '.$this->sequence,
         ]);
 
-        $series = DocumentSeries::create([
-            'company_id' => $company->id,
-            'document_type' => DocumentType::Invoice,
-            'prefix' => 'FCT',
-            'start_number' => 1,
-            'current_number' => 1,
-            'is_default' => true,
-            'is_active' => true,
-        ]);
+        // ca in productie: cate o serie pentru fiecare tip de document (inclusiv CHT)
+        app(DocumentSeriesService::class)->ensureDefaultsFor($company);
+
+        $series = DocumentSeries::where('company_id', $company->id)
+            ->where('document_type', DocumentType::Invoice)
+            ->firstOrFail();
 
         $invoice = Invoice::create([
             'company_id' => $company->id,

@@ -55,7 +55,11 @@ class PaymentController extends Controller
 
         $invoiceId = $payment->invoice_id;
 
-        $paymentService->remove($payment);
+        try {
+            $paymentService->remove($payment);
+        } catch (RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         return redirect()
             ->route('invoices.show', $invoiceId)
