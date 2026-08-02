@@ -168,6 +168,133 @@ class PaymentServiceTest extends TestCase
         $this->assertSame(InvoiceStatus::Credited, $invoice->fresh()->status);
     }
 
+    public function test_a_cash_payment_can_issue_a_receipt(): void
+    {
+        [$invoice, $user] = $this->createInvoice(1000.00);
+
+        $payment = $this->service->record($invoice, [
+            'payment_date' => '2026-08-01',
+            'amount' => 500.00,
+            'payment_method' => 'cash',
+            'issue_receipt' => true,
+        ], $user);
+
+        $this->assertTrue($payment->hasReceipt());
+        $this->assertSame('CHT', $payment->receipt_series);
+        $this->assertSame(1, $payment->receipt_number);
+        $this->assertSame('CHT-1', $payment->receipt_label);
+    }
+
+    public function test_a_payment_without_the_option_gets_no_receipt(): void
+    {
+        [$invoice, $user] = $this->createInvoice(1000.00);
+
+        $payment = $this->service->record($invoice, [
+            'payment_date' => '2026-08-01',
+            'amount' => 500.00,
+            'payment_method' => 'cash',
+        ], $user);
+
+        $this->assertFalse($payment->hasReceipt());
+        $this->assertNull($payment->receipt_label);
+    }
+
+    public function test_receipt_numbers_are_consecutive(): void
+    {
+        [$invoice, $user] = $this->createInvoice(1000.00);
+
+        $data = [
+            'payment_date' => '2026-08-01',
+            'amount' => 100.00,
+            'payment_method' => 'cash',
+            'issue_receipt' => true,
+        ];
+
+        $first = $this->service->record($invoice, $data, $user);
+        $second = $this->service->record($invoice, $data, $user);
+
+        $this->assertSame(1, $first->receipt_number);
+        $this->assertSame(2, $second->receipt_number);
+    }
+
+    public function test_a_receipt_cannot_be_issued_for_a_bank_transfer(): void
+    {
+        [$invoice, $user] = $this->createInvoice(1000.00);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('doar pentru incasarile in numerar');
+
+        $this->service->record($invoice, [
+            'payment_date' => '2026-08-01',
+            'amount' => 100.00,
+            'payment_method' => 'bank_transfer',
+            'reference' => 'OP-1',
+            'issue_receipt' => true,
+        ], $user);
+    }
+
+    /**
+     * F-103: daca plata esueaza dupa alocare, numarul ar ramane ars si seria
+     * ar capata un gol. Tranzactia trebuie sa dea totul inapoi.
+     */
+    public function test_a_failed_payment_does_not_burn_a_receipt_number(): void
+    {
+        [$invoice, $user] = $this->createInvoice(1000.00);
+
+        $series = DocumentSeries::where('company_id', $invoice->company_id)
+            ->where('document_type', DocumentType::Receipt)
+            ->firstOrFail();
+
+        $numberBefore = $series->current_number;
+
+        try {
+            // suma depaseste soldul: pica DUPA alocarea numarului
+            $this->service->record($invoice, [
+                'payment_date' => '2026-08-01',
+                'amount' => 5000.00,
+                'payment_method' => 'cash',
+                'issue_receipt' => true,
+            ], $user);
+        } catch (RuntimeException) {
+            // asteptat
+        }
+
+        $this->assertSame($numberBefore, $series->fresh()->current_number);
+        $this->assertSame(0, Payment::where('invoice_id', $invoice->id)->count());
+    }
+
+    /**
+     * F-103: chitanta e predata clientului, deci numarul nu se poate elibera.
+     */
+    public function test_a_payment_with_a_receipt_cannot_be_deleted(): void
+    {
+        [$invoice, $user] = $this->createInvoice(1000.00);
+
+        $payment = $this->service->record($invoice, [
+            'payment_date' => '2026-08-01',
+            'amount' => 500.00,
+            'payment_method' => 'cash',
+            'issue_receipt' => true,
+        ], $user);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('nu mai poate fi stearsa');
+
+        $this->service->remove($payment);
+    }
+
+    public function test_a_payment_without_a_receipt_can_still_be_deleted(): void
+    {
+        [$invoice, $user] = $this->createInvoice(1000.00);
+
+        $payment = $this->service->record($invoice, $this->paymentData(400.00), $user);
+
+        $this->service->remove($payment);
+
+        $this->assertSame(0, Payment::where('invoice_id', $invoice->id)->count());
+        $this->assertSame(InvoiceStatus::Issued, $invoice->fresh()->status);
+    }
+
     private function paymentData(float $amount): array
     {
         return [

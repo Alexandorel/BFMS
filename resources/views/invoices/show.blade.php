@@ -245,6 +245,7 @@
                                     <th class="px-5 py-3 font-medium">Data</th>
                                     <th class="px-5 py-3 font-medium">Metodă</th>
                                     <th class="px-5 py-3 font-medium">Referință</th>
+                                    <th class="px-5 py-3 font-medium">Chitanță</th>
                                     <th class="px-5 py-3 font-medium text-right">Sumă</th>
                                     @if ($canDeletePayments)
                                         <th class="px-5 py-3 font-medium text-right">
@@ -259,6 +260,15 @@
                                         <td class="px-5 py-3 text-slate-600">{{ $payment->payment_date?->format('d.m.Y') }}</td>
                                         <td class="px-5 py-3 text-slate-600">{{ $payment->payment_method->label() }}</td>
                                         <td class="px-5 py-3 text-slate-600">{{ $payment->reference ?? '—' }}</td>
+                                        <td class="px-5 py-3">
+                                            @if ($payment->receipt_label)
+                                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+                                                    {{ $payment->receipt_label }}
+                                                </span>
+                                            @else
+                                                <span class="text-slate-400">—</span>
+                                            @endif
+                                        </td>
                                         <td class="px-5 py-3 text-right font-medium text-slate-900">
                                             {{ number_format($payment->amount, 2, ',', '.') }} {{ $payment->currency }}
                                         </td>
@@ -296,7 +306,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="{{ $canDeletePayments ? 5 : 4 }}" class="px-5 py-8 text-center text-slate-400">
+                                        <td colspan="{{ $canDeletePayments ? 6 : 5 }}" class="px-5 py-8 text-center text-slate-400">
                                             Nicio plată înregistrată.
                                         </td>
                                     </tr>
