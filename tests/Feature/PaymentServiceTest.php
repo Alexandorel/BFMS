@@ -10,6 +10,7 @@ use App\Models\DocumentSeries;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\User;
+use App\Services\DocumentSeriesService;
 use App\Services\PaymentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
@@ -346,15 +347,12 @@ class PaymentServiceTest extends TestCase
             'address' => 'Strada Client nr. '.$this->sequence,
         ]);
 
-        $series = DocumentSeries::create([
-            'company_id' => $company->id,
-            'document_type' => DocumentType::Invoice,
-            'prefix' => 'FCT',
-            'start_number' => 1,
-            'current_number' => 1,
-            'is_default' => true,
-            'is_active' => true,
-        ]);
+        // ca in productie: cate o serie pentru fiecare tip de document (inclusiv CHT)
+        app(DocumentSeriesService::class)->ensureDefaultsFor($company);
+
+        $series = DocumentSeries::where('company_id', $company->id)
+            ->where('document_type', DocumentType::Invoice)
+            ->firstOrFail();
 
         $invoice = Invoice::create([
             'company_id' => $company->id,
