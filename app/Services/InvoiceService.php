@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\DocumentType;
 use App\Enums\InvoiceStatus;
+use App\Models\DocumentSeries;
 use App\Models\Invoice;
 use App\Models\User;
 use App\Mail\IssuedMail;
