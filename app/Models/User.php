@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Concerns\AuditsCompany;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,7 +15,26 @@ use OwenIt\Auditing\Contracts\Auditable;
 class User extends Authenticatable implements Auditable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasApiTokens, Notifiable, \OwenIt\Auditing\Auditable;
+    // our transformAudit() replaces the package no-op, stamping company_id
+    use HasFactory, HasApiTokens, Notifiable, \OwenIt\Auditing\Auditable, AuditsCompany {
+        AuditsCompany::transformAudit insteadof \OwenIt\Auditing\Auditable;
+    }
+
+    /**
+     * A user belongs to several companies through company_user, so the row has
+     * no company of its own. The audit is filed under the company the actor
+     * was working in, which is the one change that is visible to them.
+     *
+     * Known limit: role is a single global column, so a role change made while
+     * company A is active stays out of company B's log even though it applies
+     * there too.
+     */
+    protected function auditCompanyId(): ?int
+    {
+        $companyId = session('active_company_id');
+
+        return $companyId !== null ? (int) $companyId : null;
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -35,6 +55,18 @@ class User extends Authenticatable implements Auditable
      * @var list<string>
      */
     protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * audit.strict is false, so $hidden alone does not keep these out of the
+     * audits table. Without this list every password change copies the hash
+     * into a second, longer lived table.
+     *
+     * @var list<string>
+     */
+    protected $auditExclude = [
         'password',
         'remember_token',
     ];

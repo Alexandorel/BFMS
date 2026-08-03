@@ -2,8 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Enums\DocumentType;
+use App\Enums\InvoiceStatus;
 use App\Models\Audit;
+use App\Models\Client;
 use App\Models\Company;
+use App\Models\DocumentSeries;
+use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -216,6 +221,350 @@ class AuditLogAccessTest extends TestCase
     }
 
     /**
+     * getModified() pushes the values back through the model casts, so an
+     * invoice diff carries an InvoiceStatus instance where a product diff only
+     * ever carried scalars. Casting that to a string killed the page.
+     */
+    public function test_an_invoice_diff_renders_a_casted_enum(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+        $invoice = $this->makeInvoice($company, $contabil);
+
+        $invoice->update(['status' => InvoiceStatus::FullyPaid]);
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index'))
+            ->assertOk()
+            ->assertSee('Stare')
+            ->assertSee('Emisă')
+            ->assertSee('Încasată total');
+    }
+
+    /**
+     * getModified() serializes dates with serializeDate(), which hands the
+     * blade an ISO-8601 string rather than a Carbon.
+     */
+    public function test_a_date_change_is_readable(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+        $invoice = $this->makeInvoice($company, $contabil);
+
+        $invoice->update(['due_date' => '2026-09-15']);
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index'))
+            ->assertOk()
+            ->assertSee('Dată scadență')
+            ->assertSee('15.09.2026')
+            ->assertDontSee('2026-09-15T');
+    }
+
+    /**
+     * audit.strict is false, so $hidden is not honoured and nothing keeps the
+     * password hash out of the audit trail by default.
+     */
+    public function test_a_password_change_never_reaches_the_audit_trail(): void
+    {
+        [$user] = $this->userWithCompany('administrator');
+
+        $user->update(['password' => 'a-brand-new-password']);
+
+        $audits = Audit::where('auditable_type', User::class)
+            ->where('auditable_id', $user->id)
+            ->get();
+
+        foreach ($audits as $audit) {
+            $this->assertArrayNotHasKey('password', (array) $audit->old_values);
+            $this->assertArrayNotHasKey('password', (array) $audit->new_values);
+        }
+    }
+
+    /**
+     * The users table has no company_id, so User::auditCompanyId() falls back
+     * to the company the actor had active when the change was made.
+     */
+    public function test_a_profile_change_is_filed_under_the_active_company(): void
+    {
+        [$admin, $company] = $this->userWithCompany('administrator');
+
+        $this->actingAs($admin)
+            ->withSession(['active_company_id' => $company->id])
+            ->put(route('administrator.profile.update'), [
+                'first_name' => 'Prenume nou',
+            ])
+            ->assertRedirect(route('administrator.settings.profile'));
+
+        $audit = Audit::where('auditable_type', User::class)
+            ->where('auditable_id', $admin->id)
+            ->where('event', 'updated')
+            ->latest()
+            ->first();
+
+        $this->assertNotNull($audit, 'the profile change should be audited');
+        $this->assertSame($company->id, $audit->company_id);
+    }
+
+    public function test_a_profile_change_shows_up_in_the_company_log(): void
+    {
+        [$admin, $company] = $this->userWithCompany('administrator');
+
+        $this->actingAs($admin)
+            ->withSession(['active_company_id' => $company->id])
+            ->put(route('administrator.profile.update'), ['first_name' => 'Prenume nou']);
+
+        $this->actingAs($admin)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index'))
+            ->assertOk()
+            ->assertSee('Utilizator')
+            ->assertSee('Prenume nou');
+    }
+
+    public function test_the_accountant_gets_the_sidebar_on_the_audit_log(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index'))
+            ->assertOk()
+            ->assertSee('Jurnal de audit')
+            ->assertSee(route('dashboard.contabil'));
+    }
+
+    /**
+     * The sidebar used to send everyone to the administrator dashboard, which
+     * answers 403 for the other two roles.
+     */
+    public function test_the_sidebar_dashboard_link_follows_the_role(): void
+    {
+        [$operator, $company] = $this->userWithCompany('operator');
+
+        $this->actingAs($operator)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('products.index'))
+            ->assertOk()
+            ->assertSee(route('dashboard.operator'))
+            ->assertDontSee(route('dashboard.administrator'));
+    }
+
+    public function test_the_entity_filter_narrows_the_list(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+        $this->makeProduct($company, 'Produs de filtrat');
+        $this->makeInvoice($company, $contabil);
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', ['auditable_type' => Product::class]))
+            ->assertOk()
+            ->assertSee('Produs de filtrat')
+            ->assertDontSee('FCT');
+    }
+
+    public function test_the_user_filter_narrows_the_list(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+
+        // acting user is recorded on the audit, so the product below is his
+        $this->actingAs($contabil);
+        $this->makeProduct($company, 'Produs al contabilului');
+
+        $other = User::create([
+            'first_name' => 'Alt',
+            'last_name' => 'Utilizator',
+            'email' => fake()->unique()->safeEmail(),
+            'password' => 'password',
+            'role' => 'operator',
+        ]);
+        $other->companies()->attach($company);
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', ['user_id' => $other->id]))
+            ->assertOk()
+            ->assertDontSee('Produs al contabilului');
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', ['user_id' => $contabil->id]))
+            ->assertOk()
+            ->assertSee('Produs al contabilului');
+    }
+
+    public function test_the_date_filters_narrow_the_list(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+        $this->makeProduct($company, 'Produs de azi');
+
+        $today = now()->toDateString();
+        $tomorrow = now()->addDay()->toDateString();
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', ['from' => $today]))
+            ->assertOk()
+            ->assertSee('Produs de azi');
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', ['from' => $tomorrow]))
+            ->assertOk()
+            ->assertDontSee('Produs de azi');
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', ['to' => now()->subDay()->toDateString()]))
+            ->assertOk()
+            ->assertDontSee('Produs de azi');
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', ['from' => $today, 'to' => $today]))
+            ->assertOk()
+            ->assertSee('Produs de azi');
+    }
+
+    /**
+     * to before from fails validation, and the screen has to say so instead of
+     * silently redirecting back to an unchanged list.
+     */
+    public function test_an_inverted_date_range_is_reported_to_the_user(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+
+        $response = $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', [
+                'from' => now()->toDateString(),
+                'to' => now()->subDays(5)->toDateString(),
+            ]));
+
+        $response->assertSessionHasErrors('to');
+        $response->assertRedirect(route('audit-log.index'));
+    }
+
+    /**
+     * Mirrors the browser: the user is already on the log, then submits the
+     * filter form with a bad range. Laravel redirects to the previous url.
+     */
+    public function test_an_inverted_range_does_not_bounce_back_to_itself(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+
+        $bad = route('audit-log.index', [
+            'from' => now()->toDateString(),
+            'to' => now()->subDays(5)->toDateString(),
+        ]);
+
+        $this->actingAs($contabil)->withSession(['active_company_id' => $company->id]);
+
+        $this->get(route('audit-log.index'))->assertOk();
+        $this->get($bad)->assertRedirect()->assertSessionHasErrors('to');
+
+        $this->assertNotSame($bad, $this->get($bad)->headers->get('Location'));
+    }
+
+    /**
+     * The form submits every input, so empty ones must not narrow anything.
+     */
+    public function test_empty_filters_are_ignored(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+        $this->makeProduct($company, 'Produs vizibil');
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', [
+                'from' => '',
+                'to' => '',
+                'user_id' => '',
+                'auditable_type' => '',
+                'event' => '',
+            ]))
+            ->assertOk()
+            ->assertSee('Produs vizibil');
+    }
+
+    /**
+     * The shared sidebar used to carry the administrator menu to every role.
+     * The accountant reads the catalogue too (products.index allows his role),
+     * but Setari is administrator only and must stay out.
+     */
+    public function test_the_accountant_sidebar_shows_his_own_menu(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index'))
+            ->assertOk()
+            ->assertSee('Rapoarte')
+            ->assertSee('Facturi')
+            ->assertSee('Produse')
+            ->assertSee('Jurnal de audit')
+            ->assertDontSee('Setări');
+    }
+
+    /**
+     * The dashboard used to carry its own copy of the menu, so the two could
+     * drift apart. Both screens now render the same component.
+     */
+    public function test_the_accountant_menu_is_identical_on_every_screen(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+
+        $dashboard = $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('dashboard.contabil'))
+            ->assertOk();
+
+        foreach (['Dashboard', 'Rapoarte', 'Facturi', 'Produse', 'Jurnal de audit'] as $label) {
+            $dashboard->assertSee($label);
+        }
+
+        $dashboard->assertDontSee('Setări');
+    }
+
+    public function test_the_header_lists_every_company_for_switching(): void
+    {
+        [$contabil, $companyA] = $this->userWithCompany('contabil');
+        $companyB = $this->userWithCompany('contabil')[1];
+        $contabil->companies()->attach($companyB);
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $companyA->id])
+            ->get(route('audit-log.index'))
+            ->assertOk()
+            ->assertSee('companySelect')
+            ->assertSee($companyA->name)
+            ->assertSee($companyB->name);
+    }
+
+    /**
+     * The switcher must not become a way to read a company the user is not
+     * part of. switchTo() refuses the id, so the session keeps the old one.
+     */
+    public function test_switching_to_a_foreign_company_is_refused(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+        $foreign = $this->userWithCompany('administrator')[1];
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get('/company/switch/'.$foreign->id)
+            ->assertForbidden();
+
+        $this->actingAs($contabil)
+            ->get(route('audit-log.index'))
+            ->assertOk()
+            ->assertSee($company->name)
+            ->assertDontSee($foreign->name);
+    }
+
+    /**
      * @return array{0: User, 1: Company}
      */
     private function userWithCompany(string $role): array
@@ -245,6 +594,49 @@ class AuditLogAccessTest extends TestCase
         $user->companies()->attach($company);
 
         return [$user, $company];
+    }
+
+    private function makeInvoice(Company $company, User $user): Invoice
+    {
+        $this->sequence++;
+
+        $client = Client::create([
+            'company_id' => $company->id,
+            'client_type' => 'company',
+            'name' => 'Client Test SRL',
+            'cui' => 'RO8765432'.$this->sequence,
+            'county' => 'Cluj',
+            'city' => 'Cluj-Napoca',
+            'address' => 'Strada Client nr. '.$this->sequence,
+        ]);
+
+        $series = DocumentSeries::create([
+            'company_id' => $company->id,
+            'document_type' => DocumentType::Invoice,
+            'prefix' => 'FCT',
+            'start_number' => 1,
+            'current_number' => 1,
+            'is_default' => true,
+            'is_active' => true,
+        ]);
+
+        return Invoice::create([
+            'company_id' => $company->id,
+            'client_id' => $client->id,
+            'document_series_id' => $series->id,
+            'document_type' => DocumentType::Invoice,
+            'series' => 'FCT',
+            'number' => $this->sequence,
+            'status' => InvoiceStatus::Issued,
+            'issue_date' => '2026-08-01',
+            'due_date' => '2026-08-31',
+            'currency' => 'RON',
+            'exchange_rate' => 1,
+            'subtotal' => 100,
+            'vat_total' => 19,
+            'total' => 119,
+            'created_by' => $user->id,
+        ]);
     }
 
     private function makeProduct(Company $company, string $name): Product

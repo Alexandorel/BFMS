@@ -9,19 +9,30 @@
 <body class="bg-slate-50 text-slate-800 antialiased">
 
 @php
-    // The screen is shared by administrator and accountant, so the way back
-    // cannot be hardcoded to one dashboard.
-    $backRoute = auth()->user()?->role === 'contabil'
-        ? route('dashboard.contabil')
-        : route('dashboard.administrator');
-
-    // Audited values arrive as raw json: nulls, booleans and casted arrays.
+    // getModified() runs the values through the model casts, so what lands here
+    // is not always a scalar: status is an enum, issue_date is a Carbon.
     $show = function ($value) {
         if ($value === null || $value === '') {
             return '—';
         }
         if (is_bool($value)) {
             return $value ? 'Da' : 'Nu';
+        }
+        if ($value instanceof \BackedEnum) {
+            return method_exists($value, 'label') ? $value->label() : (string) $value->value;
+        }
+        if ($value instanceof \UnitEnum) {
+            return $value->name;
+        }
+        // Dates are already serialized by getModified(), so what arrives is an
+        // ISO string. The pattern is anchored on purpose: a free text field
+        // that merely starts with a date must not be reformatted.
+        if (is_string($value) && preg_match('/^(\d{4}-\d{2}-\d{2})(?:[T ](\d{2}:\d{2}):\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?)?$/', $value, $matches)) {
+            $date = \Illuminate\Support\Carbon::parse($value);
+
+            return isset($matches[2]) && $matches[2] !== '00:00'
+                ? $date->format('d.m.Y H:i')
+                : $date->format('d.m.Y');
         }
         if (is_array($value)) {
             return json_encode($value, JSON_UNESCAPED_UNICODE);
@@ -33,18 +44,27 @@
 
 <div class="flex min-h-screen">
 
-    {{-- sidebar-ul trimite la rutele de administrator, contabilul ar primi 403 --}}
-    @if (auth()->user()?->role === 'administrator')
-        <x-sidebar />
-    @endif
+    <x-sidebar />
 
     <div class="flex-1 flex flex-col min-w-0">
 
     <header class="flex items-center justify-between gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
-        <a href="{{ $backRoute }}" class="text-sm text-indigo-600 hover:underline">
-            &larr; Înapoi la dashboard
-        </a>
-        <span class="text-sm text-slate-500">{{ $company->name }}</span>
+        <div class="flex items-center gap-3">
+            <label class="relative">
+                <select id="companySelect"
+                    class="appearance-none pl-3 pr-9 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    @forelse ($companies as $c)
+                        <option value="{{ $c->id }}" @selected($company?->id === $c->id)>{{ $c->name }}</option>
+                    @empty
+                        <option value="">Nicio firmă</option>
+                    @endforelse
+                </select>
+                <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </label>
+        </div>
     </header>
 
     <main class="flex-1 p-4 sm:p-6 space-y-6">
@@ -55,6 +75,16 @@
                 Cine ce a modificat, pe firma {{ $company->name }}
             </p>
         </div>
+
+        @if ($errors->any())
+            <div class="p-3 rounded-lg bg-rose-50 text-rose-700 text-sm">
+                <ul class="list-disc list-inside space-y-1">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
         {{-- Filtre --}}
         <form method="GET" action="{{ route('audit-log.index') }}"
@@ -205,6 +235,14 @@
     </main>
     </div>
 </div>
+
+<script>
+    document.getElementById('companySelect')?.addEventListener('change', function () {
+        if (this.value) {
+            window.location.href = `/company/switch/${this.value}`;
+        }
+    });
+</script>
 
 </body>
 </html>
