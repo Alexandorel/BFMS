@@ -59,10 +59,12 @@
                         <p class="ui-stat-label">Restante</p>
                         <p class="ui-stat-value text-rose-600">{{ $stats['overdue'] }}</p>
                     </div>
-                    <div class="ui-stat-card">
-                        <p class="ui-stat-label">Clienți activi</p>
-                        <p class="ui-stat-value">{{ $stats['clients'] }}</p>
-                    </div>
+                    <a href="{{ route('clients.index') }}">
+                        <div class="ui-stat-card">
+                            <p class="ui-stat-label">Clienți activi</p>
+                            <p class="ui-stat-value">{{ $stats['clients'] }}</p>
+                        </div>
+                    </a>
                     <div class="ui-stat-card">
                         <p class="ui-stat-label">Produse active</p>
                         <p class="ui-stat-value">{{ $stats['products'] }}</p>
