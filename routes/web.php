@@ -27,35 +27,6 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-});
-
-Route::get('/dashboard/administrator', [AdministratorController::class, 'dashboard']);
-
-Route::prefix('dashboard/operator')->name('operator.')->group(function () {
-
-    Route::get('/', function () {
-        return view('operator.dashboard');
-    })->name('dashboard');
-
-    Route::get('/clienti', function () {
-        return view('operator.clients.index');
-    })->name('clients.index');
-
-    Route::get('/produse', function () {
-        return view('operator.products.index');
-    })->name('products.index');
-
-    Route::get('/facturi', function () {
-        return view('operator.invoices.index');
-    })->name('invoices.index');
-
-    Route::get('/plati', function () {
-        return view('operator.payments.index');
-    })->name('payments.index');
-});
-
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
