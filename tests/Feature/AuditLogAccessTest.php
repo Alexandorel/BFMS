@@ -2,8 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Enums\DocumentType;
+use App\Enums\InvoiceStatus;
 use App\Models\Audit;
+use App\Models\Client;
 use App\Models\Company;
+use App\Models\DocumentSeries;
+use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -216,6 +221,27 @@ class AuditLogAccessTest extends TestCase
     }
 
     /**
+     * getModified() pushes the values back through the model casts, so an
+     * invoice diff carries an InvoiceStatus instance where a product diff only
+     * ever carried scalars. Casting that to a string killed the page.
+     */
+    public function test_an_invoice_diff_renders_a_casted_enum(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+        $invoice = $this->makeInvoice($company, $contabil);
+
+        $invoice->update(['status' => InvoiceStatus::FullyPaid]);
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index'))
+            ->assertOk()
+            ->assertSee('Stare')
+            ->assertSee('Emisă')
+            ->assertSee('Încasată total');
+    }
+
+    /**
      * @return array{0: User, 1: Company}
      */
     private function userWithCompany(string $role): array
@@ -245,6 +271,49 @@ class AuditLogAccessTest extends TestCase
         $user->companies()->attach($company);
 
         return [$user, $company];
+    }
+
+    private function makeInvoice(Company $company, User $user): Invoice
+    {
+        $this->sequence++;
+
+        $client = Client::create([
+            'company_id' => $company->id,
+            'client_type' => 'company',
+            'name' => 'Client Test SRL',
+            'cui' => 'RO8765432'.$this->sequence,
+            'county' => 'Cluj',
+            'city' => 'Cluj-Napoca',
+            'address' => 'Strada Client nr. '.$this->sequence,
+        ]);
+
+        $series = DocumentSeries::create([
+            'company_id' => $company->id,
+            'document_type' => DocumentType::Invoice,
+            'prefix' => 'FCT',
+            'start_number' => 1,
+            'current_number' => 1,
+            'is_default' => true,
+            'is_active' => true,
+        ]);
+
+        return Invoice::create([
+            'company_id' => $company->id,
+            'client_id' => $client->id,
+            'document_series_id' => $series->id,
+            'document_type' => DocumentType::Invoice,
+            'series' => 'FCT',
+            'number' => $this->sequence,
+            'status' => InvoiceStatus::Issued,
+            'issue_date' => '2026-08-01',
+            'due_date' => '2026-08-31',
+            'currency' => 'RON',
+            'exchange_rate' => 1,
+            'subtotal' => 100,
+            'vat_total' => 19,
+            'total' => 119,
+            'created_by' => $user->id,
+        ]);
     }
 
     private function makeProduct(Company $company, string $name): Product

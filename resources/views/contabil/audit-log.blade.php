@@ -30,9 +30,6 @@
         if ($value instanceof \UnitEnum) {
             return $value->name;
         }
-        if ($value instanceof \DateTimeInterface) {
-            return $value->format('d.m.Y');
-        }
         if (is_array($value)) {
             return json_encode($value, JSON_UNESCAPED_UNICODE);
         }
