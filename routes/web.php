@@ -203,20 +203,20 @@ Route::middleware('auth')->group (function () {
     // Vizualizare produse - toate rolurile
     Route::middleware('auth')->group(function () {
         Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-        Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+        Route::get('/products/{product}', [ProductController::class, 'show'])->whereNumber('product')->name('products.show');
     });
 
     // Adauga/editeaza - Admin + Operator
     Route::middleware('role:administrator,operator')->group(function () {
         Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
         Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-        Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
-        Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+        Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->whereNumber('product')->name('products.edit');
+        Route::put('/products/{product}', [ProductController::class, 'update'])->whereNumber('product')->name('products.update');
     });
 
     // Sterge - doar Admin
     Route::middleware('role:administrator')->group(function () {
-        Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+        Route::delete('/products/{product}', [ProductController::class, 'destroy'])->whereNumber('product')->name('products.destroy');
     });
 
     // Conturi bancare - Admin (din varianta colegului)
