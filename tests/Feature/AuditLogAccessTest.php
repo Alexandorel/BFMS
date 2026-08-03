@@ -322,6 +322,34 @@ class AuditLogAccessTest extends TestCase
             ->assertSee('Prenume nou');
     }
 
+    public function test_the_accountant_gets_the_sidebar_on_the_audit_log(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index'))
+            ->assertOk()
+            ->assertSee('Jurnal de audit')
+            ->assertSee(route('dashboard.contabil'));
+    }
+
+    /**
+     * The sidebar used to send everyone to the administrator dashboard, which
+     * answers 403 for the other two roles.
+     */
+    public function test_the_sidebar_dashboard_link_follows_the_role(): void
+    {
+        [$operator, $company] = $this->userWithCompany('operator');
+
+        $this->actingAs($operator)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('products.index'))
+            ->assertOk()
+            ->assertSee(route('dashboard.operator'))
+            ->assertDontSee(route('dashboard.administrator'));
+    }
+
     /**
      * @return array{0: User, 1: Company}
      */

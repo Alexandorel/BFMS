@@ -50,10 +50,7 @@
 
 <div class="flex min-h-screen">
 
-    {{-- sidebar-ul trimite la rutele de administrator, contabilul ar primi 403 --}}
-    @if (auth()->user()?->role === 'administrator')
-        <x-sidebar />
-    @endif
+    <x-sidebar />
 
     <div class="flex-1 flex flex-col min-w-0">
 

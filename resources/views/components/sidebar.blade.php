@@ -1,6 +1,17 @@
 {{-- Sidebar vertical refolosibil pentru admin pages --}}
 @php
     $currentUser = $user ?? auth()->user();
+
+    // each role has its own dashboard, the other two answer with a 403
+    $dashboardRoute = match ($currentUser->role ?? null) {
+        'contabil' => route('dashboard.contabil'),
+        'operator' => route('dashboard.operator'),
+        default => route('dashboard.administrator'),
+    };
+
+    $onDashboard = request()->routeIs('dashboard.administrator')
+        || request()->routeIs('dashboard.operator')
+        || request()->routeIs('dashboard.contabil');
 @endphp
 
 <aside class="hidden lg:flex w-64 shrink-0 flex-col border-r border-slate-200 bg-white sticky top-0 h-screen self-start overflow-y-auto">
@@ -10,9 +21,9 @@
     </div>
 
     <nav class="flex-1 px-3 py-4 space-y-1 text-sm">
-        <a href="{{ url('/dashboard/administrator') }}"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->routeIs('dashboard.administrator') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-slate-600 hover:bg-slate-50' }}">
-            <span class="w-2 h-2 rounded-full {{ request()->routeIs('dashboard.administrator') ? 'bg-indigo-600' : 'bg-slate-300' }}"></span>
+        <a href="{{ $dashboardRoute }}"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg {{ $onDashboard ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-slate-600 hover:bg-slate-50' }}">
+            <span class="w-2 h-2 rounded-full {{ $onDashboard ? 'bg-indigo-600' : 'bg-slate-300' }}"></span>
             Dashboard
         </a>
         <a href="{{ route('products.index') }}"
