@@ -282,6 +282,47 @@ class AuditLogAccessTest extends TestCase
     }
 
     /**
+     * The users table has no company_id, so User::auditCompanyId() falls back
+     * to the company the actor had active when the change was made.
+     */
+    public function test_a_profile_change_is_filed_under_the_active_company(): void
+    {
+        [$admin, $company] = $this->userWithCompany('administrator');
+
+        $this->actingAs($admin)
+            ->withSession(['active_company_id' => $company->id])
+            ->put(route('administrator.profile.update'), [
+                'first_name' => 'Prenume nou',
+            ])
+            ->assertRedirect(route('administrator.settings.profile'));
+
+        $audit = Audit::where('auditable_type', User::class)
+            ->where('auditable_id', $admin->id)
+            ->where('event', 'updated')
+            ->latest()
+            ->first();
+
+        $this->assertNotNull($audit, 'the profile change should be audited');
+        $this->assertSame($company->id, $audit->company_id);
+    }
+
+    public function test_a_profile_change_shows_up_in_the_company_log(): void
+    {
+        [$admin, $company] = $this->userWithCompany('administrator');
+
+        $this->actingAs($admin)
+            ->withSession(['active_company_id' => $company->id])
+            ->put(route('administrator.profile.update'), ['first_name' => 'Prenume nou']);
+
+        $this->actingAs($admin)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index'))
+            ->assertOk()
+            ->assertSee('Utilizator')
+            ->assertSee('Prenume nou');
+    }
+
+    /**
      * @return array{0: User, 1: Company}
      */
     private function userWithCompany(string $role): array
