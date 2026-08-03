@@ -17,6 +17,7 @@
             ['label' => 'Dashboard', 'url' => route('dashboard.contabil'), 'match' => 'dashboard.contabil', 'icon' => $icons['dashboard']],
             ['label' => 'Rapoarte', 'url' => route('dashboard.contabil.reports.index'), 'match' => 'dashboard.contabil.reports.*', 'icon' => $icons['reports']],
             ['label' => 'Facturi', 'url' => route('dashboard.contabil.invoices'), 'match' => 'dashboard.contabil.invoices', 'icon' => $icons['invoices']],
+            ['label' => 'Clienți', 'url' => route('clients.index'), 'match' => 'clients.*', 'icon' => $icons['clients']],
             ['label' => 'Produse', 'url' => route('products.index'), 'match' => 'products.*', 'icon' => $icons['products']],
             ['label' => 'Jurnal de audit', 'url' => route('audit-log.index'), 'match' => 'audit-log.*', 'icon' => $icons['audit']],
         ],
