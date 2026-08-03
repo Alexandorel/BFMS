@@ -30,6 +30,16 @@
         if ($value instanceof \UnitEnum) {
             return $value->name;
         }
+        // Dates are already serialized by getModified(), so what arrives is an
+        // ISO string. The pattern is anchored on purpose: a free text field
+        // that merely starts with a date must not be reformatted.
+        if (is_string($value) && preg_match('/^(\d{4}-\d{2}-\d{2})(?:[T ](\d{2}:\d{2}):\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?)?$/', $value, $matches)) {
+            $date = \Illuminate\Support\Carbon::parse($value);
+
+            return isset($matches[2]) && $matches[2] !== '00:00'
+                ? $date->format('d.m.Y H:i')
+                : $date->format('d.m.Y');
+        }
         if (is_array($value)) {
             return json_encode($value, JSON_UNESCAPED_UNICODE);
         }

@@ -242,6 +242,26 @@ class AuditLogAccessTest extends TestCase
     }
 
     /**
+     * getModified() serializes dates with serializeDate(), which hands the
+     * blade an ISO-8601 string rather than a Carbon.
+     */
+    public function test_a_date_change_is_readable(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+        $invoice = $this->makeInvoice($company, $contabil);
+
+        $invoice->update(['due_date' => '2026-09-15']);
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index'))
+            ->assertOk()
+            ->assertSee('Dată scadență')
+            ->assertSee('15.09.2026')
+            ->assertDontSee('2026-09-15T');
+    }
+
+    /**
      * @return array{0: User, 1: Company}
      */
     private function userWithCompany(string $role): array
