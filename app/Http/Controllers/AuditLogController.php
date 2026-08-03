@@ -50,6 +50,8 @@ class AuditLogController extends Controller
 
         return view('contabil.audit-log', [
             'company' => $company,
+            // the header switcher lists every company the user belongs to
+            'companies' => $request->user()->companies()->orderBy('name')->get(),
             'audits'  => $audits,
             'filters' => $filters,
             'users'   => $company->users()->orderBy('first_name')->get(),

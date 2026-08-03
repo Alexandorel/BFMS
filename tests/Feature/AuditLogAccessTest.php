@@ -528,6 +528,42 @@ class AuditLogAccessTest extends TestCase
         $dashboard->assertDontSee('Setări');
     }
 
+    public function test_the_header_lists_every_company_for_switching(): void
+    {
+        [$contabil, $companyA] = $this->userWithCompany('contabil');
+        $companyB = $this->userWithCompany('contabil')[1];
+        $contabil->companies()->attach($companyB);
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $companyA->id])
+            ->get(route('audit-log.index'))
+            ->assertOk()
+            ->assertSee('companySelect')
+            ->assertSee($companyA->name)
+            ->assertSee($companyB->name);
+    }
+
+    /**
+     * The switcher must not become a way to read a company the user is not
+     * part of. switchTo() refuses the id, so the session keeps the old one.
+     */
+    public function test_switching_to_a_foreign_company_is_refused(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+        $foreign = $this->userWithCompany('administrator')[1];
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get('/company/switch/'.$foreign->id)
+            ->assertForbidden();
+
+        $this->actingAs($contabil)
+            ->get(route('audit-log.index'))
+            ->assertOk()
+            ->assertSee($company->name)
+            ->assertDontSee($foreign->name);
+    }
+
     /**
      * @return array{0: User, 1: Company}
      */
