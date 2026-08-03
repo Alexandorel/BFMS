@@ -3,6 +3,7 @@
 
     $icons = [
         'dashboard' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+        'clients' => 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-6.13a4 4 0 11-8 0 4 4 0 018 0zm6 0a4 4 0 11-8 0 4 4 0 018 0z',
         'products' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
         'reports' => 'M9 17v-6h6v6m-9 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
         'invoices' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z',
@@ -29,6 +30,7 @@
         ],
         default => [
             ['label' => 'Dashboard', 'url' => route('dashboard.administrator'), 'match' => 'dashboard.administrator', 'icon' => $icons['dashboard']],
+            ['label' => 'Clienți', 'url' => route('clients.index'), 'match' => 'clients.*', 'icon' => $icons['clients']],
             ['label' => 'Facturi', 'url' => route('invoices.index'), 'match' => 'invoices.*', 'icon' => $icons['invoices']],
             ['label' => 'Produse', 'url' => route('products.index'), 'match' => 'products.*', 'icon' => $icons['products']],
             ['label' => 'Jurnal de audit', 'url' => route('audit-log.index'), 'match' => 'audit-log.*', 'icon' => $icons['audit']],
