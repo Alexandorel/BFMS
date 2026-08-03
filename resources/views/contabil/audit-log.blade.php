@@ -70,6 +70,16 @@
             </p>
         </div>
 
+        @if ($errors->any())
+            <div class="p-3 rounded-lg bg-rose-50 text-rose-700 text-sm">
+                <ul class="list-disc list-inside space-y-1">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         {{-- Filtre --}}
         <form method="GET" action="{{ route('audit-log.index') }}"
               class="bg-white rounded-xl border border-slate-200 p-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-6 items-end">

@@ -350,6 +350,144 @@ class AuditLogAccessTest extends TestCase
             ->assertDontSee(route('dashboard.administrator'));
     }
 
+    public function test_the_entity_filter_narrows_the_list(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+        $this->makeProduct($company, 'Produs de filtrat');
+        $this->makeInvoice($company, $contabil);
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', ['auditable_type' => Product::class]))
+            ->assertOk()
+            ->assertSee('Produs de filtrat')
+            ->assertDontSee('FCT');
+    }
+
+    public function test_the_user_filter_narrows_the_list(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+
+        // acting user is recorded on the audit, so the product below is his
+        $this->actingAs($contabil);
+        $this->makeProduct($company, 'Produs al contabilului');
+
+        $other = User::create([
+            'first_name' => 'Alt',
+            'last_name' => 'Utilizator',
+            'email' => fake()->unique()->safeEmail(),
+            'password' => 'password',
+            'role' => 'operator',
+        ]);
+        $other->companies()->attach($company);
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', ['user_id' => $other->id]))
+            ->assertOk()
+            ->assertDontSee('Produs al contabilului');
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', ['user_id' => $contabil->id]))
+            ->assertOk()
+            ->assertSee('Produs al contabilului');
+    }
+
+    public function test_the_date_filters_narrow_the_list(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+        $this->makeProduct($company, 'Produs de azi');
+
+        $today = now()->toDateString();
+        $tomorrow = now()->addDay()->toDateString();
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', ['from' => $today]))
+            ->assertOk()
+            ->assertSee('Produs de azi');
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', ['from' => $tomorrow]))
+            ->assertOk()
+            ->assertDontSee('Produs de azi');
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', ['to' => now()->subDay()->toDateString()]))
+            ->assertOk()
+            ->assertDontSee('Produs de azi');
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', ['from' => $today, 'to' => $today]))
+            ->assertOk()
+            ->assertSee('Produs de azi');
+    }
+
+    /**
+     * to before from fails validation, and the screen has to say so instead of
+     * silently redirecting back to an unchanged list.
+     */
+    public function test_an_inverted_date_range_is_reported_to_the_user(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+
+        $response = $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', [
+                'from' => now()->toDateString(),
+                'to' => now()->subDays(5)->toDateString(),
+            ]));
+
+        $response->assertSessionHasErrors('to');
+        $response->assertRedirect(route('audit-log.index'));
+    }
+
+    /**
+     * Mirrors the browser: the user is already on the log, then submits the
+     * filter form with a bad range. Laravel redirects to the previous url.
+     */
+    public function test_an_inverted_range_does_not_bounce_back_to_itself(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+
+        $bad = route('audit-log.index', [
+            'from' => now()->toDateString(),
+            'to' => now()->subDays(5)->toDateString(),
+        ]);
+
+        $this->actingAs($contabil)->withSession(['active_company_id' => $company->id]);
+
+        $this->get(route('audit-log.index'))->assertOk();
+        $this->get($bad)->assertRedirect()->assertSessionHasErrors('to');
+
+        $this->assertNotSame($bad, $this->get($bad)->headers->get('Location'));
+    }
+
+    /**
+     * The form submits every input, so empty ones must not narrow anything.
+     */
+    public function test_empty_filters_are_ignored(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+        $this->makeProduct($company, 'Produs vizibil');
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index', [
+                'from' => '',
+                'to' => '',
+                'user_id' => '',
+                'auditable_type' => '',
+                'event' => '',
+            ]))
+            ->assertOk()
+            ->assertSee('Produs vizibil');
+    }
+
     /**
      * @return array{0: User, 1: Company}
      */
