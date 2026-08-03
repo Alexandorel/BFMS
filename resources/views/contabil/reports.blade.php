@@ -6,43 +6,23 @@
     <title>Rapoarte · {{ config('app.name', 'BFMS') }}</title>
     @vite(['resources/css/app.css'])
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
-<div class="flex min-h-screen">
-    <x-sidebar :user="$user" />
-
-    <div class="flex-1 flex flex-col min-w-0">
-        <header class="flex items-center justify-between gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
-            <label class="relative">
-                <select id="companySelect"
-                        class="appearance-none pl-3 pr-9 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    @foreach ($companies as $availableCompany)
-                        <option value="{{ $availableCompany->id }}" @selected($company->is($availableCompany))>
-                            {{ $availableCompany->name }}
-                        </option>
-                    @endforeach
-                </select>
-                <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"
-                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-            </label>
-
-            <span class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">
-                    Doar vizualizare
-                </span>
+<body>
+<x-app-shell :user="$user">
+        <header class="app-page-toolbar">
+            <x-company-switcher :companies="$companies" :active-company="$company">
+                <x-slot:meta>
+                    <span class="ui-badge bg-slate-100 text-slate-600">Doar vizualizare</span>
+                </x-slot:meta>
+            </x-company-switcher>
         </header>
 
-        <main class="flex-1 p-4 sm:p-6 lg:p-8">
+        <main class="app-page-content">
             <div class="max-w-5xl mx-auto space-y-6">
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900">Rapoarte financiare</h1>
-                    <p class="mt-1 text-sm text-slate-500">
-                        Generează rapoarte pentru {{ $company->name }} în format PDF sau Excel.
-                    </p>
-                </div>
+                <x-page-header title="Rapoarte financiare"
+                               :description="'Generează rapoarte pentru '.$company->name.' în format PDF sau Excel.'" />
 
                 @if ($errors->any())
-                    <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                    <div class="ui-alert ui-alert-danger" role="alert">
                         <p class="font-medium">Raportul nu a putut fi generat:</p>
                         <ul class="mt-1 list-disc list-inside">
                             @foreach ($errors->all() as $error)
@@ -53,7 +33,7 @@
                 @endif
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                    <section class="bg-white rounded-xl border border-slate-200 p-5">
+                    <section class="ui-card p-5 sm:p-6">
                         <div class="flex items-start justify-between gap-4">
                             <div>
                                 <h2 class="font-semibold text-slate-900">Fișă client</h2>
@@ -72,7 +52,7 @@
                             <label class="block">
                                 <span class="text-sm font-medium text-slate-700">Client</span>
                                 <select name="client_id" required @disabled($clients->isEmpty())
-                                class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white text-sm px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-100">
+                                class="form-input mt-1.5">
                                     <option value="">Selectează clientul</option>
                                     @foreach ($clients as $client)
                                         <option value="{{ $client->id }}" @selected((string) old('client_id') === (string) $client->id)>
@@ -88,18 +68,18 @@
 
                             <div class="grid grid-cols-2 gap-3">
                                 <button type="submit" name="format" value="pdf" @disabled($clients->isEmpty())
-                                class="px-4 py-2.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50">
+                                class="ui-btn ui-btn-secondary w-full">
                                     Descarcă PDF
                                 </button>
                                 <button type="submit" name="format" value="xlsx" @disabled($clients->isEmpty())
-                                class="px-4 py-2.5 rounded-lg bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
+                                class="ui-btn ui-btn-primary w-full">
                                     Descarcă Excel
                                 </button>
                             </div>
                         </form>
                     </section>
 
-                    <section class="bg-white rounded-xl border border-slate-200 p-5">
+                    <section class="ui-card p-5 sm:p-6">
                         <div class="flex items-start justify-between gap-4">
                             <div>
                                 <h2 class="font-semibold text-slate-900">Închidere lună</h2>
@@ -118,7 +98,7 @@
                             <label class="block">
                                 <span class="text-sm font-medium text-slate-700">Luna raportată</span>
                                 <input type="month" name="month" value="{{ old('month', $defaultMonth) }}" required
-                                       class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white text-sm px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                       class="form-input mt-1.5">
                             </label>
 
                             <p class="text-xs text-slate-500">
@@ -127,11 +107,11 @@
 
                             <div class="grid grid-cols-2 gap-3">
                                 <button type="submit" name="format" value="pdf"
-                                        class="px-4 py-2.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                                        class="ui-btn ui-btn-secondary w-full">
                                     Descarcă PDF
                                 </button>
                                 <button type="submit" name="format" value="xlsx"
-                                        class="px-4 py-2.5 rounded-lg bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700">
+                                        class="ui-btn ui-btn-primary w-full">
                                     Descarcă Excel
                                 </button>
                             </div>
@@ -139,18 +119,12 @@
                     </section>
                 </div>
 
-                <div class="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+                <div class="ui-alert ui-alert-info" role="note">
                     Sumele din monede diferite sunt convertite în echivalent RON folosind cursul salvat pe fiecare factură sau încasare. În Excel, valorile sunt exportate ca numere și pot fi folosite direct în formule.
                 </div>
             </div>
         </main>
-    </div>
-</div>
+</x-app-shell>
 
-<script>
-    document.getElementById('companySelect').addEventListener('change', function () {
-        window.location.href = `/company/switch/${this.value}`;
-    });
-</script>
 </body>
 </html>

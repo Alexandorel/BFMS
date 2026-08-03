@@ -1,5 +1,4 @@
 @php
-    // TODO: date hardcodate temporar, pana se conecteaza autentificarea si baza de date reala
     $user = (object) [
         'first_name' => 'Andrei',
         'last_name'  => 'Popescu',
@@ -25,7 +24,7 @@
     <title>Dashboard · {{ config('app.name', 'BFMS') }}</title>
     @vite(['resources/css/app.css'])
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body>
 
     <div class="flex min-h-screen">
 
@@ -70,11 +69,11 @@
         <div class="flex-1 flex flex-col min-w-0">
 
             {{-- Top Bar --}}
-            <header class="flex items-center gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
+            <header class="app-page-toolbar">
                 {{-- Company Select Label (read-only pentru operator) --}}
                 <div class="flex items-center gap-3">
                     <label class="relative">
-                        <select class="appearance-none pl-3 pr-9 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500" disabled>
+                        <select class="ui-toolbar-select" disabled>
                             <option>{{ $company->name }}</option>
                         </select>
                         <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -85,29 +84,22 @@
             </header>
 
             {{-- Content --}}
-            <main class="flex-1 p-4 sm:p-6 space-y-6">
+            <main class="app-page-content space-y-6">
 
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900">Bună, {{ $user->first_name }}</h1>
-                    <p class="text-slate-500 text-sm mt-1">Iată situația firmei {{ $company->name }}:</p>
-                </div>
+                <x-page-header :title="'Bună, '.$user->first_name"
+                               :description="'Iată situația firmei '.$company->name.':'" />
 
                 {{-- Acțiuni rapide --}}
-                <div class="flex flex-wrap gap-3">
-                    {{-- TODO: legați aceste butoane la rutele /adauga când vor fi create --}}
-                    <a href="#" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                <div class="ui-button-group">
+                    <a href="{{ route('invoices.create') }}" class="ui-btn ui-btn-primary">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         Factură nouă
                     </a>
-                    <a href="#" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 transition">
+                    <a href="{{ route('invoices.index') }}" class="ui-btn ui-btn-secondary">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Plată nouă
+                        Înregistrează plată
                     </a>
-                    <a href="#" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 transition">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Client nou
-                    </a>
-                    <a href="#" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 transition">
+                    <a href="{{ route('products.create') }}" class="ui-btn ui-btn-secondary">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         Produs nou
                     </a>
@@ -115,21 +107,21 @@
 
                 {{-- Rezumat --}}
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div class="bg-white rounded-xl border border-slate-200 p-4">
-                        <p class="text-xs text-slate-500 font-medium">Facturi luna asta</p>
-                        <p class="text-2xl font-bold text-slate-900 mt-1">{{ $stats['invoices_month'] ?? 18 }}</p>
+                    <div class="ui-stat-card">
+                        <p class="ui-stat-label">Facturi luna asta</p>
+                        <p class="ui-stat-value">{{ $stats['invoices_month'] ?? 18 }}</p>
                     </div>
-                    <div class="bg-white rounded-xl border border-slate-200 p-4">
-                        <p class="text-xs text-slate-500 font-medium">Restante</p>
-                        <p class="text-2xl font-bold text-rose-600 mt-1">{{ $stats['overdue'] ?? 3 }}</p>
+                    <div class="ui-stat-card">
+                        <p class="ui-stat-label">Restante</p>
+                        <p class="ui-stat-value text-rose-600">{{ $stats['overdue'] ?? 3 }}</p>
                     </div>
-                    <div class="bg-white rounded-xl border border-slate-200 p-4">
-                        <p class="text-xs text-slate-500 font-medium">Clienți activi</p>
-                        <p class="text-2xl font-bold text-slate-900 mt-1">{{ $stats['clients'] ?? 42 }}</p>
+                    <div class="ui-stat-card">
+                        <p class="ui-stat-label">Clienți activi</p>
+                        <p class="ui-stat-value">{{ $stats['clients'] ?? 42 }}</p>
                     </div>
-                    <div class="bg-white rounded-xl border border-slate-200 p-4">
-                        <p class="text-xs text-slate-500 font-medium">Produse active</p>
-                        <p class="text-2xl font-bold text-slate-900 mt-1">{{ $stats['products'] ?? 27 }}</p>
+                    <div class="ui-stat-card">
+                        <p class="ui-stat-label">Produse active</p>
+                        <p class="ui-stat-value">{{ $stats['products'] ?? 27 }}</p>
                     </div>
                 </div>
 
@@ -137,12 +129,12 @@
 
                     {{-- Recent Invoices --}}
                     <div class="xl:col-span-2 space-y-4">
-                        <div class="bg-white rounded-xl border border-slate-200">
-                            <div class="px-5 py-4 border-b border-slate-200">
-                                <h2 class="font-semibold text-slate-900">Facturi recente</h2>
+                        <div class="ui-card overflow-hidden">
+                            <div class="ui-card-header">
+                                <h2 class="ui-section-title">Facturi recente</h2>
                             </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-sm">
+                            <div class="ui-table-wrap" tabindex="0" role="region" aria-label="Facturi recente">
+                                <table class="ui-table">
                                     <thead>
                                         <tr class="text-left text-slate-500 border-b border-slate-100">
                                             <th class="px-5 py-3 font-medium">Nr.</th>
@@ -179,10 +171,7 @@
                                                     </span>
                                                 </td>
                                                 <td class="px-5 py-3 text-right">
-                                                    <a href="#" class="text-indigo-600 hover:underline text-xs font-medium">Vezi</a>
-                                                    @if ($f['status'] !== 'platita')
-                                                        <a href="#" class="ml-3 text-emerald-600 hover:underline text-xs font-medium">Marchează plătită</a>
-                                                    @endif
+                                                    <a href="{{ route('invoices.index') }}" class="ui-action-link">Vezi</a>
                                                     {{-- Operatorul nu poate șterge facturi --}}
                                                 </td>
                                             </tr>
@@ -198,9 +187,9 @@
 
                     {{-- Recent Payments --}}
                     <div class="space-y-4">
-                        <div class="bg-white rounded-xl border border-slate-200">
-                            <div class="px-5 py-4 border-b border-slate-200">
-                                <h2 class="font-semibold text-slate-900">Plăți recente</h2>
+                        <div class="ui-card overflow-hidden">
+                            <div class="ui-card-header">
+                                <h2 class="ui-section-title">Plăți recente</h2>
                             </div>
                             <ul class="divide-y divide-slate-100 text-sm">
                                 @php
@@ -227,8 +216,7 @@
                 </div>
 
             </main>
-        </div>
-    </div>
+    </x-app-shell>
 
 </body>
 </html>

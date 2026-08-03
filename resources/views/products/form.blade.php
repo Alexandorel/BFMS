@@ -3,22 +3,22 @@
 @endphp
 
 <div>
-    <label class="block text-sm font-medium text-slate-700 mb-1">Cod unic (SKU)</label>
-    <input type="text" name="sku" value="{{ old('sku', $product->sku ?? '') }}"
-           class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+    <label for="sku" class="form-label">Cod unic (SKU)</label>
+    <input id="sku" type="text" name="sku" value="{{ old('sku', $product->sku ?? '') }}"
+           class="form-input">
     @error('sku') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
 </div>
 
 <div>
-    <label class="block text-sm font-medium text-slate-700 mb-1">Denumire</label>
-    <input type="text" name="name" value="{{ old('name', $product->name ?? '') }}"
-           class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+    <label for="name" class="form-label">Denumire</label>
+    <input id="name" type="text" name="name" value="{{ old('name', $product->name ?? '') }}"
+           class="form-input">
     @error('name') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
 </div>
 
 <div>
-    <label class="block text-sm font-medium text-slate-700 mb-1">Unitate de Masura</label>
-    <select name="unit_measure" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+    <label for="unit_measure" class="form-label">Unitate de măsură</label>
+    <select id="unit_measure" name="unit_measure" class="form-input">
         @foreach (['buc' => 'Bucata', 'ore' => 'Ore', 'kg' => 'Kilogram', 'l' => 'Litri', 'luni' => 'Luni'] as $value => $label)
             <option value="{{ $value }}" @selected(old('unit_measure', $product->unit_measure ?? '') == $value)>{{ $label }}</option>
         @endforeach
@@ -27,15 +27,15 @@
 </div>
 
 <div>
-    <label class="block text-sm font-medium text-slate-700 mb-1">Pret Unitar (fara TVA)</label>
-    <input type="number" step="0.01" name="unit_price" value="{{ old('unit_price', $product->unit_price ?? '') }}"
-           class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+    <label for="unit_price" class="form-label">Preț unitar (fără TVA)</label>
+    <input id="unit_price" type="number" step="0.01" name="unit_price" value="{{ old('unit_price', $product->unit_price ?? '') }}"
+           class="form-input">
     @error('unit_price') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
 </div>
 
 <div>
-    <label class="block text-sm font-medium text-slate-700 mb-1">Cota TVA</label>
-    <select name="vat_rate" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+    <label for="vat_rate" class="form-label">Cota TVA</label>
+    <select id="vat_rate" name="vat_rate" class="form-input">
         @foreach ($vatOptions as $rate)
             <option value="{{ $rate }}" @selected(old('vat_rate', $product->vat_rate ?? '') == $rate)>{{ $rate }}%</option>
         @endforeach
@@ -43,8 +43,9 @@
     @error('vat_rate') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
 </div>
 
-<div class="flex items-center gap-2">
+<div class="flex min-h-11 items-center gap-3 rounded-lg border border-app-border bg-slate-50 px-3">
     <input type="checkbox" name="is_vat_exempt" id="is_vat_exempt" value="1"
+           class="size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
            @checked(old('is_vat_exempt', $product->is_vat_exempt ?? false))>
     <label for="is_vat_exempt" class="text-sm text-slate-700">Produs scutit de TVA</label>
 </div>
