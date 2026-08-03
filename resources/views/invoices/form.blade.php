@@ -3,10 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Factura noua · {{ config('app.name', 'BFMS') }}</title>
+    <title>Factură nouă · {{ config('app.name', 'BFMS') }}</title>
     @vite(['resources/css/app.css'])
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body>
 
 @php
     // acelasi formular serveste crearea si editarea unei ciorne
@@ -38,15 +38,15 @@
     }
 @endphp
 
- <div class="max-w-5xl mx-auto p-6">
-    <div class="bg-white rounded-lg border border-slate-200 p-5">
-
-        <h1 class="text-2xl font-bold text-slate-900 mb-1">
-            {{ $isEdit ? 'Editare ciornă' : 'Factura noua' }}
-        </h1>
+ <x-app-shell>
+ <main class="app-page-content">
+ <div class="mx-auto max-w-5xl space-y-6">
+    <x-page-header :title="$isEdit ? 'Editare ciornă' : 'Factură nouă'"
+                   description="Completează datele documentului și liniile facturii." />
+    <div class="ui-card p-4 sm:p-6">
 
         @if ($errors->any())
-            <div class="mb-4 px-4 py-3 rounded-lg bg-rose-50 text-rose-800 text-sm">
+            <div class="ui-alert ui-alert-danger mb-5" role="alert">
                 <ul class="list-disc list-inside space-y-1">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -122,7 +122,12 @@
             <div class="space-y-4">
                 <div class="flex items-center justify-between">
                     <h2 class="form-section-title">Produse</h2>
-                    <button type="button" id="add-line-btn" class="form-btn-link">+</button>
+                    <button type="button" id="add-line-btn" class="ui-btn ui-btn-ghost">
+                        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14M5 12h14" />
+                        </svg>
+                        Adaugă linie
+                    </button>
                 </div>
                 <div id="invoice-lines-container" class="space-y-3">
                     @foreach ($lineRows as $row)
@@ -140,7 +145,7 @@
                                        value="{{ $row['quantity'] }}">
                             </div>
                             <div class="sm:col-span-2">
-                                <input type="number" name="unit_price[]" placeholder="Pret unitar" step="0.01" min="0" required class="form-input price-input"
+                                <input type="number" name="unit_price[]" placeholder="Preț unitar" step="0.01" min="0" required class="form-input price-input"
                                        value="{{ $row['unit_price'] }}">
                             </div>
                             <div class="sm:col-span-2">
@@ -153,7 +158,11 @@
                             </div>
                             <div class="sm:col-span-2 flex gap-2">
                                 <input type="text" class="line-total form-input" placeholder="Total" readonly>
-                                <button type="button" class="remove-line-btn form-btn-del">X</button>
+                                <button type="button" class="remove-line-btn form-btn-del" aria-label="Elimină linia" title="Elimină linia">
+                                    <svg class="pointer-events-none size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     @endforeach
@@ -183,16 +192,18 @@
             <input type="hidden" name="subtotal" id="subtotal-input">
             <input type="hidden" name="vat_total" id="vat-total-input">
             <input type="hidden" name="total" id="total-input">
-            <div class="flex justify-end gap-3 pt-2">
-                <a href="{{ $isEdit ? route('invoices.show', $invoice) : route(auth()->user()->dashboardRoute()) }}" class="form-btn-secondary">Anuleaza</a>
-                <button type="submit" name="action" value="draft" class="form-btn-secondary">
-                    {{ $isEdit ? 'Salveaza ciorna' : 'Salveaza ca ciorna' }}
+            <div class="ui-button-group pt-2 sm:justify-end">
+                <a href="{{ $isEdit ? route('invoices.show', $invoice) : route(auth()->user()->dashboardRoute()) }}" class="ui-btn ui-btn-secondary">Anulează</a>
+                <button type="submit" name="action" value="draft" class="ui-btn ui-btn-secondary">
+                    {{ $isEdit ? 'Salvează ciorna' : 'Salvează ca ciornă' }}
                 </button>
-                <button type="submit" name="action" value="issue" class="form-btn-primary">Emite</button>
+                <button type="submit" name="action" value="issue" class="ui-btn ui-btn-primary">Emite</button>
             </div>
         </form>
     </div>
  </div>
+ </main>
+ </x-app-shell>
  <script>
     const currencySelect = document.getElementById('currency');
     const exchangeRateWrapper = document.getElementById('exchange-rate-wrapper');
@@ -246,7 +257,11 @@
                 </div>
                 <div class="sm:col-span-2 flex gap-2">
                     <input type="text" class="line-total form-input" placeholder="Total" readonly>
-                    <button type="button" class="remove-line-btn form-btn-del">X</button>
+                    <button type="button" class="remove-line-btn form-btn-del" aria-label="Elimină linia" title="Elimină linia">
+                        <svg class="pointer-events-none size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
             </div>
             `;
@@ -292,10 +307,11 @@
         container.appendChild(wrapper.firstElementChild);
     });
     container.addEventListener('click', function (e){
-        if(e.target.classList.contains('remove-line-btn')){
+        const removeButton = e.target.closest('.remove-line-btn');
+        if(removeButton){
             const rows = document.querySelectorAll('.invoice-line-row');
             if(rows.length>1){
-                e.target.closest('.invoice-line-row').remove();
+                removeButton.closest('.invoice-line-row').remove();
                 calcTotals();
             }
         }

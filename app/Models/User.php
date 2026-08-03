@@ -116,7 +116,7 @@ class User extends Authenticatable implements Auditable
         return match ($this->role) {
             'administrator' => 'dashboard.administrator',
             'contabil'      => 'dashboard.contabil',
-            'operator'      => 'dashboard.operator',
+            'operator'      => 'operator.dashboard',
             default         => 'login',
         };
     }

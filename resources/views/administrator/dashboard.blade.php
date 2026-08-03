@@ -6,47 +6,35 @@
     <title>Dashboard · {{ config('app.name', 'BFMS') }}</title>
     @vite(['resources/css/app.css'])
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body>
 
-    <div class="flex min-h-screen">
-
-        {{-- Side Bar --}}
-        <x-sidebar />
-
-        {{-- Main --}}
-        <div class="flex-1 flex flex-col min-w-0">
+    <x-app-shell :user="$user">
 
             {{-- Top Bar --}}
-            <header class="flex items-center gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
-                {{-- Company Select Label --}}
-                <div class="flex items-center gap-3">
-                    <label class="relative">
-                        <select id="companySelect" class="appearance-none pl-3 pr-9 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            @foreach ($companies as $c)
-                                <option value="{{ $c->id }}" {{ $company?->id === $c->id ? 'selected' : '' }}>
-                                    {{ $c->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </label>
-                    <a href="{{ route('administrator.settings.addcompany') }}" class="inline-flex items-center p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-700 transition" title="Adaugă firmă">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    </a>
-                    <span class="hidden sm:inline text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium">Plătitor TVA</span>
-                </div>
+            <header class="app-page-toolbar">
+                <x-company-switcher :companies="$companies" :active-company="$company"
+                                    :add-href="route('administrator.settings.addcompany')">
+                    <x-slot:meta>
+                        <span class="ui-badge bg-emerald-50 text-emerald-700">Plătitor TVA</span>
+                    </x-slot:meta>
+                </x-company-switcher>
             </header>
 
             {{-- Content --}}
-            <main class="flex-1 p-4 sm:p-6 space-y-6">
+            <main class="app-page-content space-y-6">
 
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900">Bună, {{ $user->first_name }}</h1>
-                    <p class="text-slate-500 text-sm mt-1">Iată situația firmei {{ $companyName }}:</p>
-                </div>
+                <x-page-header :title="'Bună, '.$user->first_name"
+                               :description="'Iată situația firmei '.$companyName.':'">
+                    <x-slot:actions>
+                        <x-button :href="route('invoices.create')">
+                            <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                            Factură nouă
+                        </x-button>
+                    </x-slot:actions>
+                </x-page-header>
 
                 @if (session('success'))
-                    <div class="px-4 py-3 rounded-lg bg-emerald-50 text-emerald-800 text-sm">
+                    <div class="ui-alert ui-alert-success" role="status">
                         {{ session('success') }}
                     </div>
                 @endif
@@ -55,53 +43,50 @@
                 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
                     {{-- Recent Invoices --}}
-                    <div class="xl:col-span-2 space-y-4">
-                        <a href="{{ route('invoices.create') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
-                            Factură nouă
-                        </a>
-
-                        <div class="bg-white rounded-xl border border-slate-200">
-                            <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
-                                <h2 class="font-semibold text-slate-900">Facturi recente</h2>
+                    <div class="xl:col-span-2">
+                        <div class="ui-card overflow-hidden">
+                            <div class="ui-card-header">
+                                <h2 class="ui-section-title">Facturi recente</h2>
                                 @if ($invoices->isNotEmpty())
                                     <span class="text-xs text-slate-400">{{ $invoices->count() }}
                                         {{ $invoices->count() === 1 ? 'factură' : 'facturi' }}</span>
                                 @endif
                             </div>
                             <div id="invoices-scroll"
-                                class="overflow-x-auto overflow-y-auto transition-[max-height] duration-300 ease-out"
+                                class="ui-table-wrap overflow-y-auto transition-[max-height] duration-300 ease-out"
+                                tabindex="0" role="region" aria-label="Facturi recente"
                                 style="max-height: 17rem;">
-                                <table class="w-full text-sm">
-                                    <thead class="sticky top-0 z-10 bg-white">
-                                        <tr class="text-left text-slate-500 border-b border-slate-100">
-                                            <th class="px-5 py-3 font-medium">Nr.</th>
-                                            <th class="px-5 py-3 font-medium">Client</th>
-                                            <th class="px-5 py-3 font-medium">Valoare</th>
-                                            <th class="px-5 py-3 font-medium">Status</th>
-                                            <th class="px-5 py-3 font-medium text-right">Detalii</th>
+                                <table class="ui-table">
+                                    <thead class="sticky top-0 z-10">
+                                        <tr>
+                                            <th>Nr.</th>
+                                            <th>Client</th>
+                                            <th>Valoare</th>
+                                            <th>Status</th>
+                                            <th class="text-right">Detalii</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100">
                                         @forelse ($invoices as $inv)
-                                            <tr class="hover:bg-slate-50">
-                                                <td class="px-5 py-3 font-medium text-slate-900">
+                                            <tr>
+                                                <td class="font-medium text-slate-900">
                                                     {{ $inv->number ? $inv->series . '-' . $inv->number : '—' }}
                                                 </td>
-                                                <td class="px-5 py-3 text-slate-600">{{ $inv->client?->full_name ?? '—' }}</td>
-                                                <td class="px-5 py-3 text-slate-900">
+                                                <td class="text-slate-600">{{ $inv->client?->full_name ?? '—' }}</td>
+                                                <td class="text-slate-900">
                                                     {{ number_format($inv->total, 2, ',', '.') }} {{ $inv->currency }}
                                                 </td>
-                                                <td class="px-5 py-3">
+                                                <td>
                                                     <x-invoice-status-badge :status="$inv->status" />
                                                 </td>
-                                                <td class="px-5 py-3 text-right">
+                                                <td class="text-right">
                                                     <a href="{{ route('invoices.show', $inv) }}"
-                                                        class="text-indigo-600 hover:underline text-sm">Vezi</a>
+                                                        class="ui-action-link">Vezi</a>
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="5" class="px-5 py-8 text-center text-slate-400">
+                                                <td colspan="5" class="ui-empty-state">
                                                     Nicio factură înregistrată.
                                                 </td>
                                             </tr>
@@ -112,7 +97,7 @@
                             @if ($invoices->count() > 5)
                                 <div class="px-5 py-4 border-t border-slate-200">
                                     <button type="button" id="invoices-toggle"
-                                        class="text-sm text-indigo-600 hover:underline" aria-expanded="false"
+                                        class="ui-action-link" aria-expanded="false"
                                         aria-controls="invoices-scroll">Vezi toate</button>
                                 </div>
                             @endif
@@ -120,9 +105,9 @@
                     </div>
 
                     {{-- Jurnal de audit — preview, ecranul complet e la audit-log.index (F-101) --}}
-                    <div class="bg-white rounded-xl border border-slate-200 self-start">
-                        <div class="px-5 py-4 border-b border-slate-200">
-                            <h2 class="font-semibold text-slate-900">Activitate recentă</h2>
+                    <div class="ui-card self-start overflow-hidden">
+                        <div class="ui-card-header">
+                            <h2 class="ui-section-title">Activitate recentă</h2>
                         </div>
                         <ul class="divide-y divide-slate-100 text-sm">
                             @forelse ($audits as $entry)
@@ -147,21 +132,15 @@
                         </ul>
                         <div class="px-5 py-4 border-t border-slate-200">
                             <a href="{{ route('audit-log.index') }}"
-                                class="text-sm text-indigo-600 hover:underline">Vezi jurnalul complet</a>
+                                class="ui-action-link">Vezi jurnalul complet</a>
                         </div>
                     </div>
                 </div>
 
             </main>
-        </div>
-    </div>
+    </x-app-shell>
 
 <script>
-    document.getElementById('companySelect').addEventListener('change', function() {
-        const companyId = this.value;
-        window.location.href = `/company/switch/${companyId}`;
-    });
-
     // extend/ shorten invoices list
     const invoicesToggle = document.getElementById('invoices-toggle');
     const invoicesScroll = document.getElementById('invoices-scroll');
@@ -174,7 +153,7 @@
             const expanded = invoicesScroll.style.maxHeight === EXPANDED;
 
             invoicesScroll.style.maxHeight = expanded ? COLLAPSED : EXPANDED;
-            invoicesToggle.textContent = expanded ? 'Vezi toate' : 'Vezi mai putine';
+            invoicesToggle.textContent = expanded ? 'Vezi toate' : 'Vezi mai puține';
             invoicesToggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
 
             if (expanded) {

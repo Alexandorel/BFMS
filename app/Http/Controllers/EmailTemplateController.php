@@ -16,19 +16,19 @@ class EmailTemplateController extends Controller
         $companies = $user->companies()->orderBy('name')->get();
         $company = $companies->firstWhere('id', session('active_company_id')) ?? $companies->first();
         abort_if(! $company, 404, 'Nu există companie disponibilă.');
-        $defaults = config('emai_templates.defaults', []);
+        $defaults = config('email_templates.defaults', []);
         $variables = config('email_templates.variables', []);
         $existing = EmailTemplate::query()
         ->where('company_id',$company->id)
         ->get()
-        ->keyby(fn (EmailTemplate $t) => $t->type->value);
+        ->keyBy(fn (EmailTemplate $t) => $t->type->value);
 
         $types = [
             EmailTemplateType::InvoiceIssued,
             EmailTemplateType::DueReminder,
             EmailTemplateType::OverdueAlert,
         ];
-        $templates[] = [];
+        $templates = [];
         foreach ($types as $type){
             $row = $existing->get($type->value);
             $templates[] = [
@@ -47,15 +47,26 @@ class EmailTemplateController extends Controller
         ]);
     }
     public function update(Request $request, string $type)
-    {
-        abort_unless($request->user()?->role === 'administrator', 403);
-        $allowedTypes = array_map(fn ($c) => $c->value, EmailTemplateType::cases());
-        $validated = $request->validate([
-            'company_id' => ['required', 'integer', 'exists:companies,id'],
-            'type' => ['required', Rule::in($allowedTypes)],
-            'subject' => ['required', 'string', 'max:255'],
-            'body' => ['required', 'string'],
-        ]);
-        abort_unless($validated['type'] === $type, 422, 'Tip șablon invalid.');
-    }
+{
+    abort_unless($request->user()?->role === 'administrator', 403);
+    $allowedTypes = array_map(fn ($c) => $c->value, EmailTemplateType::cases());
+    $validated = $request->validate([
+        'company_id' => ['required', 'integer', 'exists:companies,id'],
+        'type' => ['required', Rule::in($allowedTypes)],
+        'subject' => ['required', 'string', 'max:255'],
+        'body' => ['required', 'string'],
+    ]);
+    abort_unless($validated['type'] === $type, 422, 'Tip șablon invalid.');
+    abort_unless(
+        $request->user()->companies()->whereKey($validated['company_id'])->exists(),
+        403
+    );
+
+    EmailTemplate::updateOrCreate(
+        ['company_id' => $validated['company_id'], 'type' => $type],
+        ['subject' => $validated['subject'], 'body' => $validated['body']]
+    );
+
+    return back()->with('success', 'Șablonul a fost salvat.');
+}
 }

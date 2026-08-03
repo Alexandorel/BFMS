@@ -6,52 +6,36 @@
     <title>Produse · {{ config('app.name', 'BFMS') }}</title>
     @vite(['resources/css/app.css'])
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body>
 
-    <div class="flex min-h-screen">
-
-        <x-sidebar />
-
-        <div class="flex-1 flex flex-col min-w-0">
+    <x-app-shell>
 
             {{-- Top Bar --}}
-            <header class="flex items-center gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
-                <div class="flex items-center gap-3">
-                    <label class="relative">
-                        <select id="companySelect" class="appearance-none pl-3 pr-9 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            @forelse ($companies as $c)
-                                <option value="{{ $c->id }}" @selected($company?->id === $c->id)>{{ $c->name }}</option>
-                            @empty
-                                <option value="">Nicio firmă</option>
-                            @endforelse
-                        </select>
-                        <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </label>
-                </div>
+            <header class="app-page-toolbar">
+                <x-company-switcher :companies="$companies" :active-company="$company" />
             </header>
 
-            <main class="flex-1 p-4 sm:p-6 space-y-6">
+            <main class="app-page-content space-y-6">
 
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h1 class="text-2xl font-bold text-slate-900">Produse</h1>
-                        <p class="text-slate-500 text-sm mt-1">Catalogul de produse si servicii</p>
-                    </div>
-                    <a href="{{ route('products.create') }}"
-                       class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Adauga produs
-                    </a>
-                </div>
+                <x-page-header title="Produse" description="Catalogul de produse și servicii">
+                    @if (in_array(auth()->user()->role, ['administrator', 'operator'], true))
+                        <x-slot:actions>
+                            <x-button :href="route('products.create')">
+                                <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                Adaugă produs
+                            </x-button>
+                        </x-slot:actions>
+                    @endif
+                </x-page-header>
 
                 @if (session('status'))
-                    <div class="p-3 rounded-lg bg-emerald-50 text-emerald-700 text-sm">{{ session('status') }}</div>
+                    <div class="ui-alert ui-alert-success" role="status">{{ session('status') }}</div>
                 @endif
 
-                <div class="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+                <div class="ui-card divide-y divide-slate-100 overflow-hidden">
                     @forelse ($products as $product)
-                        <div class="flex items-center justify-between px-5 py-4">
-                            <div>
+                        <div class="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                            <div class="min-w-0">
                                 <p class="text-sm font-medium text-slate-900">{{ $product->name }}</p>
                                 <p class="text-xs text-slate-500 mt-0.5">
                                     SKU: {{ $product->sku }} &nbsp;•&nbsp; {{ $product->unit_measure }} &nbsp;•&nbsp;
@@ -59,30 +43,23 @@
                                     {{ $product->is_vat_exempt ? 'Scutit' : $product->vat_rate.'%' }}
                                 </p>
                             </div>
-                            <div class="flex items-center gap-3">
-                                <a href="{{ route('products.edit', $product) }}" class="text-xs text-indigo-600 hover:underline">Editeaza</a>
-                                <form method="POST" action="{{ route('products.destroy', $product) }}" onsubmit="return confirm('Sigur stergi acest produs?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-xs text-rose-600 hover:underline">Sterge</button>
-                                </form>
+                            <div class="ui-button-group shrink-0 sm:flex-nowrap">
+                                @if(auth()->user()->role === 'administrator' || auth()->user()->role === 'operator')
+                                    <a href="{{ route('products.edit', $product) }}" class="ui-action-link">Editează</a>
+                                @endif
+                                @if(auth()->user()->role === 'administrator')
+                                    <x-confirm-action action="{{ route('products.destroy', $product) }}"
+                                                    confirm-text="Ștergi produsul?"></x-confirm-action>
+                                @endif
                             </div>
-                        </div>
+                        </div>  
                     @empty
-                        <div class="px-5 py-8 text-center text-sm text-slate-500">Nu exista produse inca.</div>
+                        <div class="ui-empty-state">Nu există produse încă.</div>
                     @endforelse
                 </div>
 
             </main>
-        </div>
-    </div>
+    </x-app-shell>
 
-<script>
-    document.getElementById('companySelect')?.addEventListener('change', function () {
-        if (this.value) {
-            window.location.href = `/company/switch/${this.value}`;
-        }
-    });
-</script>
 </body>
 </html>

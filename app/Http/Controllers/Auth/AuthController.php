@@ -31,7 +31,6 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
-        // active company id into session
         $request->session()->put(
             'active_company_id',
             $user->companies()->orderBy('companies.id')->value('companies.id')

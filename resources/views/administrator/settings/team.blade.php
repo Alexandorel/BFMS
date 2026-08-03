@@ -1,157 +1,195 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Echipă · Setări · {{ config('app.name', 'BFMS') }}</title>
-    @vite(['resources/css/app.css'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
 
-    @php
+<body>
 
-        $contabil = null;
-    @endphp
+    <x-app-shell>
 
-    <div class="flex min-h-screen">
+        {{-- Top Bar --}}
+        <header class="app-page-toolbar">
+            <x-company-switcher :companies="$companies" :active-company="$company"
+                                :add-href="route('administrator.settings.addcompany')" />
+        </header>
 
-        {{-- Side Bar --}}
-        <x-sidebar />
+        {{-- Content --}}
+        <main class="app-page-content space-y-6">
 
-        {{-- Main --}}
-        <div class="flex-1 flex flex-col min-w-0">
+            <x-page-header title="Setări" :description="'Configurările firmei '.($company?->name ?? '—')" />
 
-            {{-- Top Bar --}}
-            <header class="flex items-center gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
-                <div class="flex items-center gap-3">
-                    <label class="relative">
-                        <select id="companySelect" class="appearance-none pl-3 pr-9 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            @forelse ($companies as $c)
-                                <option value="{{ $c->id }}" @selected($company?->id === $c->id)>{{ $c->name }}</option>
-                            @empty
-                                <option value="">Nicio firmă</option>
-                            @endforelse
-                        </select>
-                        <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </label>
-                    <a href="{{ route('administrator.settings.addcompany') }}" class="inline-flex items-center p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-700 transition" title="Adaugă firmă">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    </a>
-                    @if ($company?->vat_payer)
-                        <span class="hidden sm:inline text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium">Plătitor TVA</span>
-                    @elseif ($company)
-                        <span class="hidden sm:inline text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">Neplătitor TVA</span>
-                    @endif
-                </div>
-            </header>
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-            {{-- Content --}}
-            <main class="flex-1 p-4 sm:p-6 space-y-6">
+                {{-- Settings sub-nav --}}
+                <x-settings-nav active="team" />
 
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900">Setări</h1>
-                    <p class="text-slate-500 text-sm mt-1">Configurările firmei {{ $company?->name ?? '—' }}</p>
-                </div>
+                <div class="lg:col-span-3 space-y-6">
 
-                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    {{-- Card 1: Lista echipei --}}
+                    <div class="ui-card overflow-hidden">
+                        <div class="ui-card-header flex items-center justify-between gap-3 flex-wrap">
+                            <h2 class="ui-section-title">Echipă</h2>
+                        </div>
 
-                    {{-- Settings sub-nav --}}
-                    <nav class="lg:col-span-1 space-y-1 text-sm">
-                        <a href="{{ route('administrator.settings.profile') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Profil</a>
-                        <a href="{{ route('administrator.settings.company') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Firmă</a>
-                        <a href="{{ route('administrator.settings.team') }}" class="block px-3 py-2 rounded-lg bg-white border border-slate-200 text-indigo-700 font-medium">Echipă</a>
-                        <a href="{{ route('administrator.bank-accounts.index') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white">Conturi bancare</a>
-                        <a href="{{ route('administrator.series.index') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Serii documente</a>
-                    </nav>
-
-                    {{-- Echipa --}}
-                    <div class="lg:col-span-3 space-y-6">
-
-                        <div class="bg-white rounded-xl border border-slate-200">
-                            <div class="px-5 py-4 border-b border-slate-200">
-                                <h2 class="font-semibold text-slate-900">Echipă</h2>
+                        {{-- Search + sortare --}}
+                        <div class="px-5 py-3 border-b border-slate-100 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+                            <div class="relative flex-1 max-w-xs">
+                                <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0a7.5 7.5 0 10-10.6 0 7.5 7.5 0 0010.6 0z"/>
+                                </svg>
+                                <input type="text"
+                                       id="team-search"
+                                       placeholder="Caută nume sau email..."
+                                       class="form-input text-sm !pl-10">
                             </div>
 
-                            <ul class="divide-y divide-slate-100">
-                                {{-- Operatorul: proprietarul firmei --}}
-                                <li class="flex items-center justify-between gap-3 px-5 py-4">
+                            <div class="flex items-center gap-2 text-sm">
+                                <label for="team-sort" class="text-slate-500 shrink-0">Sortează:</label>
+                                <select id="team-sort" class="form-input py-1.5 text-sm">
+                                    <option value="recent">Recent adăugate</option>
+                                    <option value="az">Nume A–Z</option>
+                                    <option value="za">Nume Z–A</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {{-- Tabel scrollabil — ~4 rânduri vizibile, restul la scroll --}}
+                        <div id="team-list" class="max-h-[19rem] overflow-y-auto divide-y divide-slate-100">
+
+                            @foreach ($allUsers as $membru)
+                                <div class="team-row flex items-center justify-between gap-3 px-5 py-4"
+                                     data-name="{{ Str::lower($membru['name']) }}"
+                                     data-email="{{ Str::lower($membru['email']) }}"
+                                     data-created="{{ $membru['created_at'] }}">
+
                                     <div class="flex items-center gap-3 min-w-0">
-                                        <div class="grid place-items-center w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-semibold text-sm shrink-0">AV</div>
+                                        <div class="grid place-items-center w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-semibold text-sm shrink-0">
+                                            {{ $membru['initials'] }}
+                                        </div>
+
                                         <div class="min-w-0">
-                                            <p class="text-sm font-medium text-slate-900 truncate">Alexandru V.</p>
-                                            <p class="text-xs text-slate-500 truncate">vintalexandru03@gmail.com</p>
+                                            <p class="text-sm font-medium text-slate-900 truncate">
+                                                {{ $membru['name'] }}
+                                            </p>
+                                            <p class="text-xs text-slate-500 truncate">
+                                                {{ $membru['email'] }}
+                                            </p>
                                         </div>
                                     </div>
-                                    <span class="shrink-0 text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 font-medium">Operator</span>
-                                </li>
 
-                                @if ($contabil)
-                                    <li class="flex items-center justify-between gap-3 px-5 py-4">
-                                        <div class="flex items-center gap-3 min-w-0">
-                                            <div class="grid place-items-center w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-semibold text-sm shrink-0">
-                                                {{ Str::of($contabil['nume'])->explode(' ')->map(fn ($p) => Str::substr($p, 0, 1))->join('') }}
-                                            </div>
-                                            <div class="min-w-0">
-                                                <p class="text-sm font-medium text-slate-900 truncate">{{ $contabil['nume'] }}</p>
-                                                <p class="text-xs text-slate-500 truncate">{{ $contabil['email'] }}</p>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center gap-3 shrink-0">
-                                            <span class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">Contabil</span>
-                                            <button type="button" class="text-xs text-rose-600 hover:underline">Revocă acces</button>
-                                        </div>
-                                    </li>
-                                @endif
-                            </ul>
+                                    <div class="flex items-center gap-3 shrink-0">
+                                        <span class="text-xs px-2 py-1 rounded-full font-medium
+                                            @if($membru['role'] === 'administrator')
+                                                bg-indigo-50 text-indigo-700
+                                            @elseif($membru['role'] === 'operator')
+                                                bg-emerald-50 text-emerald-700
+                                            @else
+                                                bg-slate-100 text-slate-600
+                                            @endif
+                                        ">
+                                            {{ ucfirst($membru['role']) }}
+                                        </span>
 
-                            {{-- Empty state (nu exista contabil) --}}
-                            @unless ($contabil)
-                                <div class="px-5 py-8 border-t border-slate-100 text-center">
-                                    <div class="grid place-items-center w-12 h-12 mx-auto rounded-full bg-slate-100 text-slate-400">
-                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                                        <a href="{{ route('administrator.team.edit', $membru['id']) }}"
+                                           class="ui-action-secondary">
+                                            Editează
+                                        </a>
                                     </div>
-                                    <p class="mt-3 text-sm font-medium text-slate-900">Niciun contabil asignat</p>
                                 </div>
-                            @endunless
-                        </div>
+                            @endforeach
 
-                        {{-- Adaugare contabil --}}
-                        <div class="bg-white rounded-xl border border-slate-200">
-                            <div class="px-5 py-4 border-b border-slate-200">
-                                <h2 class="font-semibold text-slate-900">Adaugă contabil</h2>
-                                <p class="text-xs text-slate-500 mt-0.5">Trimite o invitație pe email</p>
+                            <div id="team-empty" class="px-5 py-8 text-center text-sm text-slate-500 hidden">
+                                Niciun cont găsit.
                             </div>
-                            <form action="#" method="POST" class="px-5 py-4">
-                                @csrf
-                                <div class="flex flex-col sm:flex-row gap-3">
-                                    <div class="flex-1">
-                                        <label for="email_contabil" class="sr-only">Email contabil</label>
-                                        <input type="email" id="email_contabil" name="email" required
-                                               placeholder="contabil@exemplu.ro"
-                                               class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                    </div>
-                                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                        Trimite invitația
-                                    </button>
-                                </div>
-                                <p class="mt-2 text-xs text-slate-400">Dacă persoana nu are cont BFMS, va primi un link de înregistrare.</p>
-                            </form>
+                        </div>
+                    </div>
+
+                    {{-- Card 2: Formular de creare cont --}}
+                    <div class="ui-card overflow-hidden">
+                        <div class="ui-card-header">
+                            <h2 class="ui-section-title">Creează cont nou</h2>
                         </div>
 
+                        <div class="px-5 py-4">
+                            @if ($errors->any())
+                                <div class="mb-3 text-sm text-red-600 space-y-1">
+                                    @foreach ($errors->all() as $error)
+                                        <p>{{ $error }}</p>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <form method="POST" action="{{ route('administrator.team.store') }}" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    @csrf
+    <input type="text" name="first_name" value="{{ old('first_name') }}" placeholder="Prenume" class="form-input" required>
+    <input type="text" name="last_name" value="{{ old('last_name') }}" placeholder="Nume" class="form-input" required>
+    <input type="email" name="email" value="{{ old('email') }}" placeholder="Email" class="form-input sm:col-span-2" required>
+    <input type="password" name="password" placeholder="Parolă" class="form-input" required>
+    <input type="password" name="password_confirmation" placeholder="Confirmă parola" class="form-input" required>
+
+    <select name="role" class="form-input">
+        <option value="operator" @selected(old('role') === 'operator')>Operator</option>
+        <option value="contabil" @selected(old('role') === 'contabil')>Contabil</option>
+    </select>
+
+    <select name="company_id" class="form-input" required>
+        <option value="" disabled selected>Alege firma</option>
+        @foreach ($companies as $c)
+            <option value="{{ $c->id }}" @selected((int) old('company_id') === $c->id)>{{ $c->name }}</option>
+        @endforeach
+    </select>
+
+    <button type="submit" class="ui-btn ui-btn-primary sm:col-span-2">Salvează</button>
+</form>
+                        </div>
                     </div>
+
                 </div>
+            </div>
 
-            </main>
-        </div>
-    </div>
+        </main>
+    </x-app-shell>
 
-<script>
-    document.getElementById('companySelect')?.addEventListener('change', function () {
-        if (this.value) {
-            window.location.href = `/company/switch/${this.value}`;
-        }
-    });
-</script>
+    <script>
+        (function () {
+            const searchInput = document.getElementById('team-search');
+            const sortSelect  = document.getElementById('team-sort');
+            const list        = document.getElementById('team-list');
+            const empty       = document.getElementById('team-empty');
+
+            function apply() {
+                const rows = Array.from(list.querySelectorAll('.team-row'));
+                const query = searchInput.value.toLowerCase().trim();
+                const sortBy = sortSelect.value;
+
+                // Filtrare
+                let visible = 0;
+                rows.forEach((row) => {
+                    const match = row.dataset.name.includes(query) || row.dataset.email.includes(query);
+                    row.classList.toggle('hidden', !match);
+                    if (match) visible++;
+                });
+
+                // Sortare (doar rândurile vizibile contează pentru ordine)
+                rows.sort((a, b) => {
+                    if (sortBy === 'az') return a.dataset.name.localeCompare(b.dataset.name);
+                    if (sortBy === 'za') return b.dataset.name.localeCompare(a.dataset.name);
+                    return new Date(b.dataset.created) - new Date(a.dataset.created); // recent
+                });
+                rows.forEach((row) => list.insertBefore(row, empty));
+
+                empty.classList.toggle('hidden', visible !== 0);
+            }
+
+            searchInput.addEventListener('input', apply);
+            sortSelect.addEventListener('change', apply);
+        })();
+    </script>
+
 </body>
 </html>
