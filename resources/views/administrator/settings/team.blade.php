@@ -9,7 +9,7 @@
 <body class="bg-slate-50 text-slate-800 antialiased">
 
     @php
-        
+
         $contabil = null;
     @endphp
 
@@ -60,8 +60,8 @@
                         <a href="{{ route('administrator.settings.profile') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Profil</a>
                         <a href="{{ route('administrator.settings.company') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Firmă</a>
                         <a href="{{ route('administrator.settings.team') }}" class="block px-3 py-2 rounded-lg bg-white border border-slate-200 text-indigo-700 font-medium">Echipă</a>
-                        <a href="#" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Conturi bancare</a>
-                        <a href="#" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Serii documente</a>
+                        <a href="{{ route('administrator.bank-accounts.index') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white">Conturi bancare</a>
+                        <a href="{{ route('administrator.series.index') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Serii documente</a>
                     </nav>
 
                     {{-- Echipa --}}
@@ -69,7 +69,7 @@
 
                         <div class="bg-white rounded-xl border border-slate-200">
                             <div class="px-5 py-4 border-b border-slate-200">
-                                <h2 class="font-semibold text-slate-900">Echipă</h2>    
+                                <h2 class="font-semibold text-slate-900">Echipă</h2>
                             </div>
 
                             <ul class="divide-y divide-slate-100">

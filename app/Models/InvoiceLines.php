@@ -2,14 +2,27 @@
 
 namespace App\Models;
 
+use App\Concerns\AuditsCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class InvoiceLines extends Model
+class InvoiceLines extends Model implements Auditable
 {
-    use HasFactory;
+    // our transformAudit() replaces the package no-op, stamping company_id
+    use HasFactory, \OwenIt\Auditing\Auditable, AuditsCompany {
+        AuditsCompany::transformAudit insteadof \OwenIt\Auditing\Auditable;
+    }
+
+    /**
+     * A line has no company of its own, it inherits the invoice scope.
+     */
+    protected function auditCompanyId(): ?int
+    {
+        return $this->invoice?->company_id;
+    }
 
     protected $table = 'invoice_lines';
 

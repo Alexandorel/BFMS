@@ -31,12 +31,22 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
+<<<<<<< HEAD
         return match ($user->role) {
             'administrator' => redirect()->route('dashboard.administrator'),
             'contabil'      => redirect()->route('dashboard.contabil'),
             'operator'      => redirect()->route('clients.index'),
             default         => redirect()->route('dashboard'),
         };
+=======
+        // active company id into session
+        $request->session()->put(
+            'active_company_id',
+            $user->companies()->orderBy('companies.id')->value('companies.id')
+        );
+
+        return redirect()->route($user->dashboardRoute());
+>>>>>>> 27e51cde483dc69a97323912ed7cb50f7acd2fcd
     }
 
     /**

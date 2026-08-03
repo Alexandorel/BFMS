@@ -3,14 +3,20 @@
 namespace App\Models;
 
 use App\Enums\DocumentType;
+use App\Enums\InvoiceStatus;
+use App\Concerns\AuditsCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Invoice extends Model
+class Invoice extends Model implements Auditable
 {
-    use HasFactory;
+    // our transformAudit() replaces the package no-op, stamping company_id
+    use HasFactory, \OwenIt\Auditing\Auditable, AuditsCompany {
+        AuditsCompany::transformAudit insteadof \OwenIt\Auditing\Auditable;
+    }
 
     /**
      * Câmpurile care pot fi completate în masă (Mass Assignment).
@@ -42,6 +48,7 @@ class Invoice extends Model
     {
         return [
             'document_type' => DocumentType::class,
+            'status' => InvoiceStatus::class,
             'issue_date' => 'date',
             'due_date' => 'date',
             'exchange_rate' => 'decimal:4',
@@ -102,5 +109,32 @@ class Invoice extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * Amount collected untill now
+     * (F-302)
+     * round to two decimal places
+     */
+    public function paidAmount(): float
+    {
+        $sum = $this->relationLoaded('payments')
+            ? $this->payments->sum('amount')
+            : $this->payments()->sum('amount');
+
+        return round((float) $sum, 2);
+    }
+
+    /**
+     * Restul de plata. Pozitiv = mai are de incasat, 0 = achitata integral.
+     */
+    public function balance(): float
+    {
+        return round((float) $this->total - $this->paidAmount(), 2);
+    }
+
+    public function isFullyPaid(): bool
+    {
+        return $this->balance() <= 0;
     }
 }

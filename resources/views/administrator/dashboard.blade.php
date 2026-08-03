@@ -45,22 +45,34 @@
                     <p class="text-slate-500 text-sm mt-1">Iată situația firmei {{ $companyName }}:</p>
                 </div>
 
+                @if (session('success'))
+                    <div class="px-4 py-3 rounded-lg bg-emerald-50 text-emerald-800 text-sm">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
                 {{-- Invoices --}}
                 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
                     {{-- Recent Invoices --}}
                     <div class="xl:col-span-2 space-y-4">
-                        <a href="#" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                        <a href="{{ route('invoices.create') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
                             Factură nouă
                         </a>
 
                         <div class="bg-white rounded-xl border border-slate-200">
-                            <div class="px-5 py-4 border-b border-slate-200">
+                            <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
                                 <h2 class="font-semibold text-slate-900">Facturi recente</h2>
+                                @if ($invoices->isNotEmpty())
+                                    <span class="text-xs text-slate-400">{{ $invoices->count() }}
+                                        {{ $invoices->count() === 1 ? 'factură' : 'facturi' }}</span>
+                                @endif
                             </div>
-                            <div class="overflow-x-auto">
+                            <div id="invoices-scroll"
+                                class="overflow-x-auto overflow-y-auto transition-[max-height] duration-300 ease-out"
+                                style="max-height: 17rem;">
                                 <table class="w-full text-sm">
-                                    <thead>
+                                    <thead class="sticky top-0 z-10 bg-white">
                                         <tr class="text-left text-slate-500 border-b border-slate-100">
                                             <th class="px-5 py-3 font-medium">Nr.</th>
                                             <th class="px-5 py-3 font-medium">Client</th>
@@ -97,9 +109,45 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="px-5 py-4 border-t border-slate-200">
-                                <a href="#" class="text-sm text-indigo-600 hover:underline">Vezi toate</a>
-                            </div>
+                            @if ($invoices->count() > 5)
+                                <div class="px-5 py-4 border-t border-slate-200">
+                                    <button type="button" id="invoices-toggle"
+                                        class="text-sm text-indigo-600 hover:underline" aria-expanded="false"
+                                        aria-controls="invoices-scroll">Vezi toate</button>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Jurnal de audit — preview, ecranul complet e la audit-log.index (F-101) --}}
+                    <div class="bg-white rounded-xl border border-slate-200 self-start">
+                        <div class="px-5 py-4 border-b border-slate-200">
+                            <h2 class="font-semibold text-slate-900">Activitate recentă</h2>
+                        </div>
+                        <ul class="divide-y divide-slate-100 text-sm">
+                            @forelse ($audits as $entry)
+                                <li class="px-5 py-3">
+                                    <p class="text-slate-800">
+                                        <span class="font-medium">
+                                            {{ $entry->user ? trim($entry->user->first_name . ' ' . $entry->user->last_name) : 'Sistem' }}
+                                        </span>
+                                        {{ mb_strtolower($entry->eventLabel()) }}
+                                        {{ mb_strtolower($entry->entityLabel()) }}
+                                        {{ $entry->entityName() }}
+                                    </p>
+                                    <p class="text-xs text-slate-400 mt-0.5">
+                                        {{ $entry->created_at?->diffForHumans() }}
+                                    </p>
+                                </li>
+                            @empty
+                                <li class="px-5 py-3 text-slate-500">
+                                    Nicio modificare înregistrată încă.
+                                </li>
+                            @endforelse
+                        </ul>
+                        <div class="px-5 py-4 border-t border-slate-200">
+                            <a href="{{ route('audit-log.index') }}"
+                                class="text-sm text-indigo-600 hover:underline">Vezi jurnalul complet</a>
                         </div>
                     </div>
                 </div>
@@ -113,6 +161,27 @@
         const companyId = this.value;
         window.location.href = `/company/switch/${companyId}`;
     });
+
+    // extend/ shorten invoices list
+    const invoicesToggle = document.getElementById('invoices-toggle');
+    const invoicesScroll = document.getElementById('invoices-scroll');
+
+    if (invoicesToggle && invoicesScroll) {
+        const COLLAPSED = '17rem';
+        const EXPANDED = '32rem';
+
+        invoicesToggle.addEventListener('click', function() {
+            const expanded = invoicesScroll.style.maxHeight === EXPANDED;
+
+            invoicesScroll.style.maxHeight = expanded ? COLLAPSED : EXPANDED;
+            invoicesToggle.textContent = expanded ? 'Vezi toate' : 'Vezi mai putine';
+            invoicesToggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+
+            if (expanded) {
+                invoicesScroll.scrollTop = 0;
+            }
+        });
+    }
 </script>
 </body>
 </html>

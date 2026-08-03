@@ -12,70 +12,7 @@
 
     <div class="flex min-h-screen">
 
-        {{-- Side Bar --}}
-        <aside class="hidden lg:flex sticky top-0 h-screen w-64 flex-col border-r border-slate-200 bg-white">
-            <div class="flex items-center gap-2 px-6 h-16 border-b border-slate-200">
-                <div class="grid place-items-center w-9 h-9 rounded-lg bg-indigo-600 text-white font-bold">B</div>
-                <span class="font-semibold text-lg">BFMS</span>
-            </div>
-
-            <nav class="flex-1 px-3 py-4 space-y-1 text-sm">
-                <a href="{{ route('dashboard.contabil') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 font-medium">
-                    <span class="w-2 h-2 rounded-full bg-indigo-600"></span> Dashboard
-                </a>
-
-                <a href="{{ route('dashboard.contabil.reports.index') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50">
-                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 17v-6h6v6m-9 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Rapoarte
-                </a>
-
-                <a href="{{ route('dashboard.contabil.invoices') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50">
-
-                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z" />
-                    </svg>
-
-                    Facturi
-                </a>
-
-                <a href="{{ route('dashboard.contabil.audit-log.index') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50">
-                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Jurnal de audit
-                </a>
-            </nav>
-
-            <div class="p-4 border-t border-slate-200 space-y-3">
-                <div class="flex items-center gap-3">
-                    <div
-                        class="grid place-items-center w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-semibold text-sm">
-                        {{ Str::substr($user->first_name, 0, 1) }}{{ Str::substr($user->last_name, 0, 1) }}</div>
-                    <div class="min-w-0">
-                        <p class="text-sm font-medium truncate">{{ $user->first_name }}
-                            {{ Str::substr($user->last_name, 0, 1) }}.</p>
-                        <p class="text-xs text-slate-500">{{ $user->role }}</p>
-                    </div>
-                </div>
-
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit"
-                        class="w-full px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition text-left">
-                        Deconectare
-                    </button>
-                </form>
-            </div>
-        </aside>
+        <x-sidebar :user="$user" />
 
         {{-- Main --}}
         <div class="flex-1 flex flex-col min-w-0">
@@ -274,36 +211,28 @@
                                 <h2 class="font-semibold text-slate-900">Jurnal de audit</h2>
                             </div>
                             <ul class="divide-y divide-slate-100 text-sm">
-                                @php
-                                    $audit = [
-                                        [
-                                            'user' => 'M. Ionescu',
-                                            'action' => 'a emis factura F-0142',
-                                            'time' => 'azi, 10:24',
-                                        ],
-                                        [
-                                            'user' => 'A. Radu',
-                                            'action' => 'a înregistrat o plată pe F-0140',
-                                            'time' => 'azi, 09:10',
-                                        ],
-                                        [
-                                            'user' => 'M. Ionescu',
-                                            'action' => 'a stornat factura F-0135',
-                                            'time' => 'ieri, 17:42',
-                                        ],
-                                    ];
-                                @endphp
-                                @foreach ($audit as $entry)
+                                @forelse ($audits as $entry)
                                     <li class="px-5 py-3">
-                                        <p class="text-slate-800"><span
-                                                class="font-medium">{{ $entry['user'] }}</span>
-                                            {{ $entry['action'] }}</p>
-                                        <p class="text-xs text-slate-400 mt-0.5">{{ $entry['time'] }}</p>
+                                        <p class="text-slate-800">
+                                            <span class="font-medium">
+                                                {{ $entry->user ? trim($entry->user->first_name . ' ' . $entry->user->last_name) : 'Sistem' }}
+                                            </span>
+                                            {{ mb_strtolower($entry->eventLabel()) }}
+                                            {{ mb_strtolower($entry->entityLabel()) }}
+                                            {{ $entry->entityName() }}
+                                        </p>
+                                        <p class="text-xs text-slate-400 mt-0.5">
+                                            {{ $entry->created_at?->diffForHumans() }}
+                                        </p>
                                     </li>
-                                @endforeach
+                                @empty
+                                    <li class="px-5 py-3 text-slate-500">
+                                        Nicio modificare înregistrată încă.
+                                    </li>
+                                @endforelse
                             </ul>
                             <div class="px-5 py-4 border-t border-slate-200">
-                                <a href="{{ route('dashboard.contabil.audit-log.index') }}"
+                                <a href="{{ route('audit-log.index') }}"
                                     class="text-sm text-indigo-600 hover:underline">Vezi jurnalul complet</a>
                             </div>
                         </div>

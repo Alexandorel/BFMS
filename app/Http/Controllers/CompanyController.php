@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreCompanyRequest;
 use App\Http\Requests\UpdateCompanyRequest;
 use App\Models\Company;
+use App\Services\ActiveCompanyService;
+use App\Services\DocumentSeriesService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,16 +30,16 @@ class CompanyController extends Controller
         return Auth::user()->companies()->get();
     }
 
-    public function switchCompany($id)
+    public function switchCompany(
+        Request $request,
+        int $id,
+        ActiveCompanyService $activeCompanyService
+    ): RedirectResponse
     {
-        Session::put('active_company_id', $id);
+        $activeCompanyService->switchTo($request->user(), $request, $id);
 
-        // Fallback for the right roll
-        $fallback = Auth::user()?->role === 'contabil'
-            ? route('dashboard.contabil')
-            : route('dashboard.administrator');
-
-        return back(fallback: $fallback);
+        return back(fallback: route($request->user()->dashboardRoute()))
+            ->with('success', 'Firma activă a fost schimbată.');
     }
 
     public function index()
@@ -56,11 +58,11 @@ class CompanyController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCompanyRequest $request): RedirectResponse
+    public function store(StoreCompanyRequest $request, DocumentSeriesService $seriesService): RedirectResponse
     {
         $validated = $request->validated();
 
-        $company = DB::transaction(function () use ($request, $validated) {
+        $company = DB::transaction(function () use ($request, $validated, $seriesService) {
             $company = Company::create(Arr::only($validated, [
                 'name',
                 'juridical_form',
@@ -92,6 +94,9 @@ class CompanyController extends Controller
                     'currency' => 'RON',
                 ]);
             }
+
+            // serii implicite, ca firma sa poata emite documente imediat
+            $seriesService->ensureDefaultsFor($company);
 
             return $company;
         });

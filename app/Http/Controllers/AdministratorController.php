@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Audit;
 use App\Models\User;
 use App\Models\Company;
 use App\Models\Invoice;
@@ -24,10 +25,20 @@ class AdministratorController extends Controller
 
         $companyName = $company?->name ?? " - ";
 
-        // Cele mai recente 5 facturi ale firmei active, cu clientul atașat (eager loading).
+        // Facturile firmei active, cu clientul atașat (eager loading).
+        // Cardul din dashboard afișează primele câteva, restul devin vizibile
+        // prin extindere + scroll, fără navigare către altă pagină.
         $invoices = $company
             ? Invoice::with('client')
                 ->where('company_id', $company->id)
+                ->latest()
+                ->get()
+            : collect();
+
+        // Preview for the audit log card, the full screen lives in AuditLogController
+        $audits = $company
+            ? Audit::forCompany($company->id)
+                ->with(['user', 'auditable'])
                 ->latest()
                 ->take(5)
                 ->get()
@@ -39,6 +50,7 @@ class AdministratorController extends Controller
             'companies' => $companies,
             'companyName' => $companyName,
             'invoices' => $invoices,
+            'audits' => $audits,
         ]);
     }
 }
