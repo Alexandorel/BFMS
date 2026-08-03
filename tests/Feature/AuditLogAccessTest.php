@@ -489,8 +489,9 @@ class AuditLogAccessTest extends TestCase
     }
 
     /**
-     * The shared sidebar used to carry the administrator menu to every role,
-     * so the accountant saw Produse and Setari instead of his own screens.
+     * The shared sidebar used to carry the administrator menu to every role.
+     * The accountant reads the catalogue too (products.index allows his role),
+     * but Setari is administrator only and must stay out.
      */
     public function test_the_accountant_sidebar_shows_his_own_menu(): void
     {
@@ -502,9 +503,29 @@ class AuditLogAccessTest extends TestCase
             ->assertOk()
             ->assertSee('Rapoarte')
             ->assertSee('Facturi')
+            ->assertSee('Produse')
             ->assertSee('Jurnal de audit')
-            ->assertDontSee('Produse')
             ->assertDontSee('Setări');
+    }
+
+    /**
+     * The dashboard used to carry its own copy of the menu, so the two could
+     * drift apart. Both screens now render the same component.
+     */
+    public function test_the_accountant_menu_is_identical_on_every_screen(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+
+        $dashboard = $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('dashboard.contabil'))
+            ->assertOk();
+
+        foreach (['Dashboard', 'Rapoarte', 'Facturi', 'Produse', 'Jurnal de audit'] as $label) {
+            $dashboard->assertSee($label);
+        }
+
+        $dashboard->assertDontSee('Setări');
     }
 
     /**
