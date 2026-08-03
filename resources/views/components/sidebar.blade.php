@@ -20,7 +20,7 @@
             ['label' => 'Jurnal de audit', 'url' => route('audit-log.index'), 'match' => 'audit-log.*', 'icon' => $icons['audit']],
         ],
         'operator' => [
-            ['label' => 'Dashboard', 'url' => route('dashboard.operator'), 'match' => 'dashboard.operator', 'icon' => $icons['dashboard']],
+            ['label' => 'Dashboard', 'url' => route('operator.dashboard'), 'match' => 'operator.dashboard', 'icon' => $icons['dashboard']],
             ['label' => 'Facturi', 'url' => route('invoices.index'), 'match' => 'invoices.*', 'icon' => $icons['invoices']],
             ['label' => 'Produse', 'url' => route('products.index'), 'match' => 'products.*', 'icon' => $icons['products']],
         ],
