@@ -71,12 +71,16 @@
                                 </p>
                             </div>
                             <div class="flex items-center gap-3">
-                                <a href="{{ route('clients.edit', $client) }}" class="text-xs text-indigo-600 hover:underline">Editează</a>
-                                <form method="POST" action="{{ route('clients.destroy', $client) }}" onsubmit="return confirm('Sigur ștergi acest client?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-xs text-rose-600 hover:underline">Șterge</button>
-                                </form>
+                                @if (in_array(auth()->user()->role, ['administrator', 'operator'], true))
+                                    <a href="{{ route('clients.edit', $client) }}" class="text-xs text-indigo-600 hover:underline">Editează</a>
+                                @endif
+                                @if (auth()->user()->role === 'administrator')
+                                    <form method="POST" action="{{ route('clients.destroy', $client) }}" onsubmit="return confirm('Sigur ștergi acest client?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-xs text-rose-600 hover:underline">Șterge</button>
+                                    </form>
+                                @endif
                             </div>
                         </div>
                     @empty

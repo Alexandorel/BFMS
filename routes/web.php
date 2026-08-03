@@ -58,13 +58,26 @@ Route::middleware('auth')->group (function () {
         Route::get('/', [OperatorController::class, 'dashboard'])->name('dashboard');
     });
 
-    Route::middleware('role:operator')->prefix('clients')->name('clients.')->group(function () {
-        Route::get('/', [ClientController::class, 'index'])->name('index');
-        Route::get('/create', [ClientController::class, 'create'])->name('create');
-        Route::post('/', [ClientController::class, 'store'])->name('store');
-        Route::get('/{client}/edit', [ClientController::class, 'edit'])->name('edit');
-        Route::put('/{client}', [ClientController::class, 'update'])->name('update');
-        Route::delete('/{client}', [ClientController::class, 'destroy'])->name('destroy');
+    //rute clienti
+    Route::prefix('clients')->name('clients.')->group(function () {
+
+        // Vizualizare — admin, operator, contabil
+        Route::middleware('role:administrator,operator,contabil')->group(function () {
+            Route::get('/', [ClientController::class, 'index'])->name('index');
+        });
+
+        // Adaugă / editează — admin, operator
+        Route::middleware('role:administrator,operator')->group(function () {
+            Route::get('/create', [ClientController::class, 'create'])->name('create');
+            Route::post('/', [ClientController::class, 'store'])->name('store');
+            Route::get('/{client}/edit', [ClientController::class, 'edit'])->whereNumber('client')->name('edit');
+            Route::put('/{client}', [ClientController::class, 'update'])->whereNumber('client')->name('update');
+        });
+
+        // Șterge — doar admin
+        Route::middleware('role:administrator')->group(function () {
+            Route::delete('/{client}', [ClientController::class, 'destroy'])->whereNumber('client')->name('destroy');
+        });
     });
 
     // Dashboard + rute Contabil
@@ -225,7 +238,7 @@ Route::middleware('auth')->group (function () {
         Route::delete('/products/{product}', [ProductController::class, 'destroy'])->whereNumber('product')->name('products.destroy');
     });
 
-    // Conturi bancare - Admin (din varianta colegului)
+    // Conturi bancare 
     Route::middleware('role:administrator')
         ->prefix('administrator/settings/conturi-bancare')
         ->name('administrator.bank-accounts.')
