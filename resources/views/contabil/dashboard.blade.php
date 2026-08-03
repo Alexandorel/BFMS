@@ -8,49 +8,25 @@
     @vite(['resources/css/app.css'])
 </head>
 
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body>
 
-    <div class="flex min-h-screen">
-
-        <x-sidebar :user="$user" />
-
-        {{-- Main --}}
-        <div class="flex-1 flex flex-col min-w-0">
+    <x-app-shell :user="$user">
 
             {{-- Top Bar --}}
-            <header class="flex items-center gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
-                {{-- Company Select Label (fara buton de adaugare, doar vizualizare) --}}
-                <div class="flex items-center gap-3">
-                    <label class="relative">
-                        <select id="companySelect"
-                            class="appearance-none pl-3 pr-9 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            @foreach ($companies as $c)
-                                <option value="{{ $c->id }}" {{ $company?->id === $c->id ? 'selected' : '' }}>
-                                    {{ $c->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"
-                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </label>
-                    <span
-                        class="hidden sm:inline text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium">Plătitor
-                        TVA</span>
-                    <span
-                        class="hidden sm:inline text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">Doar
-                        vizualizare</span>
-                </div>
+            <header class="app-page-toolbar">
+                <x-company-switcher :companies="$companies" :active-company="$company">
+                    <x-slot:meta>
+                        <span class="ui-badge bg-emerald-50 text-emerald-700">Plătitor TVA</span>
+                        <span class="ui-badge bg-slate-100 text-slate-600">Doar vizualizare</span>
+                    </x-slot:meta>
+                </x-company-switcher>
             </header>
 
             {{-- Content --}}
-            <main class="flex-1 p-4 sm:p-6 space-y-6">
+            <main class="app-page-content space-y-6">
 
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900">Bună, {{ $user->first_name }}</h1>
-                    <p class="text-slate-500 text-sm mt-1">Situația firmei {{ $companyName }}:</p>
-                </div>
+                <x-page-header :title="'Bună, '.$user->first_name"
+                               :description="'Situația firmei '.$companyName.':'" />
 
                 {{-- Rapoarte --}}
                 <div>
@@ -59,7 +35,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                         {{-- Fisa Client --}}
-                        <div class="bg-white rounded-xl border border-slate-200 p-2">
+                        <div class="ui-card p-5">
                             <div class="flex items-start justify-between">
                                 <div>
                                     <h3 class="font-semibold text-slate-900">Fișă client</h3>
@@ -77,20 +53,20 @@
                                 <label class="block">
                                     <span class="text-xs font-medium text-slate-500">Client</span>
                                     <select name="client_id"
-                                        class="mt-1 w-full rounded-lg border border-slate-200 text-sm px-3 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        class="form-input mt-1">
                                         @foreach ($clients ?? [] as $client)
                                             <option value="{{ $client->id }}">{{ $client->name }}</option>
                                         @endforeach
                                     </select>
                                 </label>
 
-                                <div class="flex gap-2 pt-3">
+                                <div class="grid grid-cols-2 gap-2 pt-3">
                                     <button type="submit" name="format" value="pdf"
-                                        class="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                                        class="ui-btn ui-btn-secondary w-full">
                                         PDF
                                     </button>
                                     <button type="submit" name="format" value="xlsx"
-                                        class="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                                        class="ui-btn ui-btn-primary w-full">
                                         Excel
                                     </button>
                                 </div>
@@ -98,7 +74,7 @@
                         </div>
 
                         {{-- Inchidere Luna --}}
-                        <div class="bg-white rounded-xl border border-slate-200 p-2">
+                        <div class="ui-card p-5">
                             <div class="flex items-start justify-between">
                                 <div>
                                     <h3 class="font-semibold text-slate-900">Închidere lună</h3>
@@ -117,16 +93,16 @@
                                 <label class="block">
                                     <span class="text-xs font-medium text-slate-500">Luna</span>
                                     <input type="month" name="month"
-                                        class="mt-1 w-full rounded-lg border border-slate-200 text-sm px-3 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        class="form-input mt-1">
                                 </label>
 
-                                <div class="flex gap-2 pt-3">
+                                <div class="grid grid-cols-2 gap-2 pt-3">
                                     <button type="submit" name="format" value="pdf"
-                                        class="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                                        class="ui-btn ui-btn-secondary w-full">
                                         PDF
                                     </button>
                                     <button type="submit" name="format" value="xlsx"
-                                        class="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                                        class="ui-btn ui-btn-primary w-full">
                                         Excel
                                     </button>
                                 </div>
@@ -139,27 +115,13 @@
                 {{-- Facturi (read-only) --}}
                 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                     <div class="xl:col-span-2 space-y-4">
-                        <div class="bg-white rounded-xl border border-slate-200">
-                            <div class="px-3 py-3 border-b border-slate-200 flex items-center justify-between">
-                                <h2 class="font-semibold text-slate-900">Facturi recente</h2>
-                                <label class="relative">
-                                    <select
-                                        class="appearance-none pl-3 pr-8 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                        <option>Toate stările</option>
-                                        <option>Emisă</option>
-                                        <option>Încasată parțial</option>
-                                        <option>Încasată total</option>
-                                        <option>Stornată</option>
-                                    </select>
-                                    <svg class="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </label>
+                        <div class="ui-card overflow-hidden">
+                            <div class="ui-card-header">
+                                <h2 class="ui-section-title">Facturi recente</h2>
+                                <x-invoice-status-filter target="recent-invoice-list" compact :disabled="$invoices->isEmpty()" />
                             </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-sm">
+                            <div class="ui-table-wrap" tabindex="0" role="region" aria-label="Facturi recente">
+                                <table class="ui-table">
                                     <thead>
                                         <tr class="text-left text-slate-500 border-b border-slate-100">
                                             <th class="px-3 py-2 font-medium">Nr.</th>
@@ -169,9 +131,9 @@
                                             <th class="px-3 py-2 font-medium text-right">Detalii</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-slate-100">
+                                    <tbody id="recent-invoice-list" class="divide-y divide-slate-100">
                                         @forelse ($invoices as $inv)
-                                            <tr class="hover:bg-slate-50">
+                                            <tr data-invoice-status="{{ $inv->status->value }}">
                                                 <td class="px-3 py-2 font-medium text-slate-900">
                                                     {{ $inv->number ? $inv->series . '-' . $inv->number : '—' }}
                                                 </td>
@@ -184,7 +146,7 @@
                                                 </td>
                                                 <td class="px-3 py-2 text-right">
                                                     <a href="{{ route('invoices.show', $inv) }}"
-                                                        class="text-indigo-600 hover:underline text-sm">Vezi</a>
+                                                        class="ui-action-link">Vezi</a>
                                                 </td>
                                             </tr>
                                         @empty
@@ -194,21 +156,24 @@
                                                 </td>
                                             </tr>
                                         @endforelse
+                                        <tr data-filter-empty class="hidden">
+                                            <td colspan="5" class="ui-empty-state">Nicio factură cu starea selectată.</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                             <div class="px-3 py-3 border-t border-slate-200">
                                 <a href="{{ route('dashboard.contabil.invoices') }}"
-                                    class="text-sm text-indigo-600 hover:underline">Vezi toate</a>
+                                    class="ui-action-link">Vezi toate</a>
                             </div>
                         </div>
                     </div>
 
                     {{-- Jurnal de audit (preview) --}}
                     <div class="space-y-4">
-                        <div class="bg-white rounded-xl border border-slate-200">
-                            <div class="px-5 py-4 border-b border-slate-200">
-                                <h2 class="font-semibold text-slate-900">Jurnal de audit</h2>
+                        <div class="ui-card overflow-hidden">
+                            <div class="ui-card-header">
+                                <h2 class="ui-section-title">Jurnal de audit</h2>
                             </div>
                             <ul class="divide-y divide-slate-100 text-sm">
                                 @forelse ($audits as $entry)
@@ -233,22 +198,15 @@
                             </ul>
                             <div class="px-5 py-4 border-t border-slate-200">
                                 <a href="{{ route('audit-log.index') }}"
-                                    class="text-sm text-indigo-600 hover:underline">Vezi jurnalul complet</a>
+                                    class="ui-action-link">Vezi jurnalul complet</a>
                             </div>
                         </div>
                     </div>
                 </div>
 
             </main>
-        </div>
-    </div>
+    </x-app-shell>
 
-    <script>
-        document.getElementById('companySelect').addEventListener('change', function() {
-            const companyId = this.value;
-            window.location.href = `/company/switch/${companyId}`;
-        });
-    </script>
 </body>
 
 </html>
