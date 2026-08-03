@@ -15,6 +15,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\BankAccountController;
+use App\Http\Controllers\TeamController;
 use App\Http\Controllers\ClientController;
 use Illuminate\Support\Facades\Route;
 
@@ -195,16 +196,17 @@ Route::middleware('auth')->group (function () {
         Route::post('/administrator/settings/firme', [CompanyController::class, 'store'])
             ->name('administrator.companies.store');
 
-        Route::get('/administrator/settings/echipa', function () {
-            $companies = auth()->user()->companies()->orderBy('name')->get();
-            $company = $companies->firstWhere('id', session('active_company_id')) ?? $companies->first();
-
-            return view('administrator.settings.team', [
-                'user'      => auth()->user(),
-                'companies' => $companies,
-                'company'   => $company,
-            ]);
-        })->name('administrator.settings.team');
+        // Echipă — creare/editare conturi (nou)
+    Route::post('/administrator/settings/echipa', [TeamController::class, 'store'])
+        ->name('administrator.team.store');
+    Route::get('/administrator/settings/echipa/{user}/editeaza', [TeamController::class, 'edit'])
+        ->name('administrator.team.edit');
+    Route::put('/administrator/settings/echipa/{user}', [TeamController::class, 'update'])
+        ->name('administrator.team.update');
+    Route::delete('/administrator/settings/echipa/{user}', [TeamController::class, 'destroy'])
+        ->name('administrator.team.destroy');
+    Route::get('/administrator/settings/echipa', [TeamController::class, 'index'])
+        ->name('administrator.settings.team');
     });
 
     // Serii documente — configurare rezervata administratorului (NFR-1)
