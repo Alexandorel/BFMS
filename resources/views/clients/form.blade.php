@@ -124,7 +124,7 @@
 
     <div>
         <label for="delivery_address" class="block text-sm font-medium text-slate-700 mb-1">Adresă de livrare (opțional)</label>
-        <input type="text" name="delivery_address" id="delivery_address"
+        <input type="text" name="delivery_address" id="delivery_address" data-optional
                value="{{ old('delivery_address', $client->delivery_address ?? '') }}"
                class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
         @error('delivery_address') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
@@ -210,6 +210,7 @@
 
         function setRequired(container, isRequired) {
             container.querySelectorAll('input, select').forEach(el => {
+            if (el.hasAttribute('data-optional')) return;
                 if (isRequired) {
                     el.setAttribute('required', 'required');
                 } else {
