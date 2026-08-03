@@ -346,7 +346,7 @@ class AuditLogAccessTest extends TestCase
             ->withSession(['active_company_id' => $company->id])
             ->get(route('products.index'))
             ->assertOk()
-            ->assertSee(route('dashboard.operator'))
+            ->assertSee(route('operator.dashboard'))
             ->assertDontSee(route('dashboard.administrator'));
     }
 

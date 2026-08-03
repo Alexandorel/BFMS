@@ -1,21 +1,3 @@
-@php
-    $user = (object) [
-        'first_name' => 'Andrei',
-        'last_name'  => 'Popescu',
-        'role'       => 'Operator',
-    ];
-
-    $company = (object) [
-        'name' => 'SC Exemplu SRL',
-    ];
-
-    $stats = [
-        'invoices_month' => 18,
-        'overdue'        => 3,
-        'clients'        => 42,
-        'products'       => 27,
-    ];
-@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -34,11 +16,13 @@
                 <div class="flex items-center gap-3">
                     <label class="relative">
                         <select class="ui-toolbar-select" disabled>
-                            <option>{{ $company->name }}</option>
+                            <option>{{ $company?->name ?? 'Fără firmă' }}</option>
                         </select>
                         <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </label>
-                    <span class="hidden sm:inline text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium">Plătitor TVA</span>
+                    @if ($company?->vat_payer)
+                        <span class="hidden sm:inline text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium">Plătitor TVA</span>
+                    @endif
                     <span class="hidden sm:inline text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">Operator</span>
                 </div>
             </header>
@@ -47,7 +31,7 @@
             <main class="app-page-content space-y-6">
 
                 <x-page-header :title="'Bună, '.$user->first_name"
-                               :description="'Iată situația firmei '.$company->name.':'" />
+                               :description="$company ? 'Iată situația firmei '.$company->name.':' : 'Nu ai nicio firmă asociată contului.'" />
 
                 {{-- Acțiuni rapide --}}
                 <div class="ui-button-group">
@@ -69,19 +53,21 @@
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div class="ui-stat-card">
                         <p class="ui-stat-label">Facturi luna asta</p>
-                        <p class="ui-stat-value">{{ $stats['invoices_month'] ?? 18 }}</p>
+                        <p class="ui-stat-value">{{ $stats['invoices_month'] }}</p>
                     </div>
                     <div class="ui-stat-card">
                         <p class="ui-stat-label">Restante</p>
-                        <p class="ui-stat-value text-rose-600">{{ $stats['overdue'] ?? 3 }}</p>
+                        <p class="ui-stat-value text-rose-600">{{ $stats['overdue'] }}</p>
                     </div>
-                    <div class="ui-stat-card">
-                        <p class="ui-stat-label">Clienți activi</p>
-                        <p class="ui-stat-value">{{ $stats['clients'] ?? 42 }}</p>
-                    </div>
+                    <a href="{{ route('clients.index') }}">
+                        <div class="ui-stat-card">
+                            <p class="ui-stat-label">Clienți activi</p>
+                            <p class="ui-stat-value">{{ $stats['clients'] }}</p>
+                        </div>
+                    </a>
                     <div class="ui-stat-card">
                         <p class="ui-stat-label">Produse active</p>
-                        <p class="ui-stat-value">{{ $stats['products'] ?? 27 }}</p>
+                        <p class="ui-stat-value">{{ $stats['products'] }}</p>
                     </div>
                 </div>
 
@@ -105,37 +91,32 @@
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100">
-                                        @php
-                                            $facturi = [
-                                                ['nr' => 'F-0142', 'client' => 'Alpha Tech SRL',   'val' => '4.760 RON', 'status' => 'platita'],
-                                                ['nr' => 'F-0141', 'client' => 'Beta Media SA',    'val' => '2.100 RON', 'status' => 'trimisa'],
-                                                ['nr' => 'F-0140', 'client' => 'Gamma Retail SRL', 'val' => '8.900 RON', 'status' => 'restanta'],
-                                                ['nr' => 'F-0139', 'client' => 'Delta Prod SRL',   'val' => '1.250 RON', 'status' => 'ciorna'],
-                                                ['nr' => 'F-0138', 'client' => 'Omega Design',     'val' => '3.400 RON', 'status' => 'platita'],
-                                            ];
-                                            $badge = [
-                                                'platita'  => ['Plătită',  'bg-emerald-50 text-emerald-700'],
-                                                'trimisa'  => ['Trimisă',  'bg-sky-50 text-sky-700'],
-                                                'restanta' => ['Restantă', 'bg-rose-50 text-rose-700'],
-                                                'ciorna'   => ['Ciornă',   'bg-slate-100 text-slate-600'],
-                                            ];
-                                        @endphp
-                                        @foreach (array_slice($facturi, 0, 5) as $f)
+                                        @forelse ($invoices as $invoice)
                                             <tr class="hover:bg-slate-50">
-                                                <td class="px-5 py-3 font-medium text-slate-900">{{ $f['nr'] }}</td>
-                                                <td class="px-5 py-3 text-slate-600">{{ $f['client'] }}</td>
-                                                <td class="px-5 py-3 text-slate-900">{{ $f['val'] }}</td>
+                                                <td class="px-5 py-3 font-medium text-slate-900">
+                                                    {{ $invoice->number ? $invoice->series.'-'.$invoice->number : 'Ciornă' }}
+                                                </td>
+                                                <td class="px-5 py-3 text-slate-600">{{ $invoice->client?->full_name ?? '—' }}</td>
+                                                <td class="px-5 py-3 text-slate-900">
+                                                    {{ number_format((float) $invoice->total, 2, ',', '.') }} {{ $invoice->currency }}
+                                                </td>
                                                 <td class="px-5 py-3">
-                                                    <span class="text-xs px-2 py-1 rounded-full font-medium {{ $badge[$f['status']][1] }}">
-                                                        {{ $badge[$f['status']][0] }}
+                                                    <span class="text-xs px-2 py-1 rounded-full font-medium {{ $invoice->status->badgeClasses() }}">
+                                                        {{ $invoice->status->label() }}
                                                     </span>
                                                 </td>
                                                 <td class="px-5 py-3 text-right">
-                                                    <a href="{{ route('invoices.index') }}" class="ui-action-link">Vezi</a>
+                                                    <a href="{{ route('invoices.show', $invoice) }}" class="ui-action-link">Vezi</a>
                                                     {{-- Operatorul nu poate șterge facturi --}}
                                                 </td>
                                             </tr>
-                                        @endforeach
+                                        @empty
+                                            <tr>
+                                                <td colspan="5" class="px-5 py-8 text-center text-slate-500">
+                                                    Nu există facturi încă.
+                                                </td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>
@@ -152,22 +133,19 @@
                                 <h2 class="ui-section-title">Plăți recente</h2>
                             </div>
                             <ul class="divide-y divide-slate-100 text-sm">
-                                @php
-                                    $plati = [
-                                        ['client' => 'Alpha Tech SRL',   'val' => '4.760 RON', 'data' => '12 iul'],
-                                        ['client' => 'Omega Design',     'val' => '3.400 RON', 'data' => '10 iul'],
-                                        ['client' => 'Sigma Logistics',  'val' => '1.980 RON', 'data' => '08 iul'],
-                                    ];
-                                @endphp
-                                @foreach ($plati as $p)
+                                @forelse ($payments as $payment)
                                     <li class="px-5 py-3 flex items-center justify-between">
                                         <div>
-                                            <p class="font-medium text-slate-900">{{ $p['client'] }}</p>
-                                            <p class="text-xs text-slate-500">{{ $p['data'] }}</p>
+                                            <p class="font-medium text-slate-900">{{ $payment->invoice?->client?->full_name ?? '—' }}</p>
+                                            <p class="text-xs text-slate-500">{{ $payment->payment_date?->translatedFormat('d M') }}</p>
                                         </div>
-                                        <span class="font-semibold text-emerald-600">{{ $p['val'] }}</span>
+                                        <span class="font-semibold text-emerald-600">
+                                            {{ number_format((float) $payment->amount, 2, ',', '.') }} {{ $payment->currency }}
+                                        </span>
                                     </li>
-                                @endforeach
+                                @empty
+                                    <li class="px-5 py-8 text-center text-slate-500">Nu există plăți încă.</li>
+                                @endforelse
                             </ul>
                             <div class="px-5 py-4 border-t border-slate-200">
                                 <a href="{{ route('invoices.index') }}" class="ui-action-link">Vezi facturile</a>

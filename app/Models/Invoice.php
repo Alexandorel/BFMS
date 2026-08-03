@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use OwenIt\Auditing\Contracts\Auditable;
 
 class Invoice extends Model implements Auditable
@@ -96,6 +97,24 @@ class Invoice extends Model implements Auditable
     public function creditedInvoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class, 'credited_invoice_id');
+    }
+
+    /**
+     * Reversul: stornarea emisă pentru această factură (dacă există).
+     * O factură se poate storna o singură dată.
+     */
+    public function creditNote(): HasOne
+    {
+        return $this->hasOne(Invoice::class, 'credited_invoice_id');
+    }
+
+    /**
+     * Aceasta e ea însăși o factură de storno (are valori negative,
+     * leagă un original). Un storno nu se mai stornează la rândul lui.
+     */
+    public function isCreditNote(): bool
+    {
+        return $this->credited_invoice_id !== null;
     }
 
     /**
