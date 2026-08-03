@@ -84,15 +84,4 @@ class OperatorController extends Controller
         return view('operator.dashboard', array_merge($context, compact('stats', 'invoices', 'payments')));
     }
 
-    public function products()
-    {
-        $context = $this->companyContext();
-        $company = $context['company'];
-
-        $products = $company
-            ? Product::where('company_id', $company->id)->get()
-            : collect();
-
-        return view('operator.products.index', array_merge($context, compact('products')));
-    }
 }

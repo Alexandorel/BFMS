@@ -55,10 +55,6 @@ Route::middleware('auth')->group (function () {
     // Dashboard Operator
     Route::middleware('role:operator')->prefix('dashboard/operator')->name('operator.')->group(function () {
         Route::get('/', [OperatorController::class, 'dashboard'])->name('dashboard');
-        Route::get('/clienti', [OperatorController::class, 'clients'])->name('clients.index');
-        Route::get('/produse', [OperatorController::class, 'products'])->name('products.index');
-        Route::get('/facturi', [OperatorController::class, 'invoices'])->name('invoices.index');
-        Route::get('/plati', [OperatorController::class, 'payments'])->name('payments.index');
     });
 
     // Dashboard + rute Contabil
