@@ -262,6 +262,26 @@ class AuditLogAccessTest extends TestCase
     }
 
     /**
+     * audit.strict is false, so $hidden is not honoured and nothing keeps the
+     * password hash out of the audit trail by default.
+     */
+    public function test_a_password_change_never_reaches_the_audit_trail(): void
+    {
+        [$user] = $this->userWithCompany('administrator');
+
+        $user->update(['password' => 'a-brand-new-password']);
+
+        $audits = Audit::where('auditable_type', User::class)
+            ->where('auditable_id', $user->id)
+            ->get();
+
+        foreach ($audits as $audit) {
+            $this->assertArrayNotHasKey('password', (array) $audit->old_values);
+            $this->assertArrayNotHasKey('password', (array) $audit->new_values);
+        }
+    }
+
+    /**
      * @return array{0: User, 1: Company}
      */
     private function userWithCompany(string $role): array

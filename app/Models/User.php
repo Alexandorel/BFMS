@@ -40,6 +40,18 @@ class User extends Authenticatable implements Auditable
     ];
 
     /**
+     * audit.strict is false, so $hidden alone does not keep these out of the
+     * audits table. Without this list every password change copies the hash
+     * into a second, longer lived table.
+     *
+     * @var list<string>
+     */
+    protected $auditExclude = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
