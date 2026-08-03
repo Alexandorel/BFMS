@@ -8,7 +8,47 @@
 </head>
 <body>
 
-    <x-app-shell>
+    <div class="flex min-h-screen">
+
+        {{-- Side Bar --}}
+        <aside class="hidden lg:flex w-64 flex-col border-r border-slate-200 bg-white">
+            <div class="flex items-center gap-2 px-6 h-16 border-b border-slate-200">
+                <div class="grid place-items-center w-9 h-9 rounded-lg bg-indigo-600 text-white font-bold">B</div>
+                <span class="font-semibold text-lg">BFMS</span>
+            </div>
+
+            <nav class="flex-1 px-3 py-4 space-y-1 text-sm">
+                <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 font-medium">
+                    <span class="w-2 h-2 rounded-full bg-indigo-600"></span> Dashboard
+                </a>
+                <a href="{{ route('clients.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-6.13a4 4 0 11-8 0 4 4 0 018 0zm6 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    Clienți
+                </a>
+                <a href="{{ route('products.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                    Produse
+                </a>
+                <a href="{{ route('invoices.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Facturi
+                </a>
+
+            </nav>
+
+            <div class="p-4 border-t border-slate-200">
+                <div class="flex items-center gap-3">
+                    <div class="grid place-items-center w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-semibold text-sm">{{ Str::substr($user->first_name, 0, 1) }}{{ Str::substr($user->last_name, 0, 1) }}</div>
+                    <div class="min-w-0">
+                        <p class="text-sm font-medium truncate">{{ $user->first_name }} {{ Str::substr($user->last_name, 0, 1) }}.</p>
+                        <p class="text-xs text-slate-500">{{ $user->role }}</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        {{-- Main --}}
+        <div class="flex-1 flex flex-col min-w-0">
 
             {{-- Top Bar --}}
             <header class="app-page-toolbar">
@@ -119,7 +159,7 @@
                                 </table>
                             </div>
                             <div class="px-5 py-4 border-t border-slate-200">
-                                <a href="{{ route('invoices.index') }}" class="ui-action-link">Vezi toate</a>
+                                <a href="{{ route('invoices.index') }}" class="text-sm text-indigo-600 hover:underline">Vezi toate</a>
                             </div>
                         </div>
                     </div>
@@ -145,9 +185,7 @@
                                     <li class="px-5 py-8 text-center text-slate-500">Nu există plăți încă.</li>
                                 @endforelse
                             </ul>
-                            <div class="px-5 py-4 border-t border-slate-200">
-                                <a href="{{ route('invoices.index') }}" class="ui-action-link">Vezi facturile</a>
-                            </div>
+
                         </div>
                     </div>
 

@@ -15,6 +15,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\BankAccountController;
+use App\Http\Controllers\ClientController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -55,6 +56,15 @@ Route::middleware('auth')->group (function () {
     // Dashboard Operator
     Route::middleware('role:operator')->prefix('dashboard/operator')->name('operator.')->group(function () {
         Route::get('/', [OperatorController::class, 'dashboard'])->name('dashboard');
+    });
+
+    Route::middleware('role:operator')->prefix('clients')->name('clients.')->group(function () {
+        Route::get('/', [ClientController::class, 'index'])->name('index');
+        Route::get('/create', [ClientController::class, 'create'])->name('create');
+        Route::post('/', [ClientController::class, 'store'])->name('store');
+        Route::get('/{client}/edit', [ClientController::class, 'edit'])->name('edit');
+        Route::put('/{client}', [ClientController::class, 'update'])->name('update');
+        Route::delete('/{client}', [ClientController::class, 'destroy'])->name('destroy');
     });
 
     // Dashboard + rute Contabil
