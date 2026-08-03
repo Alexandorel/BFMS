@@ -59,7 +59,7 @@ Route::middleware('auth')->group(function () {
             ->name('dashboard.operator');
     });
 
-    Route::middleware('role:operator')->prefix('clients')->name('clients.')->group(function () {
+    Route::middleware('role:administrator,operator')->prefix('clients')->name('clients.')->group(function () {
         Route::get('/', [ClientController::class, 'index'])->name('index');
         Route::get('/create', [ClientController::class, 'create'])->name('create');
         Route::post('/', [ClientController::class, 'store'])->name('store');
