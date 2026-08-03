@@ -79,5 +79,9 @@ class DatabaseSeeder extends Seeder
             InvoiceSeeder::class,
             DocumentSeriesSeeder::class,
         ]);
+
+        $this->call([
+    EmailTemplateSeeder::class,
+    ]);
     }
 }

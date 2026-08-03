@@ -15,6 +15,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\BankAccountController;
+use App\Http\Controllers\EmailTemplateController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -173,6 +174,11 @@ Route::middleware('auth')->group(function () {
                 'company'   => $company,
             ]);
         })->name('administrator.settings.team');
+
+        Route::get('/administrator/settings/sabloane-email', [EmailTemplateController::class, 'index'])
+            ->name('administrator.email-templates.index');
+        Route::post('/administrator/settings/sabloane-email/{type}', [EmailTemplateController::class, 'update'])
+            ->name('administrator.email-templates.update');
     });
 
     // Serii documente — configurare rezervata administratorului (NFR-1)
