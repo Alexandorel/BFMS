@@ -15,13 +15,23 @@
         ? route('dashboard.contabil')
         : route('dashboard.administrator');
 
-    // Audited values arrive as raw json: nulls, booleans and casted arrays.
+    // getModified() runs the values through the model casts, so what lands here
+    // is not always a scalar: status is an enum, issue_date is a Carbon.
     $show = function ($value) {
         if ($value === null || $value === '') {
             return '—';
         }
         if (is_bool($value)) {
             return $value ? 'Da' : 'Nu';
+        }
+        if ($value instanceof \BackedEnum) {
+            return method_exists($value, 'label') ? $value->label() : (string) $value->value;
+        }
+        if ($value instanceof \UnitEnum) {
+            return $value->name;
+        }
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format('d.m.Y');
         }
         if (is_array($value)) {
             return json_encode($value, JSON_UNESCAPED_UNICODE);
