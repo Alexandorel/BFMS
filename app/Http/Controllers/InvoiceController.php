@@ -49,6 +49,8 @@ class InvoiceController extends Controller
             'payments',
             'creator',
             'creditedInvoice',
+            'creditNote',
+            'documentSeries',
         ]);
 
         return view('invoices.show', compact('invoice'));
