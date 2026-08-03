@@ -1,9 +1,7 @@
 @php
     $client = $client ?? new \App\Models\Client();
     $existingContact = $client->exists ? $client->contacts->first() : null;
-@endphp
 
-@php
     $counties = [
         'Alba', 'Arad', 'Argeș', 'Bacău', 'Bihor', 'Bistrița-Năsăud', 'Botoșani',
         'Brăila', 'Brașov', 'București', 'Buzău', 'Călărași', 'Caraș-Severin',
@@ -12,8 +10,6 @@
         'Mehedinți', 'Mureș', 'Neamț', 'Olt', 'Prahova', 'Satu Mare', 'Sălaj',
         'Sibiu', 'Suceava', 'Teleorman', 'Timiș', 'Tulcea', 'Vaslui', 'Vâlcea', 'Vrancea',
     ];
-
-    $existingContact = $client->contacts->first() ?? null;
 @endphp
 
 {{-- Selectorul de tip client --}}
@@ -94,55 +90,8 @@
     </div>
 </div>
 
-{{-- Toggle persoană de contact — doar la companie --}}
-<div id="contact_toggle_wrapper" class="flex items-center gap-2" style="display: none;">
-    <input type="checkbox" name="add_contact" id="add_contact" value="1"
-           @checked(old('add_contact', $existingContact ? 1 : 0))>
-    <label for="add_contact" class="text-sm text-slate-700">Adaugă persoană de contact</label>
-</div>
-
-<div id="contact_person_fields" class="space-y-4" style="display: none;">
-    <p class="text-sm font-medium text-slate-700">Persoană de contact</p>
-
-    <div class="grid grid-cols-2 gap-4">
-        <div>
-            <label for="contact_name" class="block text-sm font-medium text-slate-700 mb-1">Nume</label>
-            <input type="text" name="contacts[0][name]" id="contact_name"
-                   value="{{ old('contacts.0.name', $existingContact->name ?? '') }}"
-                   class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            @error('contacts.0.name') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
-        </div>
-
-        <div>
-            <label for="contact_role" class="block text-sm font-medium text-slate-700 mb-1">Rol</label>
-            <input type="text" name="contacts[0][role]" id="contact_role" maxlength="100"
-                   value="{{ old('contacts.0.role', $existingContact->role ?? '') }}"
-                   class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            @error('contacts.0.role') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
-        </div>
-    </div>
-
-    <div class="grid grid-cols-2 gap-4">
-        <div>
-            <label for="contact_phone" class="block text-sm font-medium text-slate-700 mb-1">Telefon</label>
-            <input type="text" name="contacts[0][phone]" id="contact_phone" maxlength="20"
-                   value="{{ old('contacts.0.phone', $existingContact->phone ?? '') }}"
-                   class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            @error('contacts.0.phone') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
-        </div>
-
-        <div>
-            <label for="contact_email" class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-            <input type="email" name="contacts[0][email]" id="contact_email"
-                   value="{{ old('contacts.0.email', $existingContact->email ?? '') }}"
-                   class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            @error('contacts.0.email') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
-        </div>
-    </div>
-</div>
-
 {{-- Câmpurile comune --}}
-<div class="space-y-4">
+<div id="common_fields" class="space-y-4">
     <div class="grid grid-cols-2 gap-4">
         <div>
             <label for="county" class="block text-sm font-medium text-slate-700 mb-1">Județ</label>
@@ -200,6 +149,53 @@
     </div>
 </div>
 
+{{-- Toggle persoană de contact — doar la companie, afișat după câmpurile comune --}}
+<div id="contact_toggle_wrapper" class="flex items-center gap-2" style="display: none;">
+    <input type="checkbox" name="add_contact" id="add_contact" value="1"
+           @checked(old('add_contact', $existingContact ? 1 : 0))>
+    <label for="add_contact" class="text-sm text-slate-700">Adaugă persoană de contact</label>
+</div>
+
+<div id="contact_person_fields" class="space-y-4" style="display: none;">
+    <p class="text-sm font-medium text-slate-700">Persoană de contact</p>
+
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label for="contact_name" class="block text-sm font-medium text-slate-700 mb-1">Nume</label>
+            <input type="text" name="contacts[0][name]" id="contact_name"
+                   value="{{ old('contacts.0.name', $existingContact->name ?? '') }}"
+                   class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            @error('contacts.0.name') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
+        </div>
+
+        <div>
+            <label for="contact_role" class="block text-sm font-medium text-slate-700 mb-1">Rol</label>
+            <input type="text" name="contacts[0][role]" id="contact_role" maxlength="100"
+                   value="{{ old('contacts.0.role', $existingContact->role ?? '') }}"
+                   class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            @error('contacts.0.role') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label for="contact_phone" class="block text-sm font-medium text-slate-700 mb-1">Telefon</label>
+            <input type="text" name="contacts[0][phone]" id="contact_phone" maxlength="20"
+                   value="{{ old('contacts.0.phone', $existingContact->phone ?? '') }}"
+                   class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            @error('contacts.0.phone') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
+        </div>
+
+        <div>
+            <label for="contact_email" class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+            <input type="email" name="contacts[0][email]" id="contact_email"
+                   value="{{ old('contacts.0.email', $existingContact->email ?? '') }}"
+                   class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            @error('contacts.0.email') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const clientType = document.getElementById('client_type');
@@ -209,6 +205,7 @@
             individual: document.getElementById('individual_fields'),
             company: document.getElementById('company_fields'),
             contact: document.getElementById('contact_person_fields'),
+            common: document.getElementById('common_fields'),
         };
 
         function setRequired(container, isRequired) {
@@ -234,9 +231,16 @@
         function toggleFields() {
             groups.individual.style.display = 'none';
             groups.company.style.display = 'none';
+            groups.common.style.display = 'none';
             contactToggleWrapper.style.display = 'none';
             setRequired(groups.individual, false);
             setRequired(groups.company, false);
+            setRequired(groups.common, false);
+
+            if (clientType.value) {
+                groups.common.style.display = 'block';
+                setRequired(groups.common, true);
+            }
 
             if (clientType.value === 'individual') {
                 groups.individual.style.display = 'block';

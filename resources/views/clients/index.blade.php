@@ -34,13 +34,13 @@
 
                 <div class="flex justify-between items-center">
                     <div>
-                        <h1 class="text-2xl font-bold text-slate-900">Clienti</h1>
-                        <p class="text-slate-500 text-sm mt-1">Catalogul de clienti</p>
+                        <h1 class="text-2xl font-bold text-slate-900">Clienți</h1>
+                        <p class="text-slate-500 text-sm mt-1">Catalogul de clienți</p>
                     </div>
                     <a href="{{ route('clients.create') }}"
                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Adauga client
+                        Adaugă client
                     </a>
                 </div>
 
@@ -48,27 +48,39 @@
                     <div class="p-3 rounded-lg bg-emerald-50 text-emerald-700 text-sm">{{ session('status') }}</div>
                 @endif
 
+                @if (session('error'))
+                    <div class="p-3 rounded-lg bg-rose-50 text-rose-700 text-sm">{{ session('error') }}</div>
+                @endif
+
                 <div class="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
                     @forelse ($clients as $client)
                         <div class="flex items-center justify-between px-5 py-4">
                             <div>
-                                <p class="text-sm font-medium text-slate-900">{{ $client->name }}</p>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-sm font-medium text-slate-900">{{ $client->full_name }}</p>
+                                    <span class="text-[11px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-medium">
+                                        {{ $client->client_type === 'company' ? 'Juridic' : 'Fizic' }}
+                                    </span>
+                                </div>
                                 <p class="text-xs text-slate-500 mt-0.5">
-                                    CIF: {{ $client->cif }} &nbsp;•&nbsp; {{ $client->address }} &nbsp;•&nbsp;
-                                    {{ $client->phone }}
+                                    @if ($client->tax_id)
+                                        {{ $client->client_type === 'company' ? 'CUI' : 'CNP' }}: {{ $client->tax_id }} &nbsp;•&nbsp;
+                                    @endif
+                                    {{ $client->address }}, {{ $client->city }}, {{ $client->county }} &nbsp;•&nbsp;
+                                    {{ $client->phone ?: '—' }}
                                 </p>
                             </div>
                             <div class="flex items-center gap-3">
-                                <a href="{{ route('clients.edit', $client) }}" class="text-xs text-indigo-600 hover:underline">Editeaza</a>
-                                <form method="POST" action="{{ route('clients.destroy', $client) }}" onsubmit="return confirm('Sigur stergi acest client?')">
+                                <a href="{{ route('clients.edit', $client) }}" class="text-xs text-indigo-600 hover:underline">Editează</a>
+                                <form method="POST" action="{{ route('clients.destroy', $client) }}" onsubmit="return confirm('Sigur ștergi acest client?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-xs text-rose-600 hover:underline">Sterge</button>
+                                    <button type="submit" class="text-xs text-rose-600 hover:underline">Șterge</button>
                                 </form>
                             </div>
                         </div>
                     @empty
-                        <div class="px-5 py-8 text-center text-sm text-slate-500">Nu exista clienti inca.</div>
+                        <div class="px-5 py-8 text-center text-sm text-slate-500">Nu există clienți încă.</div>
                     @endforelse
                 </div>
 

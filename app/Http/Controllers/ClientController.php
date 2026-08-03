@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\View\View;
+use Illuminate\Database\QueryException;
 
 class ClientController extends Controller
 {
-    //Get the id of the company active in the current session. If no company is active -> uses the 1'st company of the user
+
     private function activeCompanyId(): int
     {
         $companyController = new CompanyController();
@@ -20,9 +22,7 @@ class ClientController extends Controller
 
         return $company->id;
     }
-    /**
-     * //Display a listing of the resource.
-     */
+
     public function index(): View
     {
         $companyController = new CompanyController();
@@ -35,67 +35,129 @@ class ClientController extends Controller
         return view('clients.index', compact('clients', 'companies', 'company'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+
     public function create(): View
     {
-        return view('clients.create');
+        return view('clients.create', ['client' => new Client()]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'cif' => 'required|string|max:100',
-            'address' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-        ]);
+        $validated = $this->validateClient($request);
 
-        $validated['company_id'] = $this->activeCompanyId();
-        $validated['is_vat_exempt'] = $request->has('is_vat_exempt');
+        return DB::transaction(function () use ($validated, $request) {
+            $client = Client::create([
+                'company_id' => $this->activeCompanyId(),
+                'client_type' => $validated['client_type'],
+                'name' => $validated['name'] ?? null,
+                'cui' => $validated['cui'] ?? null,
+                'trade_registry_number' => $validated['trade_registry_number'] ?? null,
+                'vat_number' => $validated['vat_number'] ?? null,
+                'first_name' => $validated['first_name'] ?? null,
+                'last_name' => $validated['last_name'] ?? null,
+                'cnp' => $validated['cnp'] ?? null,
+                'county' => $validated['county'],
+                'city' => $validated['city'],
+                'address' => $validated['address'],
+                'delivery_address' => $validated['delivery_address'] ?? null,
+                'email' => $validated['email'] ?? null,
+                'phone' => $validated['phone'] ?? null,
+            ]);
 
-        Client::create($validated);
+            if ($request->boolean('add_contact') && $request->filled('contacts.0.name')) {
+                $client->contacts()->create($validated['contacts'][0]);
+            }
 
-        return redirect()->route('clients.index')->with('status', 'Client adaugat cu succes.');
+            return redirect()->route('clients.index')->with('status', 'Client adaugat cu succes.');
+        });
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Client $client): View
     {
         return view('clients.edit', compact('client'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Client $client): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'cif' => 'required|string|max:100',
-            'address' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-        ]);
+        $validated = $this->validateClient($request);
 
-        $validated['is_vat_exempt'] = $request->has('is_vat_exempt');
+        return DB::transaction(function () use ($validated, $request, $client) {
+            $client->update([
+                'client_type' => $validated['client_type'],
+                'name' => $validated['name'] ?? null,
+                'cui' => $validated['cui'] ?? null,
+                'trade_registry_number' => $validated['trade_registry_number'] ?? null,
+                'vat_number' => $validated['vat_number'] ?? null,
+                'first_name' => $validated['first_name'] ?? null,
+                'last_name' => $validated['last_name'] ?? null,
+                'cnp' => $validated['cnp'] ?? null,
+                'county' => $validated['county'],
+                'city' => $validated['city'],
+                'address' => $validated['address'],
+                'delivery_address' => $validated['delivery_address'] ?? null,
+                'email' => $validated['email'] ?? null,
+                'phone' => $validated['phone'] ?? null,
+            ]);
 
-        $client->update($validated);
+            if ($request->boolean('add_contact') && $request->filled('contacts.0.name')) {
+                $client->contacts()->updateOrCreate(
+                    ['id' => $client->contacts()->first()?->id],
+                    $validated['contacts'][0]
+                );
+            } else {
+                $client->contacts()->delete();
+            }
 
-        return redirect()->route('clients.index')->with('status', 'Client actualizat cu succes.');
+            return redirect()->route('clients.index')->with('status', 'Client actualizat cu succes.');
+        });
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Client $client): RedirectResponse
     {
-        $client->delete();
-        return redirect()->route('clients.index')->with('status', 'Client sters cu succes.');
+        try {
+            $client->delete();
+        } catch (QueryException $e) {
+            // Codul 23000 = integrity constraint violation (FK RESTRICT)
+            if ($e->getCode() === '23000') {
+                return redirect()
+                    ->route('clients.index')
+                    ->with('error', 'Acest client nu poate fi șters deoarece are facturi asociate.');
+            }
+
+            throw $e; // orice altă eroare de DB rămâne vizibilă, nu o ascundem silențios
+        }
+
+        return redirect()->route('clients.index')->with('status', 'Client șters cu succes.');
+    }
+
+
+    private function validateClient(Request $request): array
+    {
+        return $request->validate([
+            'client_type' => 'required|in:individual,company',
+
+            'first_name' => 'required_if:client_type,individual|nullable|string|max:255',
+            'last_name' => 'required_if:client_type,individual|nullable|string|max:255',
+            'cnp' => 'nullable|string|max:20',
+
+            'name' => 'required_if:client_type,company|nullable|string|max:255',
+            'cui' => 'required_if:client_type,company|nullable|string|max:20',
+            'trade_registry_number' => 'nullable|string|max:20',
+            'vat_number' => 'nullable|string|max:20',
+
+            'county' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
+            'delivery_address' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+
+            'add_contact' => 'nullable|boolean',
+            'contacts' => 'nullable|array|max:1',
+            'contacts.0.name' => 'required_if:add_contact,1|nullable|string|max:255',
+            'contacts.0.role' => 'required_if:add_contact,1|nullable|string|max:100',
+            'contacts.0.email' => 'required_if:add_contact,1|nullable|email|max:255',
+            'contacts.0.phone' => 'required_if:add_contact,1|nullable|string|max:20',
+        ]);
     }
 }

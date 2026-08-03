@@ -16,6 +16,17 @@
                 <div class="max-w-lg mx-auto">
                     <h1 class="text-2xl font-bold text-slate-900 mb-6">Adauga client</h1>
 
+                    @if ($errors->any())
+                        <div class="mb-4 p-4 rounded-lg bg-rose-50 border border-rose-200 text-sm text-rose-700">
+                            <p class="font-semibold mb-2">Erori de validare:</p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <form method="POST" action="{{ route('clients.store') }}" class="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
                         @csrf
                         @include('clients.form')

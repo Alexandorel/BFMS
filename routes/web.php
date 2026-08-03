@@ -14,11 +14,8 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
-<<<<<<< HEAD
-use App\Http\Controllers\ClientController;
-=======
 use App\Http\Controllers\BankAccountController;
->>>>>>> 27e51cde483dc69a97323912ed7cb50f7acd2fcd
+use App\Http\Controllers\ClientController;
 use Illuminate\Support\Facades\Route;
 
 /*
