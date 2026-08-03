@@ -6,19 +6,13 @@
     <title>Conturi bancare · Setări · {{ config('app.name', 'BFMS') }}</title>
     @vite(['resources/css/app.css'])
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body>
 
-<div class="flex min-h-screen">
-
-    {{-- Side Bar --}}
-    <x-sidebar />
-
-    {{-- Main --}}
-    <div class="flex-1 flex flex-col min-w-0">
+<x-app-shell>
 
         {{-- Top Bar --}}
-        <header class="flex items-center gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
-            <div class="flex items-center gap-3">
+        <header class="app-page-toolbar">
+            <div class="flex min-w-0 items-center gap-2 sm:gap-3">
                 <form id="topCompanyForm"
                       action="{{ route('administrator.bank-accounts.index') }}"
                       method="GET">
@@ -26,7 +20,7 @@
                         <span class="sr-only">Firma activă</span>
                         <select id="companySelect"
                                 name="firma"
-                                class="appearance-none pl-3 pr-9 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                class="ui-toolbar-select">
                             @forelse ($companies as $c)
                                 <option value="{{ $c->id }}" @selected($company?->id === $c->id)>
                                     {{ $c->name }}
@@ -48,8 +42,8 @@
                 </form>
 
                 <a href="{{ route('administrator.settings.addcompany') }}"
-                   class="inline-flex items-center p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-700 transition"
-                   title="Adaugă firmă">
+                   class="ui-btn ui-btn-secondary ui-btn-icon"
+                   aria-label="Adaugă firmă" title="Adaugă firmă">
                     <svg class="w-5 h-5"
                          fill="none"
                          viewBox="0 0 24 24"
@@ -64,27 +58,24 @@
         </header>
 
         {{-- Content --}}
-        <main class="flex-1 p-4 sm:p-6 space-y-6">
+        <main class="app-page-content space-y-6">
 
-            <div>
-                <h1 class="text-2xl font-bold text-slate-900">Setări</h1>
-                <p class="text-slate-500 text-sm mt-1">Contul tău și configurările firmei</p>
-            </div>
+            <x-page-header title="Setări" description="Contul tău și configurările firmei" />
 
             @if (session('success'))
-                <div class="px-4 py-3 rounded-lg bg-emerald-50 text-emerald-800 text-sm">
+                <div class="ui-alert ui-alert-success" role="status">
                     {{ session('success') }}
                 </div>
             @endif
 
             @if (session('error'))
-                <div class="px-4 py-3 rounded-lg bg-rose-50 text-rose-800 text-sm">
+                <div class="ui-alert ui-alert-danger" role="alert">
                     {{ session('error') }}
                 </div>
             @endif
 
             @if ($errors->any())
-                <div class="px-4 py-3 rounded-lg bg-rose-50 text-rose-800 text-sm">
+                <div class="ui-alert ui-alert-danger" role="alert">
                     <p class="font-medium mb-1">Verifică datele introduse:</p>
                     <ul class="list-disc list-inside space-y-1">
                         @foreach ($errors->all() as $error)
@@ -97,37 +88,16 @@
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
                 {{-- Settings sub-nav --}}
-                <nav class="lg:col-span-1 space-y-1 text-sm">
-                    <a href="{{ route('administrator.settings.profile') }}"
-                       class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white">
-                        Profil
-                    </a>
-                    <a href="{{ route('administrator.settings.company') }}"
-                       class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white">
-                        Firmă
-                    </a>
-                    <a href="{{ route('administrator.settings.team') }}"
-                       class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white">
-                        Echipă
-                    </a>
-                    <a href="{{ route('administrator.bank-accounts.index') }}"
-                       class="block px-3 py-2 rounded-lg bg-white border border-slate-200 text-indigo-700 font-medium">
-                        Conturi bancare
-                    </a>
-                    <a href="{{ route('administrator.series.index') }}"
-                       class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white">
-                        Serii documente
-                    </a>
-                </nav>
+                <x-settings-nav active="bank-accounts" />
 
                 <div class="lg:col-span-3 space-y-6">
 
                     @if (! $company)
 
-                        <div class="bg-white rounded-xl border border-slate-200 px-5 py-8 text-center">
+                        <div class="ui-card ui-empty-state">
                             <p class="text-sm text-slate-600">Nu ai încă nicio firmă adăugată.</p>
                             <a href="{{ route('administrator.settings.addcompany') }}"
-                               class="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                               class="ui-btn ui-btn-primary mt-4">
                                 Adaugă prima firmă
                             </a>
                         </div>
@@ -136,7 +106,7 @@
 
                         {{-- Alegerea firmei configurate --}}
                         @if ($companies->count() > 1)
-                            <div class="bg-white rounded-xl border border-slate-200 px-5 py-4">
+                            <div class="ui-card px-5 py-4">
                                 <form action="{{ route('administrator.bank-accounts.index') }}"
                                       method="GET"
                                       class="flex flex-col sm:flex-row sm:items-end gap-3">
@@ -147,7 +117,7 @@
                                         </label>
                                         <select id="firma"
                                                 name="firma"
-                                                class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                                class="form-input">
                                             @foreach ($companies as $c)
                                                 <option value="{{ $c->id }}" @selected($c->id === $company->id)>
                                                     {{ $c->name }} · CUI {{ $c->cui }}
@@ -156,7 +126,7 @@
                                         </select>
                                     </div>
                                     <button type="submit"
-                                            class="px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 transition">
+                                            class="ui-btn ui-btn-secondary">
                                         Încarcă
                                     </button>
                                 </form>
@@ -164,10 +134,10 @@
                         @endif
 
                         {{-- Adăugarea unui cont nou --}}
-                        <section class="bg-white rounded-xl border border-slate-200">
-                            <div class="px-5 py-4 border-b border-slate-200">
-                                <h2 class="font-semibold text-slate-900">Adaugă un cont bancar</h2>
-                                <p class="text-xs text-slate-500 mt-0.5">
+                        <section class="ui-card overflow-hidden">
+                            <div class="ui-card-header block">
+                                <h2 class="ui-section-title">Adaugă un cont bancar</h2>
+                                <p class="ui-section-description">
                                     IBAN-ul românesc trebuie să conțină 24 de caractere și să înceapă cu RO
                                 </p>
                             </div>
@@ -191,7 +161,7 @@
                                            maxlength="255"
                                            required
                                            placeholder="Ex: Banca Transilvania"
-                                           class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                           class="form-input">
                                 </div>
 
                                 <div class="md:col-span-3">
@@ -208,7 +178,7 @@
                                            spellcheck="false"
                                            autocomplete="off"
                                            placeholder="RO00AAAA0000000000000000"
-                                           class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                           class="form-input font-mono uppercase">
                                 </div>
 
                                 <div>
@@ -221,12 +191,12 @@
                                            name="currency"
                                            value="RON"
                                            readonly
-                                           class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-100 text-slate-600 text-sm cursor-not-allowed">
+                                           class="form-input">
                                 </div>
 
                                 <div class="md:col-span-6 flex justify-end">
                                     <button type="submit"
-                                            class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                                            class="ui-btn ui-btn-primary">
                                         Adaugă contul
                                     </button>
                                 </div>
@@ -235,11 +205,11 @@
 
                         {{-- Conturile existente --}}
                         <section class="space-y-4">
-                            <div class="bg-white rounded-xl border border-slate-200 px-5 py-4">
+                            <div class="ui-card px-5 py-4">
                                 <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                                     <div>
-                                        <h2 class="font-semibold text-slate-900">Conturi bancare existente</h2>
-                                        <p class="text-xs text-slate-500 mt-0.5">
+                                        <h2 class="ui-section-title">Conturi bancare existente</h2>
+                                        <p class="ui-section-description">
                                             Conturile bancare înregistrate pentru {{ $company->name }}
                                         </p>
                                     </div>
@@ -252,7 +222,7 @@
                             </div>
 
                             @forelse ($bankAccounts as $account)
-                                <article class="overflow-hidden bg-white rounded-xl border border-slate-200 shadow-sm">
+                                <article class="ui-card overflow-hidden">
                                     <div class="flex items-center justify-between gap-3 px-5 py-3 bg-slate-50 border-b border-slate-200">
                                         <div>
                                             <h3 class="text-sm font-semibold text-slate-800">
@@ -287,7 +257,7 @@
                                                        value="{{ $account->bank_name }}"
                                                        maxlength="255"
                                                        required
-                                                       class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                                       class="form-input">
                                             </div>
 
                                             <div class="md:col-span-3">
@@ -303,7 +273,7 @@
                                                        required
                                                        spellcheck="false"
                                                        autocomplete="off"
-                                                       class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                                       class="form-input font-mono uppercase">
                                             </div>
 
                                             <div>
@@ -316,33 +286,25 @@
                                                        name="currency"
                                                        value="RON"
                                                        readonly
-                                                       class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-100 text-slate-600 text-sm cursor-not-allowed">
+                                                       class="form-input">
                                             </div>
                                         </form>
 
-                                        <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 mt-5 pt-4 border-t border-slate-100">
-                                            <form action="{{ route('administrator.bank-accounts.destroy', $account) }}"
-                                                  method="POST"
-                                                  onsubmit="return confirm('Sigur vrei să ștergi acest cont bancar?')">
-                                                @csrf
-                                                @method('DELETE')
-
-                                                <button type="submit"
-                                                        class="w-full sm:w-auto px-4 py-2 rounded-lg border border-rose-200 bg-white text-rose-600 text-sm font-medium hover:bg-rose-50 transition">
-                                                    Șterge
-                                                </button>
-                                            </form>
+                                        <div class="ui-button-group mt-5 border-t border-slate-100 pt-4 sm:justify-end">
+                                            <x-confirm-action action="{{ route('administrator.bank-accounts.destroy', $account) }}"
+                                                              variant="button"
+                                                              confirm-text="Ștergi contul bancar?"></x-confirm-action>
 
                                             <button type="submit"
                                                     form="update-bank-account-{{ $account->id }}"
-                                                    class="w-full sm:w-auto px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                                                    class="ui-btn ui-btn-primary w-full sm:w-auto">
                                                 Salvează modificările
                                             </button>
                                         </div>
                                     </div>
                                 </article>
                             @empty
-                                <div class="bg-white rounded-xl border border-slate-200 px-5 py-8 text-center">
+                                <div class="ui-card ui-empty-state">
                                     <p class="text-sm text-slate-500">
                                         Firma selectată nu are încă niciun cont bancar.
                                     </p>
@@ -354,8 +316,7 @@
                 </div>
             </div>
         </main>
-    </div>
-</div>
+</x-app-shell>
 
 <script>
     document.getElementById('companySelect')?.addEventListener('change', function () {

@@ -4,14 +4,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Add firma</title>
+    <title>Adaugă firmă · {{ config('app.name', 'BFMS') }}</title>
 
     @vite(['resources/css/app.css'])
 </head>
 
-<body class="bg-slate-50 text-slate-800 antialiased">
-<div class="max-w-3xl mx-auto p-6">
-    <div class="bg-white rounded-lg border border-slate-200 p-5">
+<body>
+<x-app-shell>
+<main class="app-page-content">
+<div class="mx-auto max-w-3xl space-y-6">
+    <x-page-header title="Adaugă firmă" description="Configurează datele juridice, fiscale și bancare." />
+    <div class="ui-card p-5 sm:p-6">
 
         <form action="{{ route('administrator.companies.store') }}"
               method="POST"
@@ -20,7 +23,7 @@
             @csrf
 
             @if ($errors->any())
-                <div class="border border-red-300 bg-red-50 p-4 text-sm text-red-700">
+                <div class="ui-alert ui-alert-danger" role="alert">
                     <p class="font-semibold">Formularul conține erori.</p>
                     <p>Verifică informațiile marcate mai jos.</p>
                 </div>
@@ -290,8 +293,11 @@
 
                     <button type="button"
                             id="add-account-btn"
-                            class="form-btn-link">
-                        + Adaugă
+                            class="ui-btn ui-btn-ghost">
+                        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14M5 12h14" />
+                        </svg>
+                        Adaugă cont
                     </button>
                 </div>
 
@@ -335,8 +341,11 @@
                                            class="form-input @error('bank_name.' . $index) !border-red-500 @enderror">
 
                                     <button type="button"
-                                            class="remove-account-btn form-btn-del">
-                                        X
+                                            class="remove-account-btn form-btn-del"
+                                            aria-label="Elimină contul" title="Elimină contul">
+                                        <svg class="pointer-events-none size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12" />
+                                        </svg>
                                     </button>
                                 </div>
 
@@ -351,19 +360,21 @@
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 pt-2">
+            <div class="ui-button-group pt-2 sm:justify-end">
                 <a href="{{ route('dashboard.administrator') }}"
-                   class="form-btn-secondary">
+                   class="ui-btn ui-btn-secondary">
                     Anulează
                 </a>
 
-                <button type="submit" class="form-btn-primary">
-                    Add firma
+                <button type="submit" class="ui-btn ui-btn-primary">
+                    Adaugă firma
                 </button>
             </div>
         </form>
     </div>
 </div>
+</main>
+</x-app-shell>
 
 <script>
     document.getElementById('add-account-btn').addEventListener('click', function () {
@@ -391,8 +402,11 @@
                            class="form-input">
 
                     <button type="button"
-                            class="remove-account-btn form-btn-del">
-                        X
+                            class="remove-account-btn form-btn-del"
+                            aria-label="Elimină contul" title="Elimină contul">
+                        <svg class="pointer-events-none size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
                     </button>
                 </div>
             </div>
@@ -404,14 +418,16 @@
     document
         .getElementById('bank-accounts-container')
         .addEventListener('click', function (event) {
-            if (!event.target.classList.contains('remove-account-btn')) {
+            const removeButton = event.target.closest('.remove-account-btn');
+
+            if (!removeButton) {
                 return;
             }
 
             const rows = document.querySelectorAll('.bank-account-row');
 
             if (rows.length > 1) {
-                event.target.closest('.bank-account-row').remove();
+                removeButton.closest('.bank-account-row').remove();
             }
         });
 </script>

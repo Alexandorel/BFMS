@@ -6,54 +6,35 @@
     <title>Firmă · Setări · {{ config('app.name', 'BFMS') }}</title>
     @vite(['resources/css/app.css'])
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body>
 
     @php
         $formeJuridice = ['SRL', 'SA', 'PFA', 'II', 'IF', 'SRL-D'];
     @endphp
 
-    <div class="flex min-h-screen">
-
-        {{-- Side Bar --}}
-        <x-sidebar />
-
-        {{-- Main --}}
-        <div class="flex-1 flex flex-col min-w-0">
+    <x-app-shell>
 
             {{-- Top Bar --}}
-            <header class="flex items-center gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
-                <div class="flex items-center gap-3">
-                    <label class="relative">
-                        <select id="companySelect" class="appearance-none pl-3 pr-9 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            @forelse ($companies as $c)
-                                <option value="{{ $c->id }}" @selected($company?->id === $c->id)>{{ $c->name }}</option>
-                            @empty
-                                <option value="">Nicio firmă</option>
-                            @endforelse
-                        </select>
-                        <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </label>
-                    <a href="{{ route('administrator.settings.addcompany') }}" class="inline-flex items-center p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-700 transition" title="Adaugă firmă">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    </a>
-                    @if ($company?->vat_payer)
-                        <span class="hidden sm:inline text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium">Plătitor TVA</span>
-                    @elseif ($company)
-                        <span class="hidden sm:inline text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">Neplătitor TVA</span>
-                    @endif
-                </div>
+            <header class="app-page-toolbar">
+                <x-company-switcher :companies="$companies" :active-company="$company"
+                                    :add-href="route('administrator.settings.addcompany')">
+                    <x-slot:meta>
+                        @if ($company?->vat_payer)
+                            <span class="ui-badge bg-emerald-50 text-emerald-700">Plătitor TVA</span>
+                        @elseif ($company)
+                            <span class="ui-badge bg-slate-100 text-slate-600">Neplătitor TVA</span>
+                        @endif
+                    </x-slot:meta>
+                </x-company-switcher>
             </header>
 
             {{-- Content --}}
-            <main class="flex-1 p-4 sm:p-6 space-y-6">
+            <main class="app-page-content space-y-6">
 
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900">Setări</h1>
-                    <p class="text-slate-500 text-sm mt-1">Contul tău și configurările firmei</p>
-                </div>
+                <x-page-header title="Setări" description="Contul tău și configurările firmei" />
 
                 @if (session('success'))
-                    <div class="px-4 py-3 rounded-lg bg-emerald-50 text-emerald-800 text-sm">
+                    <div class="ui-alert ui-alert-success" role="status">
                         {{ session('success') }}
                     </div>
                 @endif
@@ -61,22 +42,16 @@
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
                     {{-- Settings sub-nav --}}
-                    <nav class="lg:col-span-1 space-y-1 text-sm">
-                        <a href="{{ route('administrator.settings.profile') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white">Profil</a>
-                        <a href="{{ route('administrator.settings.company') }}" class="block px-3 py-2 rounded-lg bg-white border border-slate-200 text-indigo-700 font-medium">Firmă</a>
-                        <a href="{{ route('administrator.settings.team') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white">Echipă</a>
-                        <a href="{{ route('administrator.bank-accounts.index') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white">Conturi bancare</a>
-                        <a href="{{ route('administrator.series.index') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white">Serii documente</a>
-                    </nav>
+                    <x-settings-nav active="company" />
 
                     <div class="lg:col-span-3 space-y-6">
 
                         @if (! $company)
 
                             {{-- Userul nu are inca nicio firma --}}
-                            <div class="bg-white rounded-xl border border-slate-200 px-5 py-8 text-center">
+                            <div class="ui-card ui-empty-state">
                                 <p class="text-sm text-slate-600">Nu ai încă nicio firmă adăugată.</p>
-                                <a href="{{ route('administrator.settings.addcompany') }}" class="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                                <a href="{{ route('administrator.settings.addcompany') }}" class="ui-btn ui-btn-primary mt-4">
                                     Adaugă prima firmă
                                 </a>
                             </div>
@@ -85,18 +60,18 @@
 
                             {{-- Alegerea firmei editate --}}
                             @if ($companies->count() > 1)
-                                <div class="bg-white rounded-xl border border-slate-200 px-5 py-4">
+                                <div class="ui-card px-5 py-4">
                                     <form action="{{ route('administrator.settings.company') }}" method="GET" class="flex flex-col sm:flex-row sm:items-end gap-3">
                                         <div class="flex-1">
                                             <label for="firma" class="block text-sm font-medium text-slate-700 mb-1">Firma pe care o editezi</label>
                                             <select id="firma" name="firma"
-                                                    class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                                    class="form-input">
                                                 @foreach ($companies as $c)
                                                     <option value="{{ $c->id }}" @selected($c->id === $company->id)>{{ $c->name }} · CUI {{ $c->cui }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <button type="submit" class="px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 transition">
+                                        <button type="submit" class="ui-btn ui-btn-secondary">
                                             Încarcă
                                         </button>
                                     </form>
@@ -104,10 +79,10 @@
                             @endif
 
                             {{-- Date de identificare --}}
-                            <div class="bg-white rounded-xl border border-slate-200">
-                                <div class="px-5 py-4 border-b border-slate-200">
-                                    <h2 class="font-semibold text-slate-900">Date de identificare</h2>
-                                    <p class="text-xs text-slate-500 mt-0.5">Apar pe fiecare factură emisă de această firmă</p>
+                            <div class="ui-card overflow-hidden">
+                                <div class="ui-card-header block">
+                                    <h2 class="ui-section-title">Date de identificare</h2>
+                                    <p class="ui-section-description">Apar pe fiecare factură emisă de această firmă</p>
                                 </div>
                                 <form action="{{ route('administrator.companies.update', $company) }}" method="POST" class="px-5 py-5 space-y-5" data-partial>
                                     @csrf
@@ -118,13 +93,13 @@
                                             <label for="name" class="block text-sm font-medium text-slate-700 mb-1">Denumire</label>
                                             <input type="text" id="name" name="name" required maxlength="255"
                                                    value="{{ old('name', $company->name) }}"
-                                                   class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                                   class="form-input">
                                             @error('name') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
                                         </div>
                                         <div>
                                             <label for="juridical_form" class="block text-sm font-medium text-slate-700 mb-1">Formă juridică</label>
                                             <select id="juridical_form" name="juridical_form" required
-                                                    class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                                    class="form-input">
                                                 @foreach ($formeJuridice as $forma)
                                                     <option value="{{ $forma }}" @selected(old('juridical_form', $company->juridical_form) === $forma)>{{ $forma }}</option>
                                                 @endforeach
@@ -138,14 +113,14 @@
                                             <label for="cui" class="block text-sm font-medium text-slate-700 mb-1">CUI</label>
                                             <input type="text" id="cui" name="cui" required maxlength="20"
                                                    value="{{ old('cui', $company->cui) }}"
-                                                   class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                                   class="form-input">
                                             @error('cui') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
                                         </div>
                                         <div>
                                             <label for="trade_registry_number" class="block text-sm font-medium text-slate-700 mb-1">Nr. Registrul Comerțului</label>
                                             <input type="text" id="trade_registry_number" name="trade_registry_number" required maxlength="20"
                                                    value="{{ old('trade_registry_number', $company->trade_registry_number) }}"
-                                                   class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                                   class="form-input">
                                             @error('trade_registry_number') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
                                         </div>
                                     </div>
@@ -154,12 +129,12 @@
                                         <label for="social_capital" class="block text-sm font-medium text-slate-700 mb-1">Capital social (RON)</label>
                                         <input type="number" id="social_capital" name="social_capital" required step="0.01" min="0"
                                                value="{{ old('social_capital', $company->social_capital) }}"
-                                               class="w-full sm:w-64 px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                               class="form-input sm:w-64">
                                         @error('social_capital') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
                                     </div>
 
                                     <div class="flex justify-end pt-1">
-                                        <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                                        <button type="submit" class="ui-btn ui-btn-primary">
                                             Salvează modificările
                                         </button>
                                     </div>
@@ -167,9 +142,9 @@
                             </div>
 
                             {{-- Sediu social --}}
-                            <div class="bg-white rounded-xl border border-slate-200">
-                                <div class="px-5 py-4 border-b border-slate-200">
-                                    <h2 class="font-semibold text-slate-900">Sediu social</h2>
+                            <div class="ui-card overflow-hidden">
+                                <div class="ui-card-header">
+                                    <h2 class="ui-section-title">Sediu social</h2>
                                 </div>
                                 <form action="{{ route('administrator.companies.update', $company) }}" method="POST" class="px-5 py-5 space-y-5" data-partial>
                                     @csrf
@@ -180,14 +155,14 @@
                                             <label for="county" class="block text-sm font-medium text-slate-700 mb-1">Județ</label>
                                             <input type="text" id="county" name="county" required maxlength="255"
                                                    value="{{ old('county', $company->county) }}"
-                                                   class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                                   class="form-input">
                                             @error('county') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
                                         </div>
                                         <div>
                                             <label for="city" class="block text-sm font-medium text-slate-700 mb-1">Localitate</label>
                                             <input type="text" id="city" name="city" required maxlength="255"
                                                    value="{{ old('city', $company->city) }}"
-                                                   class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                                   class="form-input">
                                             @error('city') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
                                         </div>
                                     </div>
@@ -196,12 +171,12 @@
                                         <label for="address" class="block text-sm font-medium text-slate-700 mb-1">Adresă</label>
                                         <input type="text" id="address" name="address" required maxlength="255"
                                                value="{{ old('address', $company->address) }}"
-                                               class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                               class="form-input">
                                         @error('address') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
                                     </div>
 
                                     <div class="flex justify-end pt-1">
-                                        <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                                        <button type="submit" class="ui-btn ui-btn-primary">
                                             Salvează modificările
                                         </button>
                                     </div>
@@ -209,10 +184,10 @@
                             </div>
 
                             {{-- TVA: schimbarea afecteaza toate facturile emise de acum inainte --}}
-                            <div class="bg-white rounded-xl border border-slate-200">
-                                <div class="px-5 py-4 border-b border-slate-200">
-                                    <h2 class="font-semibold text-slate-900">TVA</h2>
-                                    <p class="text-xs text-slate-500 mt-0.5">Determină dacă facturile noi se emit cu TVA</p>
+                            <div class="ui-card overflow-hidden">
+                                <div class="ui-card-header block">
+                                    <h2 class="ui-section-title">TVA</h2>
+                                    <p class="ui-section-description">Determină dacă facturile noi se emit cu TVA</p>
                                 </div>
                                 <form action="{{ route('administrator.companies.update', $company) }}" method="POST" class="px-5 py-5 space-y-4" data-partial>
                                     @csrf
@@ -236,7 +211,7 @@
                                     </div>
 
                                     <div class="flex justify-end pt-1">
-                                        <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                                        <button type="submit" class="ui-btn ui-btn-primary">
                                             Salvează
                                         </button>
                                     </div>
@@ -249,16 +224,9 @@
                 </div>
 
             </main>
-        </div>
-    </div>
+    </x-app-shell>
 
 <script>
-    document.getElementById('companySelect')?.addEventListener('change', function () {
-        if (this.value) {
-            window.location.href = `/company/switch/${this.value}`;
-        }
-    });
-
     /*
      * Trimite catre server doar campurile modificate.
      * Campurile neatinse sunt dezactivate inainte de submit, deci nu ajung in

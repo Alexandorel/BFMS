@@ -1,64 +1,41 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<x-auth-layout page-title="Autentificare" title="Bine ai revenit"
+               description="Autentifică-te pentru a continua în aplicație.">
+    @if (session('status'))
+        <div class="ui-alert ui-alert-success mb-5" role="status">{{ session('status') }}</div>
+    @endif
 
-        <title>{{ config('app.name', 'Laravel') }} - Autentificare</title>
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="min-h-screen flex items-center justify-center bg-gray-50">
-        <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
-            <h1 class="text-2xl font-semibold text-center mb-6">Autentifică-te</h1>
+    <form method="POST" action="{{ route('login') }}" class="space-y-5">
+        @csrf
 
-            @if (session('status'))
-                <p class="text-sm text-green-600 text-center mb-4">{{ session('status') }}</p>
-            @endif
-
-            <form method="POST" action="{{ route('login') }}">
-                @csrf
-
-                {{-- Email --}}
-                <div class="mb-4">
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input id="email" type="email"
-                    name="email" value="{{ old('email') }}"
-                    required autofocus
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-
-                    @error('email')
-                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                {{-- Password --}}
-                <div class="mb-6">
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Parolă</label>
-                    <input id="password" type="password"
-                    name="password"
-                    required
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-
-                    @error('password')
-                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div class="flex items-center mb-6">
-                    <input id="remember" type="checkbox" name="remember"
-                    class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                    <label for="remember" class="ml-2 text-sm text-gray-600">Ține-mă minte</label>
-                </div>
-
-                <button type="submit"
-                class="w-full bg-indigo-600 text-white font-medium py-2 rounded-md hover:bg-indigo-700 transition">
-                Autentifică-te
-                </button>
-            </form>
-                <p class="text-sm text-center text-gray-500 mt-6">
-                 Nu ai cont?
-                 <a href="{{ route('register') }}" class="text-blue-600 hover:underline">Înregistrează-te</a>
-               </p>
+        <div>
+            <label for="email" class="form-label">Email</label>
+            <input id="email" type="email" name="email" value="{{ old('email') }}"
+                   required autofocus autocomplete="email" class="form-input">
+            @error('email')
+                <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
+            @enderror
         </div>
-    </body>
-</html>
+
+        <div>
+            <label for="password" class="form-label">Parolă</label>
+            <input id="password" type="password" name="password" required
+                   autocomplete="current-password" class="form-input">
+            @error('password')
+                <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <label class="flex min-h-11 cursor-pointer items-center gap-3 text-sm text-slate-600">
+            <input id="remember" type="checkbox" name="remember"
+                   class="size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">
+            Ține-mă minte
+        </label>
+
+        <button type="submit" class="ui-btn ui-btn-primary w-full">Autentifică-te</button>
+    </form>
+
+    <x-slot:footer>
+        Nu ai cont?
+        <a href="{{ route('register') }}" class="font-semibold text-brand-700 hover:text-brand-800">Înregistrează-te</a>
+    </x-slot:footer>
+</x-auth-layout>

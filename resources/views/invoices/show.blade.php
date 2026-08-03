@@ -8,18 +8,12 @@
     @vite(['resources/css/app.css'])
 </head>
 
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body>
 
-    <div class="flex min-h-screen">
-
-        {{-- Side Bar --}}
-        <x-sidebar />
-
-        {{-- Main --}}
-        <div class="flex-1 flex flex-col min-w-0">
+    <x-app-shell>
 
             {{-- Top Bar --}}
-            <header class="flex items-center gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
+            <header class="app-page-toolbar">
                 <a href="{{ route(auth()->user()->dashboardRoute()) }}" class="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                     Înapoi
@@ -31,22 +25,22 @@
             </header>
 
             {{-- Content --}}
-            <main class="flex-1 p-4 sm:p-6 space-y-6 max-w-5xl w-full">
+            <main class="app-page-content mx-auto w-full max-w-6xl space-y-6">
 
                 @if (session('success'))
-                    <div class="px-4 py-3 rounded-lg bg-emerald-50 text-emerald-800 text-sm">
+                    <div class="ui-alert ui-alert-success" role="status">
                         {{ session('success') }}
                     </div>
                 @endif
 
                 @if (session('error'))
-                    <div class="px-4 py-3 rounded-lg bg-rose-50 text-rose-800 text-sm">
+                    <div class="ui-alert ui-alert-danger" role="alert">
                         {{ session('error') }}
                     </div>
                 @endif
 
                 @if ($errors->any())
-                    <div class="px-4 py-3 rounded-lg bg-rose-50 text-rose-800 text-sm">
+                    <div class="ui-alert ui-alert-danger" role="alert">
                         <p class="font-medium mb-1">Verifică datele introduse:</p>
                         <ul class="list-disc list-inside space-y-1">
                             @foreach ($errors->all() as $error)
@@ -57,11 +51,11 @@
                 @endif
 
                 {{-- Antet --}}
-                <div class="bg-white rounded-xl border border-slate-200 p-5 sm:p-6">
+                <div class="ui-card p-5 sm:p-6">
                     <div class="flex flex-wrap items-start justify-between gap-4">
                         <div>
                             <div class="flex items-center gap-3">
-                                <h1 class="text-2xl font-bold text-slate-900">
+                                <h1 class="ui-page-title">
                                     {{ $invoice->number ? $invoice->series . '-' . $invoice->number : 'Ciornă (fără număr)' }}
                                 </h1>
                                 <x-invoice-status-badge :status="$invoice->status" />
@@ -76,26 +70,20 @@
 
                             {{-- ciornele se editeaza si se sterg; contabilul e read-only --}}
                             @if ($invoice->status->isDraft() && in_array(auth()->user()->role, ['administrator', 'operator'], true))
-                                <div class="flex flex-wrap gap-2 pt-3 sm:justify-end">
+                                <div class="ui-button-group pt-3 sm:justify-end">
                                     <a href="{{ route('invoices.edit', $invoice) }}"
-                                       class="px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 transition">
+                                       class="ui-btn ui-btn-secondary">
                                         Editează
                                     </a>
 
-                                    <form action="{{ route('invoices.destroy', $invoice) }}" method="POST"
-                                          onsubmit="return confirm('Ștergi definitiv această ciornă?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                class="px-4 py-2 rounded-lg border border-slate-200 bg-white text-rose-600 text-sm font-medium hover:bg-rose-50 transition">
-                                            Șterge
-                                        </button>
-                                    </form>
+                                    <x-confirm-action action="{{ route('invoices.destroy', $invoice) }}"
+                                                      variant="button"
+                                                      confirm-text="Ștergi definitiv ciorna?"></x-confirm-action>
 
                                     <form action="{{ route('invoices.issue', $invoice) }}" method="POST">
                                         @csrf
                                         <button type="submit"
-                                                class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                                                class="ui-btn ui-btn-primary">
                                             Emite documentul
                                         </button>
                                     </form>
@@ -116,7 +104,7 @@
 
                 {{-- Emitent + Client --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-xl border border-slate-200 p-5">
+                    <div class="ui-card p-5">
                         <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Emitent</h2>
                         <p class="font-medium text-slate-900">{{ $invoice->company->name }}</p>
                         <p class="text-sm text-slate-600 mt-1">CUI: {{ $invoice->company->cui ?? '—' }}</p>
@@ -128,7 +116,7 @@
                         </p>
                     </div>
 
-                    <div class="bg-white rounded-xl border border-slate-200 p-5">
+                    <div class="ui-card p-5">
                         <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Client</h2>
                         <p class="font-medium text-slate-900">{{ $invoice->client?->full_name ?? '—' }}</p>
                         <p class="text-sm text-slate-600 mt-1">
@@ -145,12 +133,12 @@
                 </div>
 
                 {{-- Linii --}}
-                <div class="bg-white rounded-xl border border-slate-200">
-                    <div class="px-5 py-4 border-b border-slate-200">
-                        <h2 class="font-semibold text-slate-900">Linii factură</h2>
+                <div class="ui-card overflow-hidden">
+                    <div class="ui-card-header">
+                        <h2 class="ui-section-title">Linii factură</h2>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
+                    <div class="ui-table-wrap" tabindex="0" role="region" aria-label="Liniile facturii">
+                        <table class="ui-table">
                             <thead>
                                 <tr class="text-left text-slate-500 border-b border-slate-100">
                                     <th class="px-5 py-3 font-medium">#</th>
@@ -221,9 +209,9 @@
                 </div>
 
                 {{-- Plăți --}}
-                <div class="bg-white rounded-xl border border-slate-200">
-                    <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
-                        <h2 class="font-semibold text-slate-900">Plăți</h2>
+                <div class="ui-card overflow-hidden">
+                    <div class="ui-card-header">
+                        <h2 class="ui-section-title">Plăți</h2>
                         <span class="text-sm text-slate-500">
                             Rest de plată:
                             <span class="font-semibold {{ $invoice->balance() > 0 ? 'text-amber-700' : 'text-emerald-700' }}">
@@ -238,8 +226,8 @@
                         $canDeletePayments = auth()->user()->role === 'administrator';
                     @endphp
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
+                    <div class="ui-table-wrap" tabindex="0" role="region" aria-label="Plățile facturii">
+                        <table class="ui-table">
                             <thead>
                                 <tr class="text-left text-slate-500 border-b border-slate-100">
                                     <th class="px-5 py-3 font-medium">Data</th>
@@ -278,7 +266,7 @@
                                                 <div class="inline-flex items-center gap-2" data-delete-cell>
                                                     <button type="button"
                                                             data-delete-trigger
-                                                            class="text-xs font-medium text-rose-600 hover:text-rose-700 hover:underline">
+                                                            class="ui-action-danger">
                                                         Șterge
                                                     </button>
 
@@ -290,13 +278,13 @@
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit"
-                                                                    class="px-2 py-1 rounded-md bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 transition">
+                                                                    class="ui-btn ui-btn-danger">
                                                                 Da
                                                             </button>
                                                         </form>
                                                         <button type="button"
                                                                 data-delete-cancel
-                                                                class="px-2 py-1 rounded-md border border-slate-200 text-slate-600 text-xs font-medium hover:bg-slate-50 transition">
+                                                                class="ui-btn ui-btn-secondary">
                                                             Nu
                                                         </button>
                                                     </span>
@@ -335,7 +323,7 @@
                                            @if ($invoice->issue_date) min="{{ $invoice->issue_date->toDateString() }}" @endif
                                            max="{{ now()->toDateString() }}"
                                            required
-                                           class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                           class="form-input">
                                 </div>
 
                                 <div class="md:col-span-3">
@@ -351,7 +339,7 @@
                                            min="0.01"
                                            max="{{ number_format($invoice->balance(), 2, '.', '') }}"
                                            required
-                                           class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                           class="form-input text-right">
                                 </div>
 
                                 <div class="md:col-span-3">
@@ -360,7 +348,7 @@
                                     </label>
                                     <select id="payment_method"
                                             name="payment_method"
-                                            class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                            class="form-input">
                                         @foreach (\App\Enums\PaymentMethod::cases() as $method)
                                             <option value="{{ $method->value }}" @selected(old('payment_method') === $method->value)>
                                                 {{ $method->label() }}
@@ -379,7 +367,7 @@
                                            value="{{ old('reference') }}"
                                            maxlength="100"
                                            placeholder="Nr. extras de cont"
-                                           class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                           class="form-input">
                                 </div>
 
                                 {{-- F-401: chitanta insoteste doar incasarile in numerar --}}
@@ -400,7 +388,7 @@
 
                                 <div class="md:col-span-12 flex justify-end">
                                     <button type="submit"
-                                            class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                                            class="ui-btn ui-btn-primary">
                                         Înregistrează plata
                                     </button>
                                 </div>
@@ -410,8 +398,7 @@
                 </div>
 
             </main>
-        </div>
-    </div>
+    </x-app-shell>
 
     <script>
         // Confirmare de stergere in doi pasi. NFR-3 interzice confirm() nativ,

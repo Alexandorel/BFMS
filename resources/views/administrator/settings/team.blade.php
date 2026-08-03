@@ -6,70 +6,37 @@
     <title>Echipă · Setări · {{ config('app.name', 'BFMS') }}</title>
     @vite(['resources/css/app.css'])
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body>
 
     @php
 
         $contabil = null;
     @endphp
 
-    <div class="flex min-h-screen">
-
-        {{-- Side Bar --}}
-        <x-sidebar />
-
-        {{-- Main --}}
-        <div class="flex-1 flex flex-col min-w-0">
+    <x-app-shell>
 
             {{-- Top Bar --}}
-            <header class="flex items-center gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
-                <div class="flex items-center gap-3">
-                    <label class="relative">
-                        <select id="companySelect" class="appearance-none pl-3 pr-9 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            @forelse ($companies as $c)
-                                <option value="{{ $c->id }}" @selected($company?->id === $c->id)>{{ $c->name }}</option>
-                            @empty
-                                <option value="">Nicio firmă</option>
-                            @endforelse
-                        </select>
-                        <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </label>
-                    <a href="{{ route('administrator.settings.addcompany') }}" class="inline-flex items-center p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-700 transition" title="Adaugă firmă">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    </a>
-                    @if ($company?->vat_payer)
-                        <span class="hidden sm:inline text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium">Plătitor TVA</span>
-                    @elseif ($company)
-                        <span class="hidden sm:inline text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">Neplătitor TVA</span>
-                    @endif
-                </div>
+            <header class="app-page-toolbar">
+                <x-company-switcher :companies="$companies" :active-company="$company"
+                                    :add-href="route('administrator.settings.addcompany')" />
             </header>
 
             {{-- Content --}}
-            <main class="flex-1 p-4 sm:p-6 space-y-6">
+            <main class="app-page-content space-y-6">
 
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-900">Setări</h1>
-                    <p class="text-slate-500 text-sm mt-1">Configurările firmei {{ $company?->name ?? '—' }}</p>
-                </div>
+                <x-page-header title="Setări" :description="'Configurările firmei '.($company?->name ?? '—')" />
 
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
                     {{-- Settings sub-nav --}}
-                    <nav class="lg:col-span-1 space-y-1 text-sm">
-                        <a href="{{ route('administrator.settings.profile') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Profil</a>
-                        <a href="{{ route('administrator.settings.company') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Firmă</a>
-                        <a href="{{ route('administrator.settings.team') }}" class="block px-3 py-2 rounded-lg bg-white border border-slate-200 text-indigo-700 font-medium">Echipă</a>
-                        <a href="{{ route('administrator.bank-accounts.index') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white">Conturi bancare</a>
-                        <a href="{{ route('administrator.series.index') }}" class="block px-3 py-2 rounded-lg text-slate-600 hover:bg-white hover:border-slate-200">Serii documente</a>
-                    </nav>
+                    <x-settings-nav active="team" />
 
                     {{-- Echipa --}}
                     <div class="lg:col-span-3 space-y-6">
 
-                        <div class="bg-white rounded-xl border border-slate-200">
-                            <div class="px-5 py-4 border-b border-slate-200">
-                                <h2 class="font-semibold text-slate-900">Echipă</h2>
+                        <div class="ui-card overflow-hidden">
+                            <div class="ui-card-header">
+                                <h2 class="ui-section-title">Echipă</h2>
                             </div>
 
                             <ul class="divide-y divide-slate-100">
@@ -98,7 +65,7 @@
                                         </div>
                                         <div class="flex items-center gap-3 shrink-0">
                                             <span class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">Contabil</span>
-                                            <button type="button" class="text-xs text-rose-600 hover:underline">Revocă acces</button>
+                                            <button type="button" class="ui-action-danger" disabled title="Funcție indisponibilă momentan">Revocă acces</button>
                                         </div>
                                     </li>
                                 @endif
@@ -115,43 +82,32 @@
                             @endunless
                         </div>
 
-                        {{-- Adaugare contabil --}}
-                        <div class="bg-white rounded-xl border border-slate-200">
-                            <div class="px-5 py-4 border-b border-slate-200">
-                                <h2 class="font-semibold text-slate-900">Adaugă contabil</h2>
-                                <p class="text-xs text-slate-500 mt-0.5">Trimite o invitație pe email</p>
+                        {{-- Invitațiile vor fi activate când serviciul de email este disponibil. --}}
+                        <div class="ui-card overflow-hidden">
+                            <div class="ui-card-header block">
+                                <h2 class="ui-section-title">Invită un contabil</h2>
+                                <p class="ui-section-description">Funcția va fi disponibilă după configurarea serviciului de email.</p>
                             </div>
-                            <form action="#" method="POST" class="px-5 py-4">
-                                @csrf
+                            <div class="px-5 py-4">
                                 <div class="flex flex-col sm:flex-row gap-3">
                                     <div class="flex-1">
                                         <label for="email_contabil" class="sr-only">Email contabil</label>
-                                        <input type="email" id="email_contabil" name="email" required
+                                        <input type="email" id="email_contabil" name="email" disabled
                                                placeholder="contabil@exemplu.ro"
-                                               class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                               class="form-input">
                                     </div>
-                                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                        Trimite invitația
+                                    <button type="button" class="ui-btn ui-btn-secondary" disabled>
+                                        Indisponibil momentan
                                     </button>
                                 </div>
-                                <p class="mt-2 text-xs text-slate-400">Dacă persoana nu are cont BFMS, va primi un link de înregistrare.</p>
-                            </form>
+                            </div>
                         </div>
 
                     </div>
                 </div>
 
             </main>
-        </div>
-    </div>
+    </x-app-shell>
 
-<script>
-    document.getElementById('companySelect')?.addEventListener('change', function () {
-        if (this.value) {
-            window.location.href = `/company/switch/${this.value}`;
-        }
-    });
-</script>
 </body>
 </html>

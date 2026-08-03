@@ -6,7 +6,7 @@
     <title>Jurnal de audit · {{ config('app.name', 'BFMS') }}</title>
     @vite(['resources/css/app.css'])
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body>
 
 @php
     // getModified() runs the values through the model casts, so what lands here
@@ -42,42 +42,19 @@
     };
 @endphp
 
-<div class="flex min-h-screen">
+<x-app-shell>
 
-    <x-sidebar />
-
-    <div class="flex-1 flex flex-col min-w-0">
-
-    <header class="flex items-center justify-between gap-4 h-16 px-4 sm:px-6 border-b border-slate-200 bg-white">
-        <div class="flex items-center gap-3">
-            <label class="relative">
-                <select id="companySelect"
-                    class="appearance-none pl-3 pr-9 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    @forelse ($companies as $c)
-                        <option value="{{ $c->id }}" @selected($company?->id === $c->id)>{{ $c->name }}</option>
-                    @empty
-                        <option value="">Nicio firmă</option>
-                    @endforelse
-                </select>
-                <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"
-                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-            </label>
-        </div>
+    <header class="app-page-toolbar">
+        <x-company-switcher :companies="$companies" :active-company="$company" />
     </header>
 
-    <main class="flex-1 p-4 sm:p-6 space-y-6">
+    <main class="app-page-content space-y-6">
 
-        <div>
-            <h1 class="text-2xl font-bold text-slate-900">Jurnal de audit</h1>
-            <p class="text-slate-500 text-sm mt-1">
-                Cine ce a modificat, pe firma {{ $company->name }}
-            </p>
-        </div>
+        <x-page-header title="Jurnal de audit"
+                       :description="'Cine și ce a modificat în firma '.$company->name" />
 
         @if ($errors->any())
-            <div class="p-3 rounded-lg bg-rose-50 text-rose-700 text-sm">
+            <div class="ui-alert ui-alert-danger" role="alert">
                 <ul class="list-disc list-inside space-y-1">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -88,24 +65,24 @@
 
         {{-- Filtre --}}
         <form method="GET" action="{{ route('audit-log.index') }}"
-              class="bg-white rounded-xl border border-slate-200 p-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-6 items-end">
+              class="ui-card grid items-end gap-3 p-4 sm:grid-cols-2 lg:grid-cols-6">
 
             <label class="text-sm">
                 <span class="block text-slate-600 mb-1">De la</span>
                 <input type="date" name="from" value="{{ $filters['from'] ?? '' }}"
-                       class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                       class="form-input">
             </label>
 
             <label class="text-sm">
                 <span class="block text-slate-600 mb-1">Până la</span>
                 <input type="date" name="to" value="{{ $filters['to'] ?? '' }}"
-                       class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                       class="form-input">
             </label>
 
             <label class="text-sm">
                 <span class="block text-slate-600 mb-1">Utilizator</span>
                 <select name="user_id"
-                        class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        class="form-input">
                     <option value="">Toți</option>
                     @foreach ($users as $u)
                         <option value="{{ $u->id }}" @selected(($filters['user_id'] ?? null) == $u->id)>
@@ -118,7 +95,7 @@
             <label class="text-sm">
                 <span class="block text-slate-600 mb-1">Entitate</span>
                 <select name="auditable_type"
-                        class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        class="form-input">
                     <option value="">Toate</option>
                     @foreach ($types as $type)
                         <option value="{{ $type }}" @selected(($filters['auditable_type'] ?? null) === $type)>
@@ -131,7 +108,7 @@
             <label class="text-sm">
                 <span class="block text-slate-600 mb-1">Acțiune</span>
                 <select name="event"
-                        class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        class="form-input">
                     <option value="">Toate</option>
                     @foreach (\App\Models\Audit::EVENT_LABELS as $value => $label)
                         <option value="{{ $value }}" @selected(($filters['event'] ?? null) === $value)>{{ $label }}</option>
@@ -139,23 +116,23 @@
                 </select>
             </label>
 
-            <div class="flex gap-2">
+            <div class="ui-button-group">
                 <button type="submit"
-                        class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                        class="ui-btn ui-btn-primary">
                     Filtrează
                 </button>
                 <a href="{{ route('audit-log.index') }}"
-                   class="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+                   class="ui-btn ui-btn-secondary">
                     Resetează
                 </a>
             </div>
         </form>
 
         {{-- Tabel --}}
-        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
+        <div class="ui-card overflow-hidden">
+            <div class="ui-table-wrap" tabindex="0" role="region" aria-label="Înregistrări jurnal de audit">
+                <table class="ui-table">
+                    <thead>
                         <tr>
                             <th class="text-left font-medium px-5 py-3 whitespace-nowrap">Data</th>
                             <th class="text-left font-medium px-5 py-3 whitespace-nowrap">Utilizator</th>
@@ -218,7 +195,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-5 py-10 text-center text-slate-500">
+                                <td colspan="5" class="ui-empty-state">
                                     Nicio înregistrare pentru filtrele alese.
                                 </td>
                             </tr>
@@ -233,16 +210,7 @@
         @endif
 
     </main>
-    </div>
-</div>
-
-<script>
-    document.getElementById('companySelect')?.addEventListener('change', function () {
-        if (this.value) {
-            window.location.href = `/company/switch/${this.value}`;
-        }
-    });
-</script>
+</x-app-shell>
 
 </body>
 </html>
