@@ -3,11 +3,16 @@
     'method' => 'DELETE',
     'label' => 'Șterge',
     'confirmText' => 'Sigur?',
+    'confirmLabel' => 'Da, șterge',
     'variant' => 'action',
+    'triggerClass' => null,
+    'confirmClass' => 'ui-btn ui-btn-danger',
 ])
 
 @php
-    $triggerClass = $variant === 'button'
+    // triggerClass override lets a non-destructive action (ex. storno) reuse
+    // the same two-step confirm without looking like a delete.
+    $triggerClass ??= $variant === 'button'
         ? 'ui-btn ui-btn-danger-ghost'
         : 'ui-action-danger';
 @endphp
@@ -24,7 +29,7 @@
             @if (strtoupper($method) !== 'POST')
                 @method($method)
             @endif
-            <button type="submit" class="ui-btn ui-btn-danger">Da, șterge</button>
+            <button type="submit" class="{{ $confirmClass }}">{{ $confirmLabel }}</button>
         </form>
         <button type="button" data-confirm-cancel class="ui-btn ui-btn-secondary">Nu</button>
     </div>

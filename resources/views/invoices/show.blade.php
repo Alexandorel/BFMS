@@ -89,6 +89,40 @@
                                     </form>
                                 </div>
                             @endif
+
+                            {{-- Actiuni pe factura emisa: anulare (doar ultima din serie) si stornare --}}
+                            @php
+                                $canManageInvoice = in_array(auth()->user()->role, ['administrator', 'operator'], true)
+                                    && $invoice->document_type === \App\Enums\DocumentType::Invoice
+                                    && ! $invoice->isCreditNote();
+                                $isLastInSeries = $invoice->documentSeries
+                                    && (int) $invoice->number === (int) $invoice->documentSeries->current_number;
+                                $canCancel = $canManageInvoice && $invoice->status->canBeCancelled() && $isLastInSeries;
+                                $canStorno = $canManageInvoice && $invoice->status->canBeCredited() && ! $invoice->creditNote;
+                            @endphp
+                            @if ($canCancel || $canStorno)
+                                <div class="ui-button-group pt-3 sm:justify-end">
+                                    @if ($canStorno)
+                                        <x-confirm-action action="{{ route('invoices.storno', $invoice) }}"
+                                                          method="POST"
+                                                          variant="button"
+                                                          trigger-class="ui-btn ui-btn-secondary"
+                                                          confirm-class="ui-btn ui-btn-primary"
+                                                          label="Stornează"
+                                                          confirm-text="Emiți o factură de storno pentru acest document?"
+                                                          confirm-label="Da, stornează" />
+                                    @endif
+
+                                    @if ($canCancel)
+                                        <x-confirm-action action="{{ route('invoices.cancel', $invoice) }}"
+                                                          method="POST"
+                                                          variant="button"
+                                                          label="Anulează"
+                                                          confirm-text="Anulezi definitiv factura?"
+                                                          confirm-label="Da, anulează" />
+                                    @endif
+                                </div>
+                            @endif
                         </div>
                     </div>
 
@@ -97,6 +131,15 @@
                             Această factură stornează
                             <a href="{{ route('invoices.show', $invoice->creditedInvoice) }}" class="font-medium underline">
                                 {{ $invoice->creditedInvoice->series }}-{{ $invoice->creditedInvoice->number }}
+                            </a>.
+                        </div>
+                    @endif
+
+                    @if ($invoice->creditNote)
+                        <div class="mt-4 text-sm px-3 py-2 rounded-lg bg-slate-100 text-slate-600">
+                            Această factură a fost stornată prin
+                            <a href="{{ route('invoices.show', $invoice->creditNote) }}" class="font-medium underline">
+                                {{ $invoice->creditNote->series }}-{{ $invoice->creditNote->number }}
                             </a>.
                         </div>
                     @endif

@@ -131,6 +131,16 @@ Route::middleware('auth')->group (function () {
             ->whereNumber('invoice')
             ->name('issue');
 
+        // emisa -> anulata (doar ultima din serie, fara plati)
+        Route::post('/{invoice}/anulare', [InvoiceController::class, 'cancel'])
+            ->whereNumber('invoice')
+            ->name('cancel');
+
+        // emisa -> stornata; se emite o factura noua cu valori negative
+        Route::post('/{invoice}/stornare', [InvoiceController::class, 'storno'])
+            ->whereNumber('invoice')
+            ->name('storno');
+
         // editarea si stergerea sunt permise doar pe ciorne (vezi abortUnlessDraft)
         Route::get('/{invoice}/editare', [InvoiceController::class, 'edit'])
             ->whereNumber('invoice')
