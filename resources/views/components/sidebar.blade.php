@@ -1,17 +1,27 @@
-{{-- Sidebar vertical refolosibil pentru admin pages --}}
+{{-- Sidebar vertical refolosibil --}}
 @php
     $currentUser = $user ?? auth()->user();
 
-    // each role has its own dashboard, the other two answer with a 403
-    $dashboardRoute = match ($currentUser->role ?? null) {
-        'contabil' => route('dashboard.contabil'),
-        'operator' => route('dashboard.operator'),
-        default => route('dashboard.administrator'),
+    // Every role reaches a different set of routes, so the menu is built per
+    // role instead of listing everything and hiding the rest. A link that
+    // leads to a 403 is worse than a link that is not there.
+    $links = match ($currentUser->role ?? null) {
+        'contabil' => [
+            ['label' => 'Dashboard', 'url' => route('dashboard.contabil'), 'match' => 'dashboard.contabil'],
+            ['label' => 'Rapoarte', 'url' => route('dashboard.contabil.reports.index'), 'match' => 'dashboard.contabil.reports.*'],
+            ['label' => 'Facturi', 'url' => route('dashboard.contabil.invoices'), 'match' => 'dashboard.contabil.invoices'],
+            ['label' => 'Jurnal de audit', 'url' => route('audit-log.index'), 'match' => 'audit-log.*'],
+        ],
+        'operator' => [
+            ['label' => 'Dashboard', 'url' => route('dashboard.operator'), 'match' => 'dashboard.operator'],
+            ['label' => 'Produse', 'url' => route('products.index'), 'match' => 'products.*'],
+        ],
+        default => [
+            ['label' => 'Dashboard', 'url' => route('dashboard.administrator'), 'match' => 'dashboard.administrator'],
+            ['label' => 'Produse', 'url' => route('products.index'), 'match' => 'products.*'],
+            ['label' => 'Jurnal de audit', 'url' => route('audit-log.index'), 'match' => 'audit-log.*'],
+        ],
     };
-
-    $onDashboard = request()->routeIs('dashboard.administrator')
-        || request()->routeIs('dashboard.operator')
-        || request()->routeIs('dashboard.contabil');
 @endphp
 
 <aside class="hidden lg:flex w-64 shrink-0 flex-col border-r border-slate-200 bg-white sticky top-0 h-screen self-start overflow-y-auto">
@@ -21,25 +31,14 @@
     </div>
 
     <nav class="flex-1 px-3 py-4 space-y-1 text-sm">
-        <a href="{{ $dashboardRoute }}"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg {{ $onDashboard ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-slate-600 hover:bg-slate-50' }}">
-            <span class="w-2 h-2 rounded-full {{ $onDashboard ? 'bg-indigo-600' : 'bg-slate-300' }}"></span>
-            Dashboard
-        </a>
-        <a href="{{ route('products.index') }}"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->routeIs('products.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-slate-600 hover:bg-slate-50' }}">
-            <span class="w-2 h-2 rounded-full {{ request()->routeIs('products.*') ? 'bg-indigo-600' : 'bg-slate-300' }}"></span>
-            Produse
-        </a>
-
-        {{-- jurnalul e deschis administratorului si contabilului, operatorul ar primi 403 --}}
-        @if (in_array($currentUser->role ?? null, ['administrator', 'contabil'], true))
-            <a href="{{ route('audit-log.index') }}"
-                class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->routeIs('audit-log.*') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-slate-600 hover:bg-slate-50' }}">
-                <span class="w-2 h-2 rounded-full {{ request()->routeIs('audit-log.*') ? 'bg-indigo-600' : 'bg-slate-300' }}"></span>
-                Jurnal de audit
+        @foreach ($links as $link)
+            @php $isActive = request()->routeIs($link['match']); @endphp
+            <a href="{{ $link['url'] }}"
+                class="flex items-center gap-3 px-3 py-2 rounded-lg {{ $isActive ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-slate-600 hover:bg-slate-50' }}">
+                <span class="w-2 h-2 rounded-full {{ $isActive ? 'bg-indigo-600' : 'bg-slate-300' }}"></span>
+                {{ $link['label'] }}
             </a>
-        @endif
+        @endforeach
     </nav>
 
     {{-- setarile sunt rezervate administratorului, restul ar primi 403 --}}

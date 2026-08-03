@@ -489,6 +489,25 @@ class AuditLogAccessTest extends TestCase
     }
 
     /**
+     * The shared sidebar used to carry the administrator menu to every role,
+     * so the accountant saw Produse and Setari instead of his own screens.
+     */
+    public function test_the_accountant_sidebar_shows_his_own_menu(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index'))
+            ->assertOk()
+            ->assertSee('Rapoarte')
+            ->assertSee('Facturi')
+            ->assertSee('Jurnal de audit')
+            ->assertDontSee('Produse')
+            ->assertDontSee('Setări');
+    }
+
+    /**
      * @return array{0: User, 1: Company}
      */
     private function userWithCompany(string $role): array
