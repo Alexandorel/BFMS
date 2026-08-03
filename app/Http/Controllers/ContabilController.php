@@ -2,30 +2,57 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Company;
+use App\Models\Audit;
+use App\Models\Client;
+use App\Models\Invoice;
+use App\Services\ActiveCompanyService;
 use Illuminate\Http\Request;
 
 class ContabilController extends Controller
-{   
-    public function dashboard(Request $request)
+{
+    public function dashboard(
+        Request $request,
+        ActiveCompanyService $activeCompanyService
+    )
     {
-        // User with ID = 1, until login is done
-        $user = User::find(1);
+        $user = $request->user();
 
-        // All companies of the user
+        // All user's businesses
         $companies = $user->companies()->get();
+        $company = $activeCompanyService->get($user, $request);
 
-        // First company of the user
-        $company = $companies->first();
+        $companyName = $company?->name ?? 'N/A';
 
-        $companyName = $company ? $company->name : 'N/A';
+        // Last 5 active invoices
+        $invoices = $company
+            ? Invoice::with('client')
+                ->where('company_id', $company->id)
+                ->latest()
+                ->take(5)
+                ->get()
+            : collect();
+
+        $clients = $company
+            ? Client::where('company_id', $company->id)->orderBy('name')->get()
+            : collect();
+
+        // Preview for the audit log card, the full screen lives in AuditLogController
+        $audits = $company
+            ? Audit::forCompany($company->id)
+                ->with(['user', 'auditable'])
+                ->latest()
+                ->take(5)
+                ->get()
+            : collect();
 
         return view('contabil.dashboard', compact(
             'user',
             'companies',
             'company',
-            'companyName'
+            'companyName',
+            'invoices',
+            'clients',
+            'audits'
         ));
     }
 }

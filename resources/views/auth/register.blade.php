@@ -1,91 +1,48 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<x-auth-layout page-title="Înregistrare" title="Creează contul"
+               description="Completează datele de mai jos pentru a începe.">
+    <form method="POST" action="{{ route('register') }}" class="space-y-4">
+        @csrf
 
-        <title>{{ config('app.name', 'Laravel') }} - Register </title>
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="min-h-screen flex items center justify-center bg-gray-50">
-        <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
-            <h1 class="text-2xl font-semibold text-center mb-6">Register</h1>
-
-            <form method="POST" action="{{ route('register') }}">
-                @csrf 
-
-                {{-- First Name --}}
-                <div class="mb-4">
-                    <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                    <input id="first_name" type="text" 
-                    name="first_name" value="{{ old('first_name') }}" 
-                    required autofocus
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring2 focus:ring-blue-500">
-                    
-                    @error('first_name')
-                    <p class="text-sm text-red-600 mt-1"> {{ $message }} </p>
-                    @enderror
-                </div>
-
-                {{-- Last Name --}}
-                <div class="mb-4">
-                    <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                    <input id="last_name" type="text" 
-                    name="last_name" value="{{ old('last_name') }}" 
-                    required autofocus
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring2 focus:ring-blue-500">
-                    
-                    @error('last_name')
-                    <p class="text-sm text-red-600 mt-1"> {{ $message }} </p>
-                    @enderror
-                </div>
-
-                {{--Email--}}
-                <div class="mb-4">
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input id="email" type="email" 
-                    name="email" value="{{ old('email') }}" 
-                    required
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring2 focus:ring-blue-500">
-
-                    @error('email')
-                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                {{--Password--}}
-                <div class="mb-4">
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <input id="password" type="password" 
-                    name="password"
-                    required
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring2 focus:ring-blue-500">
-
-                    @error('password')
-                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                {{--Confirm-Password--}}
-                <div class="mb-6">
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-                    <input id="password_confirmation" type="password" 
-                    name="password_confirmation"
-                    required
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring2 focus:ring-blue-500">
-                </div>
-
-                <button type="submit" 
-                class="w-full bg-blue-600 text-white font-medium py-2 rounded-md hover:bg-blue-700 transition">
-                Register
-                </button>
-            </form>
-
-            <p class="text-sm text-center text-gray-500 mt-6">
-                Already have an account?
-                <a href="{{ route('login') }}" class="text-blue-600 hover:underline"> Sign In </a>
-            </p>
+        <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+                <label for="first_name" class="form-label">Prenume</label>
+                <input id="first_name" type="text" name="first_name" value="{{ old('first_name') }}"
+                       required autofocus autocomplete="given-name" class="form-input">
+                @error('first_name') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
+            </div>
+            <div>
+                <label for="last_name" class="form-label">Nume</label>
+                <input id="last_name" type="text" name="last_name" value="{{ old('last_name') }}"
+                       required autocomplete="family-name" class="form-input">
+                @error('last_name') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
+            </div>
         </div>
-    </body>
-</html>
 
+        <div>
+            <label for="email" class="form-label">Email</label>
+            <input id="email" type="email" name="email" value="{{ old('email') }}"
+                   required autocomplete="email" class="form-input">
+            @error('email') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
+        </div>
+
+        <div>
+            <label for="password" class="form-label">Parolă</label>
+            <input id="password" type="password" name="password" required
+                   autocomplete="new-password" class="form-input">
+            @error('password') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
+        </div>
+
+        <div>
+            <label for="password_confirmation" class="form-label">Confirmă parola</label>
+            <input id="password_confirmation" type="password" name="password_confirmation" required
+                   autocomplete="new-password" class="form-input">
+        </div>
+
+        <button type="submit" class="ui-btn ui-btn-primary w-full">Creează contul</button>
+    </form>
+
+    <x-slot:footer>
+        Ai deja cont?
+        <a href="{{ route('login') }}" class="font-semibold text-brand-700 hover:text-brand-800">Autentifică-te</a>
+    </x-slot:footer>
+</x-auth-layout>

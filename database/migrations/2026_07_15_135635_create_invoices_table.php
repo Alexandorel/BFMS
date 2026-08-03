@@ -18,8 +18,8 @@ return new class extends Migration
             $table->foreignId('client_id')->constrained('clients')->onDelete('restrict');
             $table->foreignId('document_series_id')->constrained('document_series')->onDelete('restrict');
 
-            // Tipul documentului: factura, proforma, chitanta
-            $table->enum('document_type', ['factura', 'proforma', 'chitanta']);
+            // Tipul documentului (etichetele în română sunt în App\Enums\DocumentType)
+            $table->enum('document_type', ['invoice', 'proforma', 'receipt']);
             $table->string('series', 10)->nullable();
             $table->unsignedInteger('number')->nullable();
 

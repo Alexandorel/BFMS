@@ -25,8 +25,14 @@ class ProductController extends Controller
      */
     public function index(): View
     {
-        $products = Product::where('company_id', $this->activeCompanyId())->get();
-        return view('products.index', compact('products'));
+        $companyController = new CompanyController();
+        $companies = $companyController->getUserCompanies();
+        $activeCompanyId = Session::get('active_company_id');
+        $company = $companies->firstWhere('id', $activeCompanyId) ?? $companies->first();
+
+        $products = Product::where('company_id', $company->id)->get();
+
+        return view('products.index', compact('products', 'companies', 'company'));
     }
 
     /**

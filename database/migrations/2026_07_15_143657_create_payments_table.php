@@ -24,20 +24,33 @@ return new class extends Migration
             $table->enum('currency', ['RON', 'EUR', 'USD'])->default('RON');
             $table->decimal('exchange_rate', 10, 4)->default(1);
 
+            // Metodele acceptate sunt fixate de F-401 (etichetele in App\Enums\PaymentMethod)
             $table->enum('payment_method', [
-                'cash',           // Cash / Chitanță
-                'bank_transfer',  // Ordin de plată
-                'card',           // Card online
+                'cash',
+                'bank_transfer',
+                'card',
+                'ramburs',
             ]);
 
             //Numar plata
             $table->string('reference', 100)->nullable();
+
+            // F-401: optional receipt for cash payment
+            // allocated number from company's series (DocumentType::Receipt).
+            $table->string('receipt_series', 10)->nullable();
+            $table->unsignedInteger('receipt_number')->nullable();
 
             $table->foreignId('created_by')->constrained('users')->onDelete('restrict');
             $table->timestamps();
 
             $table->index(['invoice_id']);
             $table->index(['company_id', 'payment_date']);
+
+            // null on both columns if there is no payment
+            $table->unique(
+                ['company_id', 'receipt_series', 'receipt_number'],
+                'payments_receipt_number_unique'
+            );
         });
     }
 

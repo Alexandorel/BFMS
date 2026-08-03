@@ -99,7 +99,7 @@ class ProfileSettingsTest extends TestCase
 
     public function test_rolul_nu_poate_fi_modificat_prin_formular(): void
     {
-        $user = $this->user(['role' => 'operator']);
+        $user = $this->user();
 
         $this->actingAs($user)->put(route('administrator.profile.update'), [
             'first_name' => 'Andrei',
@@ -107,7 +107,22 @@ class ProfileSettingsTest extends TestCase
         ])->assertRedirect();
 
         // validated() nu contine 'role', deci escaladarea de privilegii nu are efect
-        $this->assertSame('operator', $user->fresh()->role);
+        $this->assertSame('administrator', $user->fresh()->role);
+    }
+
+    public function test_doar_administratorul_ajunge_la_setarile_de_profil(): void
+    {
+        foreach (['operator', 'contabil'] as $rol) {
+            $user = $this->user(['role' => $rol]);
+
+            $this->actingAs($user)
+                ->get(route('administrator.settings.profile'))
+                ->assertForbidden();
+
+            $this->actingAs($user)
+                ->put(route('administrator.profile.update'), ['first_name' => 'Andrei'])
+                ->assertForbidden();
+        }
     }
 
     public function test_parola_se_schimba_cu_parola_actuala_corecta(): void
