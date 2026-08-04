@@ -105,7 +105,7 @@
                                         </span>
 
                                         <a href="{{ route('administrator.team.edit', $membru['id']) }}"
-                                           class="ui-action-secondary">
+                                           class="ui-action-link">
                                             Editează
                                         </a>
                                     </div>
