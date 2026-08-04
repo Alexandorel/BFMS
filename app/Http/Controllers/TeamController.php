@@ -52,19 +52,21 @@ class TeamController extends Controller
     {
         $this->authorizeCompanyAccess($request, $user);
         $companies = $request->user()->companies;
-        return view('administrator.team.edit', compact('user', 'companies'));
+        return view('administrator.settings.teamedit', compact('user', 'companies'));
     }
 
     public function update(Request $request, User $user)
     {
         $this->authorizeCompanyAccess($request, $user);
+
+        $adminCompanyIds = $request->user()->companies()->pluck('companies.id');
+
         $data = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name'  => 'required|string|max:255',
             'email'      => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'role'       => 'required|in:operator,contabil',
-            'companies'   => 'required|array|min:1',
-            'companies.*' => 'exists:companies,id',
+            'company_id' => ['required', Rule::in($adminCompanyIds)],
         ]);
 
         $user->update([
@@ -74,9 +76,10 @@ class TeamController extends Controller
             'role'       => $data['role'],
         ]);
 
-        $user->companies()->sync($data['companies']);
+        $user->companies()->syncWithoutDetaching([$data['company_id']]);
 
-        return back()->with('status', 'Cont actualizat.');
+        return redirect()->route('administrator.settings.team')
+            ->with('status', "Cont actualizat pentru {$user->email}.");
     }
 
     public function destroy(Request $request, User $user)
