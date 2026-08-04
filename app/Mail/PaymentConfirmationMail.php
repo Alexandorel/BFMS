@@ -9,9 +9,9 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class PaymentConfirmationMail extends Mailable implements \Illuminate\Contracts\Queue\ShouldQueue
+class PaymentConfirmationMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use SerializesModels;
 
     public function __construct(public Payment $payment) {}
 
@@ -36,3 +36,4 @@ class PaymentConfirmationMail extends Mailable implements \Illuminate\Contracts\
         );
     }
 }
+

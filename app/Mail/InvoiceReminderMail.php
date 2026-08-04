@@ -9,11 +9,11 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class InvoiceReminderMail extends Mailable implements \Illuminate\Contracts\Queue\ShouldQueue
+class InvoiceReminderMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use SerializesModels;
 
-    // $type: 'reminder_before_due' | 'reminder_due' | 'overdue_1' | 'overdue_2'
+
     public function __construct(
         public Invoice $invoice,
         public string $type,

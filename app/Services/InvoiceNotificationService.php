@@ -28,17 +28,12 @@ class InvoiceNotificationService
 
     public function sendPaymentConfirmation(Payment $payment): void
     {
-        $email = $payment->invoice->client->email;
-
-        InvoiceNotification::create([
-            'invoice_id' => $payment->invoice_id,
-            'payment_id' => $payment->id,
-            'type' => 'payment_confirmation',
-            'sent_to' => $email,
-            'status' => 'pending',
-        ]);
-
-        Mail::to($email)->send(new PaymentConfirmationMail($payment));
+        $this->send(
+            $payment->invoice,
+            'payment_confirmation',
+            new PaymentConfirmationMail($payment),
+            $payment->id,
+        );
     }
 
     protected function alreadySent(Invoice $invoice, string $type): bool
@@ -49,19 +44,20 @@ class InvoiceNotificationService
             ->exists();
     }
 
-    protected function send(Invoice $invoice, string $type, $mailable): void
+    protected function send(Invoice $invoice, string $type, $mailable, ?int $paymentId = null): void
     {
         $email = $invoice->client->email;
 
         $notification = InvoiceNotification::create([
             'invoice_id' => $invoice->id,
+            'payment_id' => $paymentId,
             'type' => $type,
             'sent_to' => $email,
             'status' => 'pending',
         ]);
 
         try {
-            Mail::to($email)->send($mailable); // sincron aici ca să prindem eroarea; vezi nota de mai jos
+            Mail::to($email)->send($mailable);
             $notification->update(['status' => 'sent', 'sent_at' => now()]);
         } catch (\Throwable $e) {
             $notification->update(['status' => 'failed', 'error_message' => $e->getMessage()]);
