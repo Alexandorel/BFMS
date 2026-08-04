@@ -55,4 +55,22 @@ enum InvoiceStatus: string
     {
         return in_array($this, [self::Issued, self::PartiallyPaid], true);
     }
+
+    /**
+     * Cancelling voids the document. Only an issued invoice with no payments
+     * yet qualifies; once money is in, the correction path is a storno.
+     */
+    public function canBeCancelled(): bool
+    {
+        return $this === self::Issued;
+    }
+
+    /**
+     * A storno (credit note) is the only correction for a transmitted invoice.
+     * Allowed on any issued invoice, whether unpaid, partially or fully paid.
+     */
+    public function canBeCredited(): bool
+    {
+        return in_array($this, [self::Issued, self::PartiallyPaid, self::FullyPaid], true);
+    }
 }

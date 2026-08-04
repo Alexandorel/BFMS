@@ -15,6 +15,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\BankAccountController;
+use App\Http\Controllers\TeamController;
 use App\Http\Controllers\ClientController;
 use Illuminate\Support\Facades\Route;
 
@@ -43,7 +44,7 @@ Route::post('/register', [RegisteredUserController::class, 'store']);
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth')->group (function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -54,18 +55,30 @@ Route::middleware('auth')->group(function () {
     });
 
     // Dashboard Operator
-    Route::middleware('role:operator')->group(function () {
-        Route::get('/dashboard/operator', [OperatorController::class, 'dashboard'])
-            ->name('dashboard.operator');
+    Route::middleware('role:operator')->prefix('dashboard/operator')->name('operator.')->group(function () {
+        Route::get('/', [OperatorController::class, 'dashboard'])->name('dashboard');
     });
 
-    Route::middleware('role:operator')->prefix('clients')->name('clients.')->group(function () {
-        Route::get('/', [ClientController::class, 'index'])->name('index');
-        Route::get('/create', [ClientController::class, 'create'])->name('create');
-        Route::post('/', [ClientController::class, 'store'])->name('store');
-        Route::get('/{client}/edit', [ClientController::class, 'edit'])->name('edit');
-        Route::put('/{client}', [ClientController::class, 'update'])->name('update');
-        Route::delete('/{client}', [ClientController::class, 'destroy'])->name('destroy');
+    //rute clienti
+    Route::prefix('clients')->name('clients.')->group(function () {
+
+        // Vizualizare — admin, operator, contabil
+        Route::middleware('role:administrator,operator,contabil')->group(function () {
+            Route::get('/', [ClientController::class, 'index'])->name('index');
+        });
+
+        // Adaugă / editează — admin, operator
+        Route::middleware('role:administrator,operator')->group(function () {
+            Route::get('/create', [ClientController::class, 'create'])->name('create');
+            Route::post('/', [ClientController::class, 'store'])->name('store');
+            Route::get('/{client}/edit', [ClientController::class, 'edit'])->whereNumber('client')->name('edit');
+            Route::put('/{client}', [ClientController::class, 'update'])->whereNumber('client')->name('update');
+        });
+
+        // Șterge — doar admin
+        Route::middleware('role:administrator')->group(function () {
+            Route::delete('/{client}', [ClientController::class, 'destroy'])->whereNumber('client')->name('destroy');
+        });
     });
 
     // Dashboard + rute Contabil
@@ -103,7 +116,7 @@ Route::middleware('auth')->group(function () {
         ->name('company.switch');
 
     // Gestionare Factura
-    Route::middleware(['auth', 'role:administrator,operator'])->prefix('facturi')->name('invoices.')->group(function () {
+    Route::middleware('role:administrator,operator')->prefix('facturi')->name('invoices.')->group(function () {
 
         Route::get('/', [InvoiceController::class, 'index'])
             ->name('index');
@@ -118,6 +131,16 @@ Route::middleware('auth')->group(function () {
         Route::post('/{invoice}/emitere', [InvoiceController::class, 'issue'])
             ->whereNumber('invoice')
             ->name('issue');
+
+        // emisa -> anulata (doar ultima din serie, fara plati)
+        Route::post('/{invoice}/anulare', [InvoiceController::class, 'cancel'])
+            ->whereNumber('invoice')
+            ->name('cancel');
+
+        // emisa -> stornata; se emite o factura noua cu valori negative
+        Route::post('/{invoice}/stornare', [InvoiceController::class, 'storno'])
+            ->whereNumber('invoice')
+            ->name('storno');
 
         // editarea si stergerea sunt permise doar pe ciorne (vezi abortUnlessDraft)
         Route::get('/{invoice}/editare', [InvoiceController::class, 'edit'])
@@ -173,16 +196,17 @@ Route::middleware('auth')->group(function () {
         Route::post('/administrator/settings/firme', [CompanyController::class, 'store'])
             ->name('administrator.companies.store');
 
-        Route::get('/administrator/settings/echipa', function () {
-            $companies = auth()->user()->companies()->orderBy('name')->get();
-            $company = $companies->firstWhere('id', session('active_company_id')) ?? $companies->first();
-
-            return view('administrator.settings.team', [
-                'user'      => auth()->user(),
-                'companies' => $companies,
-                'company'   => $company,
-            ]);
-        })->name('administrator.settings.team');
+        // Echipă — creare/editare conturi (nou)
+    Route::post('/administrator/settings/echipa', [TeamController::class, 'store'])
+        ->name('administrator.team.store');
+    Route::get('/administrator/settings/echipa/{user}/editeaza', [TeamController::class, 'edit'])
+        ->name('administrator.team.edit');
+    Route::put('/administrator/settings/echipa/{user}', [TeamController::class, 'update'])
+        ->name('administrator.team.update');
+    Route::delete('/administrator/settings/echipa/{user}', [TeamController::class, 'destroy'])
+        ->name('administrator.team.destroy');
+    Route::get('/administrator/settings/echipa', [TeamController::class, 'index'])
+        ->name('administrator.settings.team');
     });
 
     // Serii documente — configurare rezervata administratorului (NFR-1)
@@ -207,35 +231,33 @@ Route::middleware('auth')->group(function () {
                 ->name('status');
         });
 
+    // Vizualizare produse - toate rolurile
+    Route::middleware('auth')->group(function () {
+        Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+        Route::get('/products/{product}', [ProductController::class, 'show'])->whereNumber('product')->name('products.show');
+    });
+
+    // Adauga/editeaza - Admin + Operator
+    Route::middleware('role:administrator,operator')->group(function () {
+        Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+        Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+        Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->whereNumber('product')->name('products.edit');
+        Route::put('/products/{product}', [ProductController::class, 'update'])->whereNumber('product')->name('products.update');
+    });
+
+    // Sterge - doar Admin
+    Route::middleware('role:administrator')->group(function () {
+        Route::delete('/products/{product}', [ProductController::class, 'destroy'])->whereNumber('product')->name('products.destroy');
+    });
+
+    // Conturi bancare 
     Route::middleware('role:administrator')
         ->prefix('administrator/settings/conturi-bancare')
         ->name('administrator.bank-accounts.')
         ->group(function () {
-            // afisarea conturilor bancare
-            Route::get('/', [BankAccountController::class, 'index'])
-                ->name('index');
-
-            //adaugarea unui cont bancar
-            Route::post('/', [BankAccountController::class, 'store'])
-                ->name('store');
-
-            //editarea unui cont bancar
-            Route::put('/{bankAccount}', [BankAccountController::class, 'update'])
-                ->name('update');
-
-            //stergerea unui cont bancar
-            Route::delete('/{bankAccount}', [BankAccountController::class, 'destroy'])
-                ->name('destroy');
+            Route::get('/', [BankAccountController::class, 'index'])->name('index');
+            Route::post('/', [BankAccountController::class, 'store'])->name('store');
+            Route::put('/{bankAccount}', [BankAccountController::class, 'update'])->name('update');
+            Route::delete('/{bankAccount}', [BankAccountController::class, 'destroy'])->name('destroy');
         });
-
-    // (NFR-1: read-only access)
-    Route::get('products', [ProductController::class, 'index'])
-        ->middleware('role:administrator,operator,contabil')
-        ->name('products.index');
-
-    // Managing the catalogue is limited to administrator and operator
-    Route::middleware('role:administrator,operator')->group(function () {
-        Route::resource('products', ProductController::class)
-            ->only(['create', 'store', 'edit', 'update', 'destroy']);
-    });
 });

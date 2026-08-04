@@ -49,6 +49,8 @@ class InvoiceController extends Controller
             'payments',
             'creator',
             'creditedInvoice',
+            'creditNote',
+            'documentSeries',
         ]);
 
         return view('invoices.show', compact('invoice'));
@@ -218,6 +220,43 @@ class InvoiceController extends Controller
         return redirect()
             ->route('invoices.show', $invoice)
             ->with('success', "Documentul {$invoice->series}-{$invoice->number} a fost emis.");
+    }
+
+    /**
+     * Anulare (Cancelled): doar ultima factură emisă din serie, fără plăți.
+     */
+    public function cancel(Invoice $invoice, InvoiceService $invoiceService)
+    {
+        $this->authorizeInvoice($invoice);
+
+        try {
+            $invoiceService->cancel($invoice);
+        } catch (RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return redirect()
+            ->route('invoices.show', $invoice)
+            ->with('success', "Factura {$invoice->series}-{$invoice->number} a fost anulată.");
+    }
+
+    /**
+     * Stornare (Credited): emite factura de storno cu valori negative,
+     * legată de original, și trece originalul în starea Stornată.
+     */
+    public function storno(Invoice $invoice, InvoiceService $invoiceService)
+    {
+        $this->authorizeInvoice($invoice);
+
+        try {
+            $storno = $invoiceService->storno($invoice, Auth::user());
+        } catch (RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return redirect()
+            ->route('invoices.show', $storno)
+            ->with('success', "S-a emis stornarea {$storno->series}-{$storno->number} pentru factura {$invoice->series}-{$invoice->number}.");
     }
 
     /**

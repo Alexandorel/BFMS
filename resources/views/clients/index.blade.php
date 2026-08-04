@@ -37,11 +37,13 @@
                         <h1 class="text-2xl font-bold text-slate-900">Clienți</h1>
                         <p class="text-slate-500 text-sm mt-1">Catalogul de clienți</p>
                     </div>
-                    <a href="{{ route('clients.create') }}"
-                       class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Adaugă client
-                    </a>
+                    @if (in_array(auth()->user()->role, ['administrator', 'operator'], true))
+                        <a href="{{ route('clients.create') }}"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Adaugă client
+                        </a>
+                    @endif
                 </div>
 
                 @if (session('status'))
@@ -71,12 +73,16 @@
                                 </p>
                             </div>
                             <div class="flex items-center gap-3">
-                                <a href="{{ route('clients.edit', $client) }}" class="text-xs text-indigo-600 hover:underline">Editează</a>
-                                <form method="POST" action="{{ route('clients.destroy', $client) }}" onsubmit="return confirm('Sigur ștergi acest client?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-xs text-rose-600 hover:underline">Șterge</button>
-                                </form>
+                                @if (in_array(auth()->user()->role, ['administrator', 'operator'], true))
+                                    <a href="{{ route('clients.edit', $client) }}" class="text-xs text-indigo-600 hover:underline">Editează</a>
+                                @endif
+                                @if (auth()->user()->role === 'administrator')
+                                    <form method="POST" action="{{ route('clients.destroy', $client) }}" onsubmit="return confirm('Sigur ștergi acest client?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-xs text-rose-600 hover:underline">Șterge</button>
+                                    </form>
+                                @endif
                             </div>
                         </div>
                     @empty

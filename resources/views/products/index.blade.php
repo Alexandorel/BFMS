@@ -44,11 +44,15 @@
                                 </p>
                             </div>
                             <div class="ui-button-group shrink-0 sm:flex-nowrap">
-                                <a href="{{ route('products.edit', $product) }}" class="ui-action-link">Editează</a>
-                                <x-confirm-action action="{{ route('products.destroy', $product) }}"
-                                                  confirm-text="Ștergi produsul?"></x-confirm-action>
+                                @if(auth()->user()->role === 'administrator' || auth()->user()->role === 'operator')
+                                    <a href="{{ route('products.edit', $product) }}" class="ui-action-link">Editează</a>
+                                @endif
+                                @if(auth()->user()->role === 'administrator')
+                                    <x-confirm-action action="{{ route('products.destroy', $product) }}"
+                                                    confirm-text="Ștergi produsul?"></x-confirm-action>
+                                @endif
                             </div>
-                        </div>
+                        </div>  
                     @empty
                         <div class="ui-empty-state">Nu există produse încă.</div>
                     @endforelse
