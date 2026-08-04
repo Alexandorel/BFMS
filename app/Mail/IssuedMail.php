@@ -18,15 +18,19 @@ class IssuedMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(public Invoice $invoice)
-    {
-        //
-    }
+    public function __construct( 
+        public Invoice $invoice,
+        public string $subjectLine,
+        public string $htmlBody
+        ){}
     
     public function build()
     {
-        return $this->subject("Factura {$this->invoice->series}-{$this->invoice->number}")
-        ->view('email.issued-invoice');
+        return $this->subject($this->subjectLine)
+            ->view('email.generic-template')
+            ->with([
+                'htmlBody' => $this->htmlBody,
+            ]);
     }
 
 }

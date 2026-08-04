@@ -237,7 +237,7 @@ Route::middleware('auth')->group (function () {
             ->name('administrator.email-templates.index');
             Route::post('/administrator/settings/sabloane-email/{type}', [EmailTemplateController::class, 'update'])
             ->name('administrator.email-templates.update');
-    });
+        });
 
     // Vizualizare produse - toate rolurile
     Route::middleware('auth')->group(function () {

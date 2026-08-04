@@ -3,11 +3,13 @@
 namespace App\Services;
 
 use App\Enums\DocumentType;
+use App\Enums\EmailTemplateType;
 use App\Enums\InvoiceStatus;
+use App\Mail\IssuedMail;
 use App\Models\DocumentSeries;
+use App\Models\EmailTemplate;
 use App\Models\Invoice;
 use App\Models\User;
-use App\Mail\IssuedMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use RuntimeException;
@@ -15,7 +17,8 @@ use RuntimeException;
 class InvoiceService
 {
     public function __construct(
-        private DocumentSeriesService $seriesService
+        private DocumentSeriesService $seriesService,
+        private EmailTemplateRenderer $templateRenderer
     ) {
     }
 
@@ -28,30 +31,57 @@ class InvoiceService
         if (! $invoice->status->isDraft()) {
             throw new RuntimeException(
                 'Doar o ciornă poate fi emisă. Documentul este deja '
-                .mb_strtolower($invoice->status->label()).'.'
+                . mb_strtolower($invoice->status->label()) . '.'
             );
         }
-        $invoice = DB::transaction(function() use($invoice){
+
+        $invoice = DB::transaction(function () use ($invoice) {
             $series = $invoice->documentSeries;
-            if(! $series){
+            if (! $series) {
                 throw new RuntimeException('Ciorna nu are o serie asociată.');
             }
+
             $number = $this->seriesService->allocateNumber($series);
+
             $invoice->update([
                 'series' => $series->prefix,
                 'number' => $number,
                 'status' => InvoiceStatus::Issued,
             ]);
+
             return $invoice;
         });
 
-        if($invoice->client?->email){
-            Mail::to($invoice->client->email)->queue(new IssuedMail($invoice));
+        // ne asigurăm că avem relațiile pt variabile
+        $invoice->loadMissing(['client', 'company']);
+
+        if ($invoice->client?->email) {
+            $type = EmailTemplateType::InvoiceIssued->value;
+
+            $tpl = EmailTemplate::query()
+                ->where('company_id', $invoice->company_id)
+                ->where('type', $type)
+                ->first();
+
+            $default = config("email_templates.defaults.$type");
+
+            $subjectTemplate = $tpl?->subject ?? ($default['subject'] ?? 'Factura {numar_factura}');
+            $bodyTemplate    = $tpl?->body ?? ($default['body'] ?? 'Bună ziua, {nume_client}');
+
+            $rendered = $this->templateRenderer->render($subjectTemplate, $bodyTemplate, $invoice);
+
+            Mail::to($invoice->client->email)->queue(
+                new IssuedMail(
+                    invoice: $invoice,
+                    subjectLine: $rendered['subject'],
+                    htmlBody: $rendered['body']
+                )
+            );
         }
+
         return $invoice;
     }
-
-    /**
+     /**
      * Anulare: doar ultima factură emisă din serie, fără plăți, poate fi
      * anulată (netransmisă). Numărul rămâne atribuit — documentul stă în
      * arhivă ca Anulată, deci nu apare gol în serie (F-103).
@@ -70,10 +100,9 @@ class InvoiceService
             if (! $locked->status->canBeCancelled()) {
                 throw new RuntimeException(
                     'Doar o factură emisă, fără plăți, poate fi anulată. '
-                    .'Pentru o factură transmisă, folosește stornarea.'
+                    . 'Pentru o factură transmisă, folosește stornarea.'
                 );
             }
-
             // "ultima din serie": numărul trebuie să fie chiar vârful seriei,
             // altfel anularea ar rupe logica netransmiterii.
             $series = DocumentSeries::whereKey($locked->document_series_id)
@@ -83,7 +112,7 @@ class InvoiceService
             if ((int) $locked->number !== (int) $series->current_number) {
                 throw new RuntimeException(
                     'Doar ultima factură emisă din serie poate fi anulată. '
-                    .'Corectează prin stornare.'
+                    . 'Corectează prin stornare.'
                 );
             }
 
@@ -94,8 +123,7 @@ class InvoiceService
             return $invoice;
         });
     }
-
-    /**
+      /**
      * Stornare: emite o factură nouă cu valori negative, legată de original,
      * și trece originalul în starea Stornată. Singura corecție pentru o
      * factură deja transmisă (imutabilitatea originalului rămâne intactă).
@@ -119,8 +147,7 @@ class InvoiceService
             if ($original->creditNote()->exists()) {
                 throw new RuntimeException('Factura a fost deja stornată.');
             }
-
-            // Seria facturii, dacă e încă activă; altfel seria implicită de facturi.
+            // Seria facturii, dacă e încă activă; altfel seria implicită de facturi.            
             $series = $original->documentSeries;
             if (! $series || ! $series->is_active) {
                 $series = $this->seriesService->defaultFor($original->company_id, DocumentType::Invoice);
@@ -151,7 +178,6 @@ class InvoiceService
                 'credited_invoice_id' => $original->id,
                 'created_by' => $user->id,
             ]);
-
             // Liniile oglindă: aceleași snapshot-uri, cantitate și totaluri negate.
             $mirrored = $original->lines->map(fn ($line) => [
                 'product_id' => $line->product_id,

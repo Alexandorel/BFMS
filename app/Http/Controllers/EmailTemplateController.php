@@ -4,15 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Enums\EmailTemplateType;
 use App\Models\EmailTemplate;
-use Illuminate\http\Request;
+use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class EmailTemplateController extends Controller
 {
     public function index(Request $request)
     {
-        abort_unless($request->user()?->role === 'administrator' , 403);
-        $user = $request->user();
+        abort_unless(auth()->user()?->role === 'administrator', 403);
+        $user = auth()->user();
         $companies = $user->companies()->orderBy('name')->get();
         $company = $companies->firstWhere('id', session('active_company_id')) ?? $companies->first();
         abort_if(! $company, 404, 'Nu există companie disponibilă.');
@@ -48,7 +48,7 @@ class EmailTemplateController extends Controller
     }
     public function update(Request $request, string $type)
 {
-    abort_unless($request->user()?->role === 'administrator', 403);
+    abort_unless(auth()->user()?->role === 'administrator', 403);
     $allowedTypes = array_map(fn ($c) => $c->value, EmailTemplateType::cases());
     $validated = $request->validate([
         'company_id' => ['required', 'integer', 'exists:companies,id'],
@@ -58,8 +58,7 @@ class EmailTemplateController extends Controller
     ]);
     abort_unless($validated['type'] === $type, 422, 'Tip șablon invalid.');
     abort_unless(
-        $request->user()->companies()->whereKey($validated['company_id'])->exists(),
-        403
+    auth()->user()->companies()->whereKey($validated['company_id'])->exists(), 403
     );
 
     EmailTemplate::updateOrCreate(
