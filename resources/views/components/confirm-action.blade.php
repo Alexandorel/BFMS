@@ -23,7 +23,7 @@
     </button>
 
     <div data-confirm-panel class="hidden flex-wrap items-center gap-2">
-        <span class="text-sm text-slate-500">{{ $confirmText }}</span>
+        <span class="text-sm text-slate-500 dark:text-slate-400">{{ $confirmText }}</span>
         <form action="{{ $action }}" method="POST" class="inline-flex">
             @csrf
             @if (strtoupper($method) !== 'POST')

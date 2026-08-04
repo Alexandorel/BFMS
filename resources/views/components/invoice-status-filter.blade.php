@@ -2,15 +2,17 @@
     'target',
     'compact' => false,
     'disabled' => false,
+    'statuses' => \App\Enums\InvoiceStatus::cases(),
+    'allLabel' => 'Toate stările',
 ])
 
 <label class="relative w-full sm:w-auto">
     <span class="sr-only">Filtrează după stare</span>
     <select data-invoice-status-filter data-filter-target="{{ $target }}"
             @disabled($disabled)
-            class="{{ $compact ? 'ui-toolbar-select !h-10 text-xs' : 'form-input min-w-44 pr-9' }}">
-        <option value="">Toate stările</option>
-        @foreach (\App\Enums\InvoiceStatus::cases() as $status)
+            class="{{ $compact ? 'ui-toolbar-select !h-10 text-xs' : 'form-input min-w-44 appearance-none pr-9' }}">
+        <option value="">{{ $allLabel }}</option>
+        @foreach ($statuses as $status)
             <option value="{{ $status->value }}">{{ $status->label() }}</option>
         @endforeach
     </select>

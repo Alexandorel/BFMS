@@ -22,7 +22,7 @@
                         @if ($company?->vat_payer)
                             <span class="ui-badge bg-emerald-50 text-emerald-700">Plătitor TVA</span>
                         @elseif ($company)
-                            <span class="ui-badge bg-slate-100 text-slate-600">Neplătitor TVA</span>
+                            <span class="ui-badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Neplătitor TVA</span>
                         @endif
                     </x-slot:meta>
                 </x-company-switcher>
@@ -50,7 +50,7 @@
 
                             {{-- Userul nu are inca nicio firma --}}
                             <div class="ui-card ui-empty-state">
-                                <p class="text-sm text-slate-600">Nu ai încă nicio firmă adăugată.</p>
+                                <p class="text-sm text-slate-600 dark:text-slate-300">Nu ai încă nicio firmă adăugată.</p>
                                 <a href="{{ route('administrator.settings.addcompany') }}" class="ui-btn ui-btn-primary mt-4">
                                     Adaugă prima firmă
                                 </a>
@@ -63,7 +63,7 @@
                                 <div class="ui-card px-5 py-4">
                                     <form action="{{ route('administrator.settings.company') }}" method="GET" class="flex flex-col sm:flex-row sm:items-end gap-3">
                                         <div class="flex-1">
-                                            <label for="firma" class="block text-sm font-medium text-slate-700 mb-1">Firma pe care o editezi</label>
+                                            <label for="firma" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Firma pe care o editezi</label>
                                             <select id="firma" name="firma"
                                                     class="form-input">
                                                 @foreach ($companies as $c)
@@ -90,14 +90,14 @@
 
                                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                         <div class="sm:col-span-2">
-                                            <label for="name" class="block text-sm font-medium text-slate-700 mb-1">Denumire</label>
+                                            <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Denumire</label>
                                             <input type="text" id="name" name="name" required maxlength="255"
                                                    value="{{ old('name', $company->name) }}"
                                                    class="form-input">
                                             @error('name') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
                                         </div>
                                         <div>
-                                            <label for="juridical_form" class="block text-sm font-medium text-slate-700 mb-1">Formă juridică</label>
+                                            <label for="juridical_form" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Formă juridică</label>
                                             <select id="juridical_form" name="juridical_form" required
                                                     class="form-input">
                                                 @foreach ($formeJuridice as $forma)
@@ -110,14 +110,14 @@
 
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
-                                            <label for="cui" class="block text-sm font-medium text-slate-700 mb-1">CUI</label>
+                                            <label for="cui" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">CUI</label>
                                             <input type="text" id="cui" name="cui" required maxlength="20"
                                                    value="{{ old('cui', $company->cui) }}"
                                                    class="form-input">
                                             @error('cui') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
                                         </div>
                                         <div>
-                                            <label for="trade_registry_number" class="block text-sm font-medium text-slate-700 mb-1">Nr. Registrul Comerțului</label>
+                                            <label for="trade_registry_number" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nr. Registrul Comerțului</label>
                                             <input type="text" id="trade_registry_number" name="trade_registry_number" required maxlength="20"
                                                    value="{{ old('trade_registry_number', $company->trade_registry_number) }}"
                                                    class="form-input">
@@ -126,7 +126,7 @@
                                     </div>
 
                                     <div>
-                                        <label for="social_capital" class="block text-sm font-medium text-slate-700 mb-1">Capital social (RON)</label>
+                                        <label for="social_capital" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Capital social (RON)</label>
                                         <input type="number" id="social_capital" name="social_capital" required step="0.01" min="0"
                                                value="{{ old('social_capital', $company->social_capital) }}"
                                                class="form-input sm:w-64">
@@ -152,14 +152,14 @@
 
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
-                                            <label for="county" class="block text-sm font-medium text-slate-700 mb-1">Județ</label>
+                                            <label for="county" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Județ</label>
                                             <input type="text" id="county" name="county" required maxlength="255"
                                                    value="{{ old('county', $company->county) }}"
                                                    class="form-input">
                                             @error('county') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
                                         </div>
                                         <div>
-                                            <label for="city" class="block text-sm font-medium text-slate-700 mb-1">Localitate</label>
+                                            <label for="city" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Localitate</label>
                                             <input type="text" id="city" name="city" required maxlength="255"
                                                    value="{{ old('city', $company->city) }}"
                                                    class="form-input">
@@ -168,7 +168,7 @@
                                     </div>
 
                                     <div>
-                                        <label for="address" class="block text-sm font-medium text-slate-700 mb-1">Adresă</label>
+                                        <label for="address" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Adresă</label>
                                         <input type="text" id="address" name="address" required maxlength="255"
                                                value="{{ old('address', $company->address) }}"
                                                class="form-input">
@@ -200,8 +200,8 @@
                                         <input type="checkbox" name="vat_payer" value="1" @checked(old('vat_payer', $company->vat_payer))
                                                class="mt-0.5 w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
                                         <span>
-                                            <span class="block text-sm font-medium text-slate-900">Firmă înregistrată în scopuri de TVA</span>
-                                            <span class="block text-xs text-slate-500 mt-0.5">Bifează doar după ce ai primit codul de TVA de la ANAF.</span>
+                                            <span class="block text-sm font-medium text-slate-900 dark:text-slate-100">Firmă înregistrată în scopuri de TVA</span>
+                                            <span class="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">Bifează doar după ce ai primit codul de TVA de la ANAF.</span>
                                         </span>
                                     </label>
 

@@ -37,6 +37,55 @@ class PaymentControllerTest extends TestCase
         $this->assertSame(InvoiceStatus::PartiallyPaid, $invoice->fresh()->status);
     }
 
+    public function test_the_payment_shortcut_lists_only_invoices_that_accept_payments(): void
+    {
+        [$issued, $company] = $this->createInvoice(1000.00);
+        $operator = $this->createUser('operator', $company);
+
+        $issued->update(['number' => 101]);
+        $partiallyPaid = $issued->replicate()->fill([
+            'number' => 102,
+            'status' => InvoiceStatus::PartiallyPaid,
+        ]);
+        $partiallyPaid->save();
+        $fullyPaid = $issued->replicate()->fill([
+            'number' => 103,
+            'status' => InvoiceStatus::FullyPaid,
+        ]);
+        $fullyPaid->save();
+        $draft = $issued->replicate()->fill([
+            'series' => null,
+            'number' => null,
+            'status' => InvoiceStatus::Draft,
+        ]);
+        $draft->save();
+
+        $this->withoutVite()
+            ->actingAs($operator)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('invoices.index', ['payment' => 1]))
+            ->assertOk()
+            ->assertSee('Facturi eligibile pentru plată')
+            ->assertSee('FCT-101')
+            ->assertSee('FCT-102')
+            ->assertDontSee('FCT-103')
+            ->assertDontSee('<option value="fully_paid">', false)
+            ->assertSee('appearance-none');
+    }
+
+    public function test_the_operator_payment_shortcut_opens_the_filtered_invoice_list(): void
+    {
+        [, $company] = $this->createInvoice(1000.00);
+        $operator = $this->createUser('operator', $company);
+
+        $this->withoutVite()
+            ->actingAs($operator)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('operator.dashboard'))
+            ->assertOk()
+            ->assertSee(route('invoices.index', ['payment' => 1]), false);
+    }
+
     public function test_a_full_payment_marks_the_invoice_as_fully_paid(): void
     {
         [$invoice, $company] = $this->createInvoice(1000.00);

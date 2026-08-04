@@ -25,7 +25,7 @@
             @enderror
         </div>
 
-        <label class="flex min-h-11 cursor-pointer items-center gap-3 text-sm text-slate-600">
+        <label class="flex min-h-11 cursor-pointer items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
             <input id="remember" type="checkbox" name="remember"
                    class="size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">
             Ține-mă minte

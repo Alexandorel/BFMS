@@ -3,23 +3,20 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Adauga produs · {{ config('app.name', 'BFMS') }}</title>
+    <title>Adaugă client · {{ config('app.name', 'BFMS') }}</title>
     @vite(['resources/css/app.css'])
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body>
 
-    <div class="flex min-h-screen">
-        <x-sidebar />
-
-        <div class="flex-1 flex flex-col min-w-0">
-            <main class="flex-1 p-4 sm:p-6">
-                <div class="max-w-lg mx-auto">
-                    <h1 class="text-2xl font-bold text-slate-900 mb-6">Adauga client</h1>
+    <x-app-shell>
+            <main class="app-page-content">
+                <div class="mx-auto max-w-2xl space-y-6">
+                    <x-page-header title="Adaugă client" description="Completează datele clientului." />
 
                     @if ($errors->any())
-                        <div class="mb-4 p-4 rounded-lg bg-rose-50 border border-rose-200 text-sm text-rose-700">
-                            <p class="font-semibold mb-2">Erori de validare:</p>
-                            <ul class="list-disc pl-5 space-y-1">
+                        <div class="ui-alert ui-alert-danger">
+                            <p class="mb-2 font-semibold">Erori de validare:</p>
+                            <ul class="list-disc space-y-1 pl-5">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
@@ -27,16 +24,16 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('clients.store') }}" class="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+                    <form method="POST" action="{{ route('clients.store') }}" class="ui-card p-5 sm:p-6 space-y-4">
                         @csrf
                         @include('clients.form')
-                        <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-semibold">
-                            Salveaza
-                        </button>
+                        <div class="ui-button-group pt-2 sm:justify-end">
+                            <x-button :href="route('clients.index')" variant="secondary">Anulează</x-button>
+                            <x-button type="submit">Salvează clientul</x-button>
+                        </div>
                     </form>
                 </div>
             </main>
-        </div>
-    </div>
+    </x-app-shell>
 </body>
 </html>

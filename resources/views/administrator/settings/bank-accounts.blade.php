@@ -95,7 +95,7 @@
                     @if (! $company)
 
                         <div class="ui-card ui-empty-state">
-                            <p class="text-sm text-slate-600">Nu ai încă nicio firmă adăugată.</p>
+                            <p class="text-sm text-slate-600 dark:text-slate-300">Nu ai încă nicio firmă adăugată.</p>
                             <a href="{{ route('administrator.settings.addcompany') }}"
                                class="ui-btn ui-btn-primary mt-4">
                                 Adaugă prima firmă
@@ -112,7 +112,7 @@
                                       class="flex flex-col sm:flex-row sm:items-end gap-3">
                                     <div class="flex-1">
                                         <label for="firma"
-                                               class="block text-sm font-medium text-slate-700 mb-1">
+                                               class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                                             Firma pentru care gestionezi conturile
                                         </label>
                                         <select id="firma"
@@ -151,7 +151,7 @@
 
                                 <div class="md:col-span-2">
                                     <label for="bank_name"
-                                           class="block text-sm font-medium text-slate-700 mb-1">
+                                           class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                                         Bancă
                                     </label>
                                     <input type="text"
@@ -166,7 +166,7 @@
 
                                 <div class="md:col-span-3">
                                     <label for="iban"
-                                           class="block text-sm font-medium text-slate-700 mb-1">
+                                           class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                                         IBAN
                                     </label>
                                     <input type="text"
@@ -183,7 +183,7 @@
 
                                 <div>
                                     <label for="currency"
-                                           class="block text-sm font-medium text-slate-700 mb-1">
+                                           class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                                         Monedă
                                     </label>
                                     <input type="text"
@@ -214,7 +214,7 @@
                                         </p>
                                     </div>
 
-                                    <span class="text-xs font-medium text-slate-500">
+                                    <span class="text-xs font-medium text-slate-500 dark:text-slate-400">
                                             {{ $bankAccounts->count() }}
                                         {{ $bankAccounts->count() === 1 ? 'cont' : 'conturi' }}
                                         </span>
@@ -225,10 +225,10 @@
                                 <article class="ui-card overflow-hidden">
                                     <div class="flex items-center justify-between gap-3 px-5 py-3 bg-slate-50 border-b border-slate-200">
                                         <div>
-                                            <h3 class="text-sm font-semibold text-slate-800">
+                                            <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">
                                                 Cont bancar #{{ $loop->iteration }}
                                             </h3>
-                                            <p class="text-xs text-slate-500 mt-0.5">
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                                                 Editează informațiile contului și salvează modificările
                                             </p>
                                         </div>
@@ -248,7 +248,7 @@
 
                                             <div class="md:col-span-2">
                                                 <label for="bank-name-{{ $account->id }}"
-                                                       class="block text-sm font-medium text-slate-700 mb-1">
+                                                       class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                                                     Bancă
                                                 </label>
                                                 <input type="text"
@@ -262,7 +262,7 @@
 
                                             <div class="md:col-span-3">
                                                 <label for="iban-{{ $account->id }}"
-                                                       class="block text-sm font-medium text-slate-700 mb-1">
+                                                       class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                                                     IBAN
                                                 </label>
                                                 <input type="text"
@@ -278,7 +278,7 @@
 
                                             <div>
                                                 <label for="currency-{{ $account->id }}"
-                                                       class="block text-sm font-medium text-slate-700 mb-1">
+                                                       class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                                                     Monedă
                                                 </label>
                                                 <input type="text"
@@ -305,7 +305,7 @@
                                 </article>
                             @empty
                                 <div class="ui-card ui-empty-state">
-                                    <p class="text-sm text-slate-500">
+                                    <p class="text-sm text-slate-500 dark:text-slate-400">
                                         Firma selectată nu are încă niciun cont bancar.
                                     </p>
                                 </div>

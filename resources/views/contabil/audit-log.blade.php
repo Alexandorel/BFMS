@@ -68,19 +68,19 @@
               class="ui-card grid items-end gap-3 p-4 sm:grid-cols-2 lg:grid-cols-6">
 
             <label class="text-sm">
-                <span class="block text-slate-600 mb-1">De la</span>
+                <span class="block text-slate-600 dark:text-slate-300 mb-1">De la</span>
                 <input type="date" name="from" value="{{ $filters['from'] ?? '' }}"
                        class="form-input">
             </label>
 
             <label class="text-sm">
-                <span class="block text-slate-600 mb-1">Până la</span>
+                <span class="block text-slate-600 dark:text-slate-300 mb-1">Până la</span>
                 <input type="date" name="to" value="{{ $filters['to'] ?? '' }}"
                        class="form-input">
             </label>
 
             <label class="text-sm">
-                <span class="block text-slate-600 mb-1">Utilizator</span>
+                <span class="block text-slate-600 dark:text-slate-300 mb-1">Utilizator</span>
                 <select name="user_id"
                         class="form-input">
                     <option value="">Toți</option>
@@ -93,7 +93,7 @@
             </label>
 
             <label class="text-sm">
-                <span class="block text-slate-600 mb-1">Entitate</span>
+                <span class="block text-slate-600 dark:text-slate-300 mb-1">Entitate</span>
                 <select name="auditable_type"
                         class="form-input">
                     <option value="">Toate</option>
@@ -106,7 +106,7 @@
             </label>
 
             <label class="text-sm">
-                <span class="block text-slate-600 mb-1">Acțiune</span>
+                <span class="block text-slate-600 dark:text-slate-300 mb-1">Acțiune</span>
                 <select name="event"
                         class="form-input">
                     <option value="">Toate</option>
@@ -144,8 +144,8 @@
                     <tbody class="divide-y divide-slate-100">
                         @forelse ($audits as $audit)
                             <tr class="align-top">
-                                <td class="px-5 py-4 whitespace-nowrap text-slate-500">
-                                    {{ $audit->created_at?->format('d.m.Y H:i') }}
+                                <td class="px-5 py-4 whitespace-nowrap text-slate-500 dark:text-slate-400">
+                                    {{ $audit->created_at?->setTimezone(config('audit.display_timezone'))->format('d.m.Y H:i') }}
                                 </td>
                                 <td class="px-5 py-4 whitespace-nowrap">
                                     @if ($audit->user)
@@ -160,7 +160,7 @@
                                             'created'  => 'bg-emerald-50 text-emerald-700',
                                             'deleted'  => 'bg-rose-50 text-rose-700',
                                             'restored' => 'bg-amber-50 text-amber-700',
-                                            default    => 'bg-slate-100 text-slate-600',
+                                            default    => 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300',
                                         };
                                     @endphp
                                     <span class="inline-block px-2 py-1 rounded-md text-xs font-medium {{ $tone }}">
@@ -168,8 +168,8 @@
                                     </span>
                                 </td>
                                 <td class="px-5 py-4 whitespace-nowrap">
-                                    <p class="font-medium text-slate-900">{{ $audit->entityLabel() }}</p>
-                                    <p class="text-xs text-slate-500 mt-0.5">{{ $audit->entityName() }}</p>
+                                    <p class="font-medium text-slate-900 dark:text-slate-100">{{ $audit->entityLabel() }}</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ $audit->entityName() }}</p>
                                 </td>
                                 <td class="px-5 py-4">
                                     @php $modified = $audit->getModified(); @endphp
@@ -180,12 +180,12 @@
                                         <ul class="space-y-1">
                                             @foreach ($modified as $field => $change)
                                                 <li class="text-xs">
-                                                    <span class="text-slate-500">{{ \App\Models\Audit::fieldLabel($field) }}:</span>
+                                                    <span class="text-slate-500 dark:text-slate-400">{{ \App\Models\Audit::fieldLabel($field) }}:</span>
                                                     @if (array_key_exists('old', $change))
                                                         <span class="line-through text-slate-400">{{ $show($change['old']) }}</span>
                                                     @endif
                                                     @if (array_key_exists('new', $change))
-                                                        <span class="font-medium text-slate-900">{{ $show($change['new']) }}</span>
+                                                        <span class="font-medium text-slate-900 dark:text-slate-100">{{ $show($change['new']) }}</span>
                                                     @endif
                                                 </li>
                                             @endforeach

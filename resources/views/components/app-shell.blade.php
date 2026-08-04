@@ -6,9 +6,11 @@
         mb_substr($currentUser->first_name ?? 'U', 0, 1)
         . mb_substr($currentUser->last_name ?? 'N', 0, 1)
     );
+    // Tema e citita din cookie pe server, ca sa fie randata corect din prima (fara flash).
+    $isDark = request()->cookie('theme') === 'dark';
 @endphp
 
-<div class="app-shell" data-app-shell>
+<div class="app-shell {{ $isDark ? 'dark' : '' }}" data-app-shell>
     <x-sidebar :user="$currentUser" />
 
     <div class="app-shell-content">
@@ -26,7 +28,7 @@
 
             <div class="flex items-center gap-2">
                 <x-brand-mark class="size-8" />
-                <span class="font-display font-bold tracking-wide text-ink-950">BFMS</span>
+                <span class="font-display font-bold tracking-wide text-ink-950 dark:text-slate-100">BFMS</span>
             </div>
 
             <div class="grid size-9 place-items-center rounded-full bg-brand-100 text-xs font-bold text-brand-800" aria-label="Utilizator {{ $currentUser?->first_name }}">
@@ -42,6 +44,15 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const shell = document.querySelector('[data-app-shell]');
+
+            // Dark mode: comuta clasa .dark pe shell si salveaza preferinta in cookie (1 an).
+            document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    const isDark = shell.classList.toggle('dark');
+                    document.cookie = 'theme=' + (isDark ? 'dark' : 'light') + ';path=/;max-age=31536000;samesite=lax';
+                });
+            });
+
             const navigation = shell?.querySelector('[data-mobile-navigation]');
             const openButton = shell?.querySelector('[data-navigation-open]');
             const closeButtons = shell?.querySelectorAll('[data-navigation-close], [data-navigation-backdrop]');

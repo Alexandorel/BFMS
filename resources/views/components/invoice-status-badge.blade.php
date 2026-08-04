@@ -7,6 +7,6 @@
         : \App\Enums\InvoiceStatus::tryFrom((string) $status);
 @endphp
 
-<span {{ $attributes->merge(['class' => 'text-xs px-2 py-1 rounded-full font-medium '.($status?->badgeClasses() ?? 'bg-slate-100 text-slate-600')]) }}>
+<span {{ $attributes->merge(['class' => 'text-xs px-2 py-1 rounded-full font-medium '.($status?->badgeClasses() ?? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300')]) }}>
     {{ $status?->label() ?? '—' }}
 </span>

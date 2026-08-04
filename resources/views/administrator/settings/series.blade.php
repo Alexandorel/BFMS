@@ -54,7 +54,7 @@
                         @if (! $company)
 
                             <div class="ui-card ui-empty-state">
-                                <p class="text-sm text-slate-600">Nu ai încă nicio firmă adăugată.</p>
+                                <p class="text-sm text-slate-600 dark:text-slate-300">Nu ai încă nicio firmă adăugată.</p>
                                 <a href="{{ route('administrator.settings.addcompany') }}" class="ui-btn ui-btn-primary mt-4">
                                     Adaugă prima firmă
                                 </a>
@@ -67,7 +67,7 @@
                                 <div class="ui-card px-5 py-4">
                                     <form action="{{ route('administrator.series.index') }}" method="GET" class="flex flex-col sm:flex-row sm:items-end gap-3">
                                         <div class="flex-1">
-                                            <label for="firma" class="block text-sm font-medium text-slate-700 mb-1">Firma pe care o configurezi</label>
+                                            <label for="firma" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Firma pe care o configurezi</label>
                                             <select id="firma" name="firma"
                                                     class="form-input">
                                                 @foreach ($companies as $c)
@@ -106,7 +106,7 @@
                                                 @method('PUT')
 
                                                 <div>
-                                                    <label for="prefix-{{ $s->id }}" class="block text-xs font-medium text-slate-500 mb-1">Prefix</label>
+                                                    <label for="prefix-{{ $s->id }}" class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Prefix</label>
                                                     <input id="prefix-{{ $s->id }}" type="text" name="prefix" maxlength="10" required
                                                            value="{{ $s->prefix }}"
                                                            @disabled($s->is_used)
@@ -114,7 +114,7 @@
                                                 </div>
 
                                                 <div>
-                                                    <label for="start-{{ $s->id }}" class="block text-xs font-medium text-slate-500 mb-1">Nr. pornire</label>
+                                                    <label for="start-{{ $s->id }}" class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Nr. pornire</label>
                                                     <input id="start-{{ $s->id }}" type="number" name="start_number" min="1" required
                                                            value="{{ $s->start_number }}"
                                                            @disabled($s->is_used)
@@ -122,8 +122,8 @@
                                                 </div>
 
                                                 <div>
-                                                    <span class="block text-xs font-medium text-slate-500 mb-1">Următorul document</span>
-                                                    <p class="px-3 py-2 text-sm font-mono text-slate-700">
+                                                    <span class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Următorul document</span>
+                                                    <p class="px-3 py-2 text-sm font-mono text-slate-700 dark:text-slate-300">
                                                         {{ $s->prefix }}-{{ $s->next_number }}
                                                     </p>
                                                 </div>
@@ -150,7 +150,7 @@
                                                 @endif
 
                                                 @if (! $s->is_active)
-                                                    <span class="text-xs px-2 py-1 rounded-full bg-slate-200 text-slate-600 font-medium">Inactivă</span>
+                                                    <span class="text-xs px-2 py-1 rounded-full bg-slate-200 text-slate-600 dark:text-slate-300 font-medium">Inactivă</span>
                                                 @endif
 
                                                 @if (! $s->is_default && $s->is_active)
@@ -190,14 +190,14 @@
                                         <input type="hidden" name="document_type" value="{{ $type->value }}">
 
                                         <div>
-                                            <label for="prefix-{{ $type->value }}" class="block text-xs font-medium text-slate-500 mb-1">Prefix serie nouă</label>
+                                            <label for="prefix-{{ $type->value }}" class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Prefix serie nouă</label>
                                             <input type="text" id="prefix-{{ $type->value }}" name="prefix" maxlength="10" required
                                                    placeholder="{{ $type->defaultPrefix() }}"
                                                    class="form-input font-mono uppercase">
                                         </div>
 
                                         <div>
-                                            <label for="start-{{ $type->value }}" class="block text-xs font-medium text-slate-500 mb-1">Nr. pornire</label>
+                                            <label for="start-{{ $type->value }}" class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Nr. pornire</label>
                                             <input type="number" id="start-{{ $type->value }}" name="start_number" min="1" required
                                                    value="1"
                                                    class="form-input">
@@ -207,7 +207,7 @@
                                             <input type="hidden" name="is_default" value="0">
                                             <input type="checkbox" id="default-{{ $type->value }}" name="is_default" value="1"
                                                    class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
-                                            <label for="default-{{ $type->value }}" class="text-sm text-slate-600">Serie implicită</label>
+                                            <label for="default-{{ $type->value }}" class="text-sm text-slate-600 dark:text-slate-300">Serie implicită</label>
                                         </div>
 
                                         <div>

@@ -27,12 +27,29 @@ class InvoiceController extends Controller
             $request
         );
 
+        $paymentMode = $request->boolean('payment');
+        $filterStatuses = collect(InvoiceStatus::cases());
+
+        if ($paymentMode) {
+            $filterStatuses = $filterStatuses
+                ->filter(fn (InvoiceStatus $status): bool => $status->acceptsPayments())
+                ->values();
+        }
+
         $invoices = Invoice::with('client')
             ->where('company_id', $company->id)
+            ->when(
+                $paymentMode,
+                fn ($query) => $query->whereIn('status', $filterStatuses->map->value)
+            )
             ->latest()
             ->get();
 
-        return view('contabil.invoices', compact('invoices'));
+        return view('contabil.invoices', compact(
+            'invoices',
+            'paymentMode',
+            'filterStatuses'
+        ));
     }
     public function show(Invoice $invoice)
     {
