@@ -14,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
         ]);
+
+        // Cookie-ul de tema e setat din JS ca text simplu, deci nu trebuie criptat,
+        // altfel Laravel nu-l poate citi la urmatoarea incarcare (dark mode s-ar reseta).
+        $middleware->encryptCookies(except: ['theme']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

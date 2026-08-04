@@ -36,8 +36,8 @@
                     @forelse ($products as $product)
                         <div class="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                             <div class="min-w-0">
-                                <p class="text-sm font-medium text-slate-900">{{ $product->name }}</p>
-                                <p class="text-xs text-slate-500 mt-0.5">
+                                <p class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ $product->name }}</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                                     SKU: {{ $product->sku }} &nbsp;•&nbsp; {{ $product->unit_measure }} &nbsp;•&nbsp;
                                     {{ number_format($product->unit_price, 2) }} RON &nbsp;•&nbsp;
                                     {{ $product->is_vat_exempt ? 'Scutit' : $product->vat_rate.'%' }}

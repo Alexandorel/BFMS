@@ -14,13 +14,13 @@
 
             {{-- Top Bar --}}
             <header class="app-page-toolbar">
-                <a href="{{ route(auth()->user()->dashboardRoute()) }}" class="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900">
+                <a href="{{ route(auth()->user()->dashboardRoute()) }}" class="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                     Înapoi
                 </a>
                 {{-- pe o ciorna editabila eticheta ar contrazice butoanele de mai jos --}}
                 @unless ($invoice->status->isDraft() && in_array(auth()->user()->role, ['administrator', 'operator'], true))
-                    <span class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">Doar vizualizare</span>
+                    <span class="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium">Doar vizualizare</span>
                 @endunless
             </header>
 
@@ -60,9 +60,9 @@
                                 </h1>
                                 <x-invoice-status-badge :status="$invoice->status" />
                             </div>
-                            <p class="text-sm text-slate-500 mt-1">{{ $invoice->document_type->label() }}</p>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ $invoice->document_type->label() }}</p>
                         </div>
-                        <div class="text-sm text-slate-600 space-y-1 sm:text-right">
+                        <div class="text-sm text-slate-600 dark:text-slate-300 space-y-1 sm:text-right">
                             <p><span class="text-slate-400">Data emiterii:</span>
                                 {{ $invoice->issue_date?->format('d.m.Y') ?? '—' }}</p>
                             <p><span class="text-slate-400">Scadență:</span>
@@ -136,7 +136,7 @@
                     @endif
 
                     @if ($invoice->creditNote)
-                        <div class="mt-4 text-sm px-3 py-2 rounded-lg bg-slate-100 text-slate-600">
+                        <div class="mt-4 text-sm px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                             Această factură a fost stornată prin
                             <a href="{{ route('invoices.show', $invoice->creditNote) }}" class="font-medium underline">
                                 {{ $invoice->creditNote->series }}-{{ $invoice->creditNote->number }}
@@ -149,28 +149,28 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div class="ui-card p-5">
                         <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Emitent</h2>
-                        <p class="font-medium text-slate-900">{{ $invoice->company->name }}</p>
-                        <p class="text-sm text-slate-600 mt-1">CUI: {{ $invoice->company->cui ?? '—' }}</p>
+                        <p class="font-medium text-slate-900 dark:text-slate-100">{{ $invoice->company->name }}</p>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">CUI: {{ $invoice->company->cui ?? '—' }}</p>
                         @if ($invoice->company->trade_registry_number)
-                            <p class="text-sm text-slate-600">Reg. com.: {{ $invoice->company->trade_registry_number }}</p>
+                            <p class="text-sm text-slate-600 dark:text-slate-300">Reg. com.: {{ $invoice->company->trade_registry_number }}</p>
                         @endif
-                        <p class="text-sm text-slate-600">
+                        <p class="text-sm text-slate-600 dark:text-slate-300">
                             {{ collect([$invoice->company->address, $invoice->company->city, $invoice->company->county])->filter()->implode(', ') ?: '—' }}
                         </p>
                     </div>
 
                     <div class="ui-card p-5">
                         <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Client</h2>
-                        <p class="font-medium text-slate-900">{{ $invoice->client?->full_name ?? '—' }}</p>
-                        <p class="text-sm text-slate-600 mt-1">
+                        <p class="font-medium text-slate-900 dark:text-slate-100">{{ $invoice->client?->full_name ?? '—' }}</p>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">
                             {{ $invoice->client?->client_type === 'individual' ? 'CNP' : 'CUI' }}:
                             {{ $invoice->client?->tax_id ?? '—' }}
                         </p>
-                        <p class="text-sm text-slate-600">
+                        <p class="text-sm text-slate-600 dark:text-slate-300">
                             {{ collect([$invoice->client?->address, $invoice->client?->city, $invoice->client?->county])->filter()->implode(', ') ?: '—' }}
                         </p>
                         @if ($invoice->client?->email)
-                            <p class="text-sm text-slate-600">{{ $invoice->client->email }}</p>
+                            <p class="text-sm text-slate-600 dark:text-slate-300">{{ $invoice->client->email }}</p>
                         @endif
                     </div>
                 </div>
@@ -183,7 +183,7 @@
                     <div class="ui-table-wrap" tabindex="0" role="region" aria-label="Liniile facturii">
                         <table class="ui-table">
                             <thead>
-                                <tr class="text-left text-slate-500 border-b border-slate-100">
+                                <tr class="text-left text-slate-500 dark:text-slate-400 border-b border-slate-100">
                                     <th class="px-5 py-3 font-medium">#</th>
                                     <th class="px-5 py-3 font-medium">Produs / serviciu</th>
                                     <th class="px-5 py-3 font-medium text-right">Cant.</th>
@@ -195,23 +195,23 @@
                             <tbody class="divide-y divide-slate-100">
                                 @forelse ($invoice->lines as $line)
                                     <tr>
-                                        <td class="px-5 py-3 text-slate-500">{{ $line->position }}</td>
-                                        <td class="px-5 py-3 text-slate-900">
+                                        <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ $line->position }}</td>
+                                        <td class="px-5 py-3 text-slate-900 dark:text-slate-100">
                                             {{ $line->product_name_snapshot }}
                                             @if ($line->sku_snapshot)
                                                 <span class="text-xs text-slate-400">({{ $line->sku_snapshot }})</span>
                                             @endif
                                         </td>
-                                        <td class="px-5 py-3 text-right text-slate-600">
+                                        <td class="px-5 py-3 text-right text-slate-600 dark:text-slate-300">
                                             {{ number_format($line->quantity, 2, ',', '.') }} {{ $line->unit_measure_snapshot }}
                                         </td>
-                                        <td class="px-5 py-3 text-right text-slate-600">
+                                        <td class="px-5 py-3 text-right text-slate-600 dark:text-slate-300">
                                             {{ number_format($line->unit_price_snapshot, 2, ',', '.') }}
                                         </td>
-                                        <td class="px-5 py-3 text-right text-slate-600">
+                                        <td class="px-5 py-3 text-right text-slate-600 dark:text-slate-300">
                                             {{ number_format($line->vat_rate_snapshot, 2, ',', '.') }}%
                                         </td>
-                                        <td class="px-5 py-3 text-right font-medium text-slate-900">
+                                        <td class="px-5 py-3 text-right font-medium text-slate-900 dark:text-slate-100">
                                             {{ number_format($line->line_total, 2, ',', '.') }}
                                         </td>
                                     </tr>
@@ -230,16 +230,16 @@
                     <div class="border-t border-slate-200 px-5 py-4 flex justify-end">
                         <dl class="w-full sm:w-72 space-y-1 text-sm">
                             <div class="flex justify-between">
-                                <dt class="text-slate-500">Subtotal</dt>
-                                <dd class="text-slate-900">{{ number_format($invoice->subtotal, 2, ',', '.') }} {{ $invoice->currency }}</dd>
+                                <dt class="text-slate-500 dark:text-slate-400">Subtotal</dt>
+                                <dd class="text-slate-900 dark:text-slate-100">{{ number_format($invoice->subtotal, 2, ',', '.') }} {{ $invoice->currency }}</dd>
                             </div>
                             <div class="flex justify-between">
-                                <dt class="text-slate-500">TVA</dt>
-                                <dd class="text-slate-900">{{ number_format($invoice->vat_total, 2, ',', '.') }} {{ $invoice->currency }}</dd>
+                                <dt class="text-slate-500 dark:text-slate-400">TVA</dt>
+                                <dd class="text-slate-900 dark:text-slate-100">{{ number_format($invoice->vat_total, 2, ',', '.') }} {{ $invoice->currency }}</dd>
                             </div>
                             <div class="flex justify-between border-t border-slate-100 pt-1 font-semibold">
-                                <dt class="text-slate-900">Total</dt>
-                                <dd class="text-slate-900">{{ number_format($invoice->total, 2, ',', '.') }} {{ $invoice->currency }}</dd>
+                                <dt class="text-slate-900 dark:text-slate-100">Total</dt>
+                                <dd class="text-slate-900 dark:text-slate-100">{{ number_format($invoice->total, 2, ',', '.') }} {{ $invoice->currency }}</dd>
                             </div>
                             @if ($invoice->currency !== 'RON')
                                 <div class="flex justify-between text-xs text-slate-400">
@@ -255,7 +255,7 @@
                 <div class="ui-card overflow-hidden">
                     <div class="ui-card-header">
                         <h2 class="ui-section-title">Plăți</h2>
-                        <span class="text-sm text-slate-500">
+                        <span class="text-sm text-slate-500 dark:text-slate-400">
                             Rest de plată:
                             <span class="font-semibold {{ $invoice->balance() > 0 ? 'text-amber-700' : 'text-emerald-700' }}">
                                 {{ number_format($invoice->balance(), 2, ',', '.') }} {{ $invoice->currency }}
@@ -272,7 +272,7 @@
                     <div class="ui-table-wrap" tabindex="0" role="region" aria-label="Plățile facturii">
                         <table class="ui-table">
                             <thead>
-                                <tr class="text-left text-slate-500 border-b border-slate-100">
+                                <tr class="text-left text-slate-500 dark:text-slate-400 border-b border-slate-100">
                                     <th class="px-5 py-3 font-medium">Data</th>
                                     <th class="px-5 py-3 font-medium">Metodă</th>
                                     <th class="px-5 py-3 font-medium">Referință</th>
@@ -288,19 +288,19 @@
                             <tbody class="divide-y divide-slate-100">
                                 @forelse ($invoice->payments as $payment)
                                     <tr>
-                                        <td class="px-5 py-3 text-slate-600">{{ $payment->payment_date?->format('d.m.Y') }}</td>
-                                        <td class="px-5 py-3 text-slate-600">{{ $payment->payment_method->label() }}</td>
-                                        <td class="px-5 py-3 text-slate-600">{{ $payment->reference ?? '—' }}</td>
+                                        <td class="px-5 py-3 text-slate-600 dark:text-slate-300">{{ $payment->payment_date?->format('d.m.Y') }}</td>
+                                        <td class="px-5 py-3 text-slate-600 dark:text-slate-300">{{ $payment->payment_method->label() }}</td>
+                                        <td class="px-5 py-3 text-slate-600 dark:text-slate-300">{{ $payment->reference ?? '—' }}</td>
                                         <td class="px-5 py-3">
                                             @if ($payment->receipt_label)
-                                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+                                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 dark:text-slate-300">
                                                     {{ $payment->receipt_label }}
                                                 </span>
                                             @else
                                                 <span class="text-slate-400">—</span>
                                             @endif
                                         </td>
-                                        <td class="px-5 py-3 text-right font-medium text-slate-900">
+                                        <td class="px-5 py-3 text-right font-medium text-slate-900 dark:text-slate-100">
                                             {{ number_format($payment->amount, 2, ',', '.') }} {{ $payment->currency }}
                                         </td>
                                         @if ($canDeletePayments)
@@ -314,7 +314,7 @@
                                                     </button>
 
                                                     <span class="hidden items-center gap-2" data-delete-confirm>
-                                                        <span class="text-xs text-slate-500">Sigur?</span>
+                                                        <span class="text-xs text-slate-500 dark:text-slate-400">Sigur?</span>
                                                         <form action="{{ route('invoices.payments.destroy', $payment) }}"
                                                               method="POST"
                                                               class="inline">
@@ -348,7 +348,7 @@
 
                     @if ($canRecordPayments)
                         <div class="px-5 py-5 border-t border-slate-200 bg-slate-50/60">
-                            <h3 class="text-sm font-semibold text-slate-800 mb-3">Înregistrează o încasare</h3>
+                            <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-3">Înregistrează o încasare</h3>
 
                             <form action="{{ route('invoices.payments.store', $invoice) }}"
                                   method="POST"
@@ -356,7 +356,7 @@
                                 @csrf
 
                                 <div class="md:col-span-3">
-                                    <label for="payment_date" class="block text-xs font-medium text-slate-600 mb-1">
+                                    <label for="payment_date" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                                         Data plății
                                     </label>
                                     <input type="date"
@@ -370,7 +370,7 @@
                                 </div>
 
                                 <div class="md:col-span-3">
-                                    <label for="amount" class="block text-xs font-medium text-slate-600 mb-1">
+                                    <label for="amount" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                                         Sumă ({{ $invoice->currency }})
                                     </label>
                                     {{-- pre-completata cu restul de plata: cazul frecvent e achitarea integrala --}}
@@ -386,7 +386,7 @@
                                 </div>
 
                                 <div class="md:col-span-3">
-                                    <label for="payment_method" class="block text-xs font-medium text-slate-600 mb-1">
+                                    <label for="payment_method" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                                         Metodă
                                     </label>
                                     <select id="payment_method"
@@ -401,7 +401,7 @@
                                 </div>
 
                                 <div class="md:col-span-3" data-reference-field>
-                                    <label for="reference" class="block text-xs font-medium text-slate-600 mb-1">
+                                    <label for="reference" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                                         Referință <span data-reference-hint class="text-slate-400">(opțional)</span>
                                     </label>
                                     <input type="text"
@@ -422,7 +422,7 @@
                                                value="1"
                                                @checked(old('issue_receipt'))
                                                class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
-                                        <span class="text-sm text-slate-700">Emite și o chitanță</span>
+                                        <span class="text-sm text-slate-700 dark:text-slate-300">Emite și o chitanță</span>
                                         <span class="text-xs text-slate-400">
                                             (primește un număr din seria de chitanțe a firmei)
                                         </span>

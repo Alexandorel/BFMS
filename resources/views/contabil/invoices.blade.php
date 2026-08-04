@@ -28,7 +28,7 @@
                         <h2 class="ui-section-title">
                             {{ $paymentMode ? 'Facturi eligibile pentru plată' : 'Toate facturile' }}
                         </h2>
-                        <p class="mt-0.5 text-xs text-slate-500">{{ $invoices->count() }} documente</p>
+                        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ $invoices->count() }} documente</p>
                     </div>
                     <x-invoice-status-filter target="invoice-list"
                                              :statuses="$filterStatuses"
@@ -50,11 +50,11 @@
                         <tbody id="invoice-list" class="divide-y divide-slate-100">
                             @forelse ($invoices as $invoice)
                                 <tr data-invoice-status="{{ $invoice->status->value }}">
-                                    <td class="whitespace-nowrap font-semibold text-ink-950">
+                                    <td class="whitespace-nowrap font-semibold text-ink-950 dark:text-slate-100">
                                         {{ $invoice->number ? $invoice->series . '-' . $invoice->number : '—' }}
                                     </td>
-                                    <td class="text-slate-600">{{ $invoice->client?->full_name ?? '—' }}</td>
-                                    <td class="whitespace-nowrap font-medium text-ink-950">
+                                    <td class="text-slate-600 dark:text-slate-300">{{ $invoice->client?->full_name ?? '—' }}</td>
+                                    <td class="whitespace-nowrap font-medium text-ink-950 dark:text-slate-100">
                                         {{ number_format($invoice->total, 2, ',', '.') }} {{ $invoice->currency }}
                                     </td>
                                     <td><x-invoice-status-badge :status="$invoice->status" /></td>

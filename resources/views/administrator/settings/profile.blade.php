@@ -18,7 +18,7 @@
                         @if ($activeCompany?->vat_payer)
                             <span class="ui-badge bg-emerald-50 text-emerald-700">Plătitor TVA</span>
                         @elseif ($activeCompany)
-                            <span class="ui-badge bg-slate-100 text-slate-600">Neplătitor TVA</span>
+                            <span class="ui-badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Neplătitor TVA</span>
                         @endif
                     </x-slot:meta>
                 </x-company-switcher>
@@ -53,25 +53,25 @@
                                 @method('PUT')
 
                                 <div class="flex items-center gap-4">
-                                    <div class="grid place-items-center w-16 h-16 rounded-full bg-slate-200 text-slate-600 font-semibold text-lg shrink-0">
+                                    <div class="grid place-items-center w-16 h-16 rounded-full bg-slate-200 text-slate-600 dark:text-slate-300 font-semibold text-lg shrink-0">
                                         {{ Str::substr($user->first_name, 0, 1) }}{{ Str::substr($user->last_name, 0, 1) }}
                                     </div>
                                     <div>
-                                        <p class="text-sm font-medium text-slate-900">{{ $user->first_name }} {{ $user->last_name }}</p>
+                                        <p class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ $user->first_name }} {{ $user->last_name }}</p>
                                         <span class="inline-block mt-1 text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 font-medium">{{ $user->role }}</span>
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label for="first_name" class="block text-sm font-medium text-slate-700 mb-1">Prenume</label>
+                                        <label for="first_name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Prenume</label>
                                         <input type="text" id="first_name" name="first_name" required maxlength="255"
                                                value="{{ old('first_name', $user->first_name) }}"
                                                class="form-input">
                                         @error('first_name') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
                                     </div>
                                     <div>
-                                        <label for="last_name" class="block text-sm font-medium text-slate-700 mb-1">Nume</label>
+                                        <label for="last_name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nume</label>
                                         <input type="text" id="last_name" name="last_name" required maxlength="255"
                                                value="{{ old('last_name', $user->last_name) }}"
                                                class="form-input">
@@ -80,7 +80,7 @@
                                 </div>
 
                                 <div>
-                                    <label for="email" class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                                    <label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
                                     <input type="email" id="email" name="email" required maxlength="255"
                                            value="{{ old('email', $user->email) }}"
                                            class="form-input">
@@ -107,7 +107,7 @@
                                 @method('PUT')
 
                                 <div>
-                                    <label for="current_password" class="block text-sm font-medium text-slate-700 mb-1">Parola actuală</label>
+                                    <label for="current_password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Parola actuală</label>
                                     <input type="password" id="current_password" name="current_password" required autocomplete="current-password"
                                            class="form-input">
                                     @error('current_password') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
@@ -115,14 +115,14 @@
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label for="password" class="block text-sm font-medium text-slate-700 mb-1">Parola nouă</label>
+                                        <label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Parola nouă</label>
                                         <input type="password" id="password" name="password" required autocomplete="new-password"
                                                class="form-input">
                                         <p class="mt-1 text-xs text-slate-400">Minimum 8 caractere.</p>
                                         @error('password') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
                                     </div>
                                     <div>
-                                        <label for="password_confirmation" class="block text-sm font-medium text-slate-700 mb-1">Confirmă parola nouă</label>
+                                        <label for="password_confirmation" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Confirmă parola nouă</label>
                                         <input type="password" id="password_confirmation" name="password_confirmation" required autocomplete="new-password"
                                                class="form-input">
                                     </div>

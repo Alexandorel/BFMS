@@ -40,7 +40,7 @@
             <div class="w-full max-w-md">
                 <div class="mb-8 flex items-center gap-3 lg:hidden">
                     <x-brand-mark class="size-10" />
-                    <span class="font-display text-lg font-bold tracking-wide text-ink-950">BFMS</span>
+                    <span class="font-display text-lg font-bold tracking-wide text-ink-950 dark:text-slate-100">BFMS</span>
                 </div>
 
                 <h1 class="ui-page-title">{{ $title }}</h1>
@@ -53,7 +53,7 @@
                 </div>
 
                 @isset($footer)
-                    <div class="mt-6 text-center text-sm text-slate-500">
+                    <div class="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
                         {{ $footer }}
                     </div>
                 @endisset
