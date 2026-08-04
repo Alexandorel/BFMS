@@ -25,10 +25,15 @@
             <section class="ui-card overflow-hidden">
                 <div class="ui-card-header flex-col items-stretch sm:flex-row sm:items-center">
                     <div>
-                        <h2 class="ui-section-title">Toate facturile</h2>
+                        <h2 class="ui-section-title">
+                            {{ $paymentMode ? 'Facturi eligibile pentru plată' : 'Toate facturile' }}
+                        </h2>
                         <p class="mt-0.5 text-xs text-slate-500">{{ $invoices->count() }} documente</p>
                     </div>
-                    <x-invoice-status-filter target="invoice-list" :disabled="$invoices->isEmpty()" />
+                    <x-invoice-status-filter target="invoice-list"
+                                             :statuses="$filterStatuses"
+                                             :all-label="$paymentMode ? 'Toate facturile eligibile' : 'Toate stările'"
+                                             :disabled="$invoices->isEmpty()" />
                 </div>
 
                 <div class="ui-table-wrap" tabindex="0" role="region" aria-label="Lista facturilor">
