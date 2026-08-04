@@ -11,7 +11,7 @@
         <header class="app-page-toolbar">
             <x-company-switcher :companies="$companies" :active-company="$company">
                 <x-slot:meta>
-                    <span class="ui-badge bg-slate-100 text-slate-600">Doar vizualizare</span>
+                    <span class="ui-badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Doar vizualizare</span>
                 </x-slot:meta>
             </x-company-switcher>
         </header>
@@ -36,8 +36,8 @@
                     <section class="ui-card p-5 sm:p-6">
                         <div class="flex items-start justify-between gap-4">
                             <div>
-                                <h2 class="font-semibold text-slate-900">Fișă client</h2>
-                                <p class="text-sm text-slate-500 mt-1">
+                                <h2 class="font-semibold text-slate-900 dark:text-slate-100">Fișă client</h2>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
                                     Total facturat, total plătit, sold și istoricul facturilor clientului.
                                 </p>
                             </div>
@@ -50,7 +50,7 @@
 
                         <form action="{{ route('dashboard.contabil.reports.client-sheet') }}" method="GET" class="mt-5 space-y-4">
                             <label class="block">
-                                <span class="text-sm font-medium text-slate-700">Client</span>
+                                <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Client</span>
                                 <select name="client_id" required @disabled($clients->isEmpty())
                                 class="form-input mt-1.5">
                                     <option value="">Selectează clientul</option>
@@ -82,8 +82,8 @@
                     <section class="ui-card p-5 sm:p-6">
                         <div class="flex items-start justify-between gap-4">
                             <div>
-                                <h2 class="font-semibold text-slate-900">Închidere lună</h2>
-                                <p class="text-sm text-slate-500 mt-1">
+                                <h2 class="font-semibold text-slate-900 dark:text-slate-100">Închidere lună</h2>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
                                     Facturi, încasări, sold la final de lună și defalcare pe cote de TVA.
                                 </p>
                             </div>
@@ -96,12 +96,12 @@
 
                         <form action="{{ route('dashboard.contabil.reports.month-close') }}" method="GET" class="mt-5 space-y-4">
                             <label class="block">
-                                <span class="text-sm font-medium text-slate-700">Luna raportată</span>
+                                <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Luna raportată</span>
                                 <input type="month" name="month" value="{{ old('month', $defaultMonth) }}" required
                                        class="form-input mt-1.5">
                             </label>
 
-                            <p class="text-xs text-slate-500">
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
                                 Soldul este calculat istoric, folosind numai încasările înregistrate până la ultima zi a lunii.
                             </p>
 

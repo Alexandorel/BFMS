@@ -172,15 +172,15 @@
             <div class="flex justify-end">
                 <div class="w-full sm:w-72 space-y-2">
                     <div class="flex justify-between text-sm">
-                        <span class="text-slate-500">Subtotal</span>
-                        <span id="subtotal-display" class="font-medium text-slate-900">0.00 RON</span>
+                        <span class="text-slate-500 dark:text-slate-400">Subtotal</span>
+                        <span id="subtotal-display" class="font-medium text-slate-900 dark:text-slate-100">0.00 RON</span>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <span class="text-slate-500">TVA</span>
-                        <span id="vat-display" class="font-medium text-slate-900">0.00 RON</span>
+                        <span class="text-slate-500 dark:text-slate-400">TVA</span>
+                        <span id="vat-display" class="font-medium text-slate-900 dark:text-slate-100">0.00 RON</span>
                     </div>
                     <div class="flex justify-between text-base font-semibold border-t border-slate-200 pt-2">
-                        <span class="text-slate-900">Total</span>
+                        <span class="text-slate-900 dark:text-slate-100">Total</span>
                         <span id="total-display" class="text-indigo-600">0.00 RON</span>
                     </div>
                     <div id="ron-equiv-wrapper" class="hidden flex justify-between text-xs text-slate-400 pt-1">

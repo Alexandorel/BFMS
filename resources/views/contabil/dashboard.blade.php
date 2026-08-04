@@ -17,7 +17,7 @@
                 <x-company-switcher :companies="$companies" :active-company="$company">
                     <x-slot:meta>
                         <span class="ui-badge bg-emerald-50 text-emerald-700">Plătitor TVA</span>
-                        <span class="ui-badge bg-slate-100 text-slate-600">Doar vizualizare</span>
+                        <span class="ui-badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Doar vizualizare</span>
                     </x-slot:meta>
                 </x-company-switcher>
             </header>
@@ -39,7 +39,7 @@
                             <div class="ui-table-wrap" tabindex="0" role="region" aria-label="Facturi recente">
                                 <table class="ui-table">
                                     <thead>
-                                        <tr class="text-left text-slate-500 border-b border-slate-100">
+                                        <tr class="text-left text-slate-500 dark:text-slate-400 border-b border-slate-100">
                                             <th class="px-3 py-2 font-medium">Nr.</th>
                                             <th class="px-3 py-2 font-medium">Client</th>
                                             <th class="px-3 py-2 font-medium">Valoare</th>
@@ -50,11 +50,11 @@
                                     <tbody id="recent-invoice-list" class="divide-y divide-slate-100">
                                         @forelse ($invoices as $inv)
                                             <tr data-invoice-status="{{ $inv->status->value }}">
-                                                <td class="px-3 py-2 font-medium text-slate-900">
+                                                <td class="px-3 py-2 font-medium text-slate-900 dark:text-slate-100">
                                                     {{ $inv->number ? $inv->series . '-' . $inv->number : '—' }}
                                                 </td>
-                                                <td class="px-3 py-2 text-slate-600">{{ $inv->client?->full_name ?? '—' }}</td>
-                                                <td class="px-3 py-2 text-slate-900">
+                                                <td class="px-3 py-2 text-slate-600 dark:text-slate-300">{{ $inv->client?->full_name ?? '—' }}</td>
+                                                <td class="px-3 py-2 text-slate-900 dark:text-slate-100">
                                                     {{ number_format($inv->total, 2, ',', '.') }} {{ $inv->currency }}
                                                 </td>
                                                 <td class="px-3 py-2">

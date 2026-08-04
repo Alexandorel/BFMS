@@ -49,7 +49,7 @@
                             </div>
 
                             <div class="flex items-center gap-2 text-sm">
-                                <label for="team-sort" class="text-slate-500 shrink-0">Sortează:</label>
+                                <label for="team-sort" class="text-slate-500 dark:text-slate-400 shrink-0">Sortează:</label>
                                 <select id="team-sort" class="form-input py-1.5 text-sm">
                                     <option value="recent">Recent adăugate</option>
                                     <option value="az">Nume A–Z</option>
@@ -68,15 +68,15 @@
                                      data-created="{{ $membru['created_at'] }}">
 
                                     <div class="flex items-center gap-3 min-w-0">
-                                        <div class="grid place-items-center w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-semibold text-sm shrink-0">
+                                        <div class="grid place-items-center w-9 h-9 rounded-full bg-slate-200 text-slate-600 dark:text-slate-300 font-semibold text-sm shrink-0">
                                             {{ $membru['initials'] }}
                                         </div>
 
                                         <div class="min-w-0">
-                                            <p class="text-sm font-medium text-slate-900 truncate">
+                                            <p class="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
                                                 {{ $membru['name'] }}
                                             </p>
-                                            <p class="text-xs text-slate-500 truncate">
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
                                                 {{ $membru['email'] }}
                                             </p>
                                         </div>
@@ -89,7 +89,7 @@
                                             @elseif($membru['role'] === 'operator')
                                                 bg-emerald-50 text-emerald-700
                                             @else
-                                                bg-slate-100 text-slate-600
+                                                bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300
                                             @endif
                                         ">
                                             {{ ucfirst($membru['role']) }}
@@ -103,7 +103,7 @@
                                 </div>
                             @endforeach
 
-                            <div id="team-empty" class="px-5 py-8 text-center text-sm text-slate-500 hidden">
+                            <div id="team-empty" class="px-5 py-8 text-center text-sm text-slate-500 dark:text-slate-400 hidden">
                                 Niciun cont găsit.
                             </div>
                         </div>

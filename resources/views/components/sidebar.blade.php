@@ -47,7 +47,7 @@
 <aside class="app-sidebar" aria-label="Navigație principală">
     <div class="flex h-16 shrink-0 items-center justify-center border-b border-app-border px-3 xl:justify-start xl:px-5">
         <x-brand-mark class="size-10" />
-        <p class="ml-3 hidden min-w-0 font-display text-lg font-bold tracking-wide text-ink-950 xl:block">BFMS</p>
+        <p class="ml-3 hidden min-w-0 font-display text-lg font-bold tracking-wide text-ink-950 dark:text-slate-100 xl:block">BFMS</p>
     </div>
 
     <nav class="flex-1 space-y-1 px-2 py-4 text-sm xl:px-3">
@@ -57,7 +57,7 @@
                aria-label="{{ $link['label'] }}"
                title="{{ $link['label'] }}"
                @if ($isActive) aria-current="page" @endif
-               class="group flex min-h-11 items-center justify-center gap-3 rounded-xl px-3 transition-colors xl:justify-start {{ $isActive ? 'bg-brand-50 font-semibold text-brand-800' : 'text-slate-600 hover:bg-slate-50 hover:text-ink-950' }}">
+               class="group flex min-h-11 items-center justify-center gap-3 rounded-xl px-3 transition-colors xl:justify-start {{ $isActive ? 'bg-brand-50 font-semibold text-brand-800 dark:bg-brand-950/50 dark:text-brand-200' : 'text-slate-600 hover:bg-slate-50 hover:text-ink-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white' }}">
                 <svg class="size-5 shrink-0 {{ $isActive ? 'text-brand-600' : 'text-slate-400 group-hover:text-brand-600' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $link['icon'] }}" />
                 </svg>
@@ -72,7 +72,7 @@
                aria-label="Setări"
                title="Setări"
                @if (request()->routeIs('administrator.settings.*') || request()->routeIs('administrator.*')) aria-current="page" @endif
-               class="group flex min-h-11 items-center justify-center gap-3 rounded-xl px-3 transition-colors xl:justify-start {{ request()->routeIs('administrator.settings.*') || request()->routeIs('administrator.*') ? 'bg-brand-50 font-semibold text-brand-800' : 'text-slate-600 hover:bg-slate-50 hover:text-ink-950' }}">
+               class="group flex min-h-11 items-center justify-center gap-3 rounded-xl px-3 transition-colors xl:justify-start {{ request()->routeIs('administrator.settings.*') || request()->routeIs('administrator.*') ? 'bg-brand-50 font-semibold text-brand-800 dark:bg-brand-950/50 dark:text-brand-200' : 'text-slate-600 hover:bg-slate-50 hover:text-ink-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white' }}">
                 <svg class="size-5 shrink-0 text-slate-400 group-hover:text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icons['settings'] }}" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -87,14 +87,24 @@
             <div class="flex items-center justify-center gap-3 xl:justify-start">
                 <div class="grid size-10 shrink-0 place-items-center rounded-full bg-brand-100 text-sm font-bold text-brand-800">{{ $initials }}</div>
                 <div class="hidden min-w-0 flex-1 xl:block">
-                    <p class="truncate text-sm font-semibold text-ink-950">{{ $currentUser->first_name }} {{ mb_substr($currentUser->last_name ?? '', 0, 1) }}.</p>
-                    <p class="truncate text-xs capitalize text-slate-500">{{ $currentUser->role }}</p>
+                    <p class="truncate text-sm font-semibold text-ink-950 dark:text-slate-100">{{ $currentUser->first_name }} {{ mb_substr($currentUser->last_name ?? '', 0, 1) }}.</p>
+                    <p class="truncate text-xs capitalize text-slate-500 dark:text-slate-400">{{ $currentUser->role }}</p>
                 </div>
             </div>
+            <button type="button" data-theme-toggle aria-label="Comută tema" title="Comută tema"
+                    class="mt-2 flex min-h-11 w-full items-center justify-center gap-3 rounded-xl px-3 text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors hover:bg-slate-50 hover:text-ink-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white xl:justify-start">
+                <svg class="size-5 shrink-0 text-slate-400 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <svg class="hidden size-5 shrink-0 text-amber-400 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <span class="hidden xl:inline">Comută tema</span>
+            </button>
             <form method="POST" action="{{ route('logout') }}" class="mt-2">
                 @csrf
                 <button type="submit" aria-label="Deconectare" title="Deconectare"
-                        class="flex min-h-11 w-full items-center justify-center gap-3 rounded-xl px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-ink-950 xl:justify-start">
+                        class="flex min-h-11 w-full items-center justify-center gap-3 rounded-xl px-3 text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors hover:bg-slate-50 hover:text-ink-950 xl:justify-start">
                     <svg class="size-5 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icons['logout'] }}" />
                     </svg>
@@ -109,11 +119,11 @@
 <div data-mobile-navigation class="fixed inset-0 z-50 hidden md:hidden" aria-hidden="true">
     <button type="button" data-navigation-backdrop class="absolute inset-0 bg-slate-950/35 backdrop-blur-[1px]" aria-label="Închide navigația"></button>
 
-    <aside id="mobile-navigation" class="relative flex h-full w-[min(20rem,88vw)] flex-col bg-white shadow-2xl" aria-label="Navigație mobilă">
+    <aside id="mobile-navigation" class="relative flex h-full w-[min(20rem,88vw)] flex-col bg-white dark:bg-slate-900 shadow-2xl" aria-label="Navigație mobilă">
         <div class="flex h-16 items-center justify-between border-b border-app-border px-4">
             <div class="flex items-center gap-3">
                 <x-brand-mark class="size-10" />
-                <p class="font-display text-lg font-bold tracking-wide text-ink-950">BFMS</p>
+                <p class="font-display text-lg font-bold tracking-wide text-ink-950 dark:text-slate-100">BFMS</p>
             </div>
             <button type="button" data-navigation-close class="ui-btn ui-btn-ghost ui-btn-icon" aria-label="Închide meniul">
                 <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -127,7 +137,7 @@
                 @php $isActive = request()->routeIs($link['match']); @endphp
                 <a href="{{ $link['url'] }}"
                    @if ($isActive) aria-current="page" @endif
-                   class="flex min-h-11 items-center gap-3 rounded-xl px-3 {{ $isActive ? 'bg-brand-50 font-semibold text-brand-800' : 'text-slate-600 hover:bg-slate-50' }}">
+                   class="flex min-h-11 items-center gap-3 rounded-xl px-3 {{ $isActive ? 'bg-brand-50 font-semibold text-brand-800 dark:bg-brand-950/50 dark:text-brand-200' : 'text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }}">
                     <svg class="size-5 shrink-0 {{ $isActive ? 'text-brand-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $link['icon'] }}" />
                     </svg>
@@ -137,7 +147,7 @@
 
             @if (($currentUser->role ?? null) === 'administrator')
                 <a href="{{ route('administrator.settings.company') }}"
-                   class="flex min-h-11 items-center gap-3 rounded-xl px-3 {{ request()->routeIs('administrator.*') ? 'bg-brand-50 font-semibold text-brand-800' : 'text-slate-600 hover:bg-slate-50' }}">
+                   class="flex min-h-11 items-center gap-3 rounded-xl px-3 {{ request()->routeIs('administrator.*') ? 'bg-brand-50 font-semibold text-brand-800 dark:bg-brand-950/50 dark:text-brand-200' : 'text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }}">
                     <svg class="size-5 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icons['settings'] }}" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -152,10 +162,19 @@
                 <div class="mb-3 flex items-center gap-3">
                     <div class="grid size-10 place-items-center rounded-full bg-brand-100 text-sm font-bold text-brand-800">{{ $initials }}</div>
                     <div class="min-w-0">
-                        <p class="truncate text-sm font-semibold text-ink-950">{{ $currentUser->first_name }} {{ $currentUser->last_name }}</p>
-                        <p class="text-xs capitalize text-slate-500">{{ $currentUser->role }}</p>
+                        <p class="truncate text-sm font-semibold text-ink-950 dark:text-slate-100">{{ $currentUser->first_name }} {{ $currentUser->last_name }}</p>
+                        <p class="text-xs capitalize text-slate-500 dark:text-slate-400">{{ $currentUser->role }}</p>
                     </div>
                 </div>
+                <button type="button" data-theme-toggle class="ui-btn ui-btn-secondary w-full mb-2">
+                    <svg class="size-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                    <svg class="hidden size-5 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    Comută tema
+                </button>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="ui-btn ui-btn-secondary w-full">

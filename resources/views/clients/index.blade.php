@@ -41,12 +41,12 @@
                         <div class="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                             <div class="min-w-0">
                                 <div class="flex items-center gap-2">
-                                    <p class="text-sm font-medium text-slate-900">{{ $client->full_name }}</p>
-                                    <span class="ui-badge bg-slate-100 text-slate-600">
+                                    <p class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ $client->full_name }}</p>
+                                    <span class="ui-badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                                         {{ $client->client_type === 'company' ? 'Juridic' : 'Fizic' }}
                                     </span>
                                 </div>
-                                <p class="mt-0.5 text-xs text-slate-500">
+                                <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                                     @if ($client->tax_id)
                                         {{ $client->client_type === 'company' ? 'CUI' : 'CNP' }}: {{ $client->tax_id }} &nbsp;•&nbsp;
                                     @endif

@@ -265,11 +265,11 @@
                            class="mt-0.5 w-4 h-4 border-slate-300 text-indigo-600 focus:ring-indigo-500">
 
                     <span>
-                        <span class="block text-sm font-medium text-slate-900">
+                        <span class="block text-sm font-medium text-slate-900 dark:text-slate-100">
                             Înregistrare pentru TVA
                         </span>
 
-                        <span class="block text-xs text-slate-500 mt-0.5">
+                        <span class="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                             Bifează dacă are cod TVA deja.
                         </span>
                     </span>

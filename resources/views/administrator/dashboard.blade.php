@@ -69,11 +69,11 @@
                                     <tbody class="divide-y divide-slate-100">
                                         @forelse ($invoices as $inv)
                                             <tr>
-                                                <td class="font-medium text-slate-900">
+                                                <td class="font-medium text-slate-900 dark:text-slate-100">
                                                     {{ $inv->number ? $inv->series . '-' . $inv->number : '—' }}
                                                 </td>
-                                                <td class="text-slate-600">{{ $inv->client?->full_name ?? '—' }}</td>
-                                                <td class="text-slate-900">
+                                                <td class="text-slate-600 dark:text-slate-300">{{ $inv->client?->full_name ?? '—' }}</td>
+                                                <td class="text-slate-900 dark:text-slate-100">
                                                     {{ number_format($inv->total, 2, ',', '.') }} {{ $inv->currency }}
                                                 </td>
                                                 <td>

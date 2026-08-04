@@ -47,5 +47,5 @@
     <input type="checkbox" name="is_vat_exempt" id="is_vat_exempt" value="1"
            class="size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
            @checked(old('is_vat_exempt', $product->is_vat_exempt ?? false))>
-    <label for="is_vat_exempt" class="text-sm text-slate-700">Produs scutit de TVA</label>
+    <label for="is_vat_exempt" class="text-sm text-slate-700 dark:text-slate-300">Produs scutit de TVA</label>
 </div>
