@@ -145,7 +145,7 @@
                         @forelse ($audits as $audit)
                             <tr class="align-top">
                                 <td class="px-5 py-4 whitespace-nowrap text-slate-500">
-                                    {{ $audit->created_at?->format('d.m.Y H:i') }}
+                                    {{ $audit->created_at?->setTimezone(config('audit.display_timezone'))->format('d.m.Y H:i') }}
                                 </td>
                                 <td class="px-5 py-4 whitespace-nowrap">
                                     @if ($audit->user)

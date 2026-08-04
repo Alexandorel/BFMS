@@ -29,6 +29,21 @@ class ReportAccessTest extends TestCase
             ->assertSee($client->full_name);
     }
 
+    public function test_report_forms_are_not_duplicated_on_the_accountant_dashboard(): void
+    {
+        $company = $this->createCompany();
+        $accountant = $this->createUser('contabil', $company);
+        $this->createClient($company);
+
+        $this->withoutVite()
+            ->actingAs($accountant)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('dashboard.contabil'))
+            ->assertOk()
+            ->assertDontSee('Fișă client')
+            ->assertDontSee('Închidere lună');
+    }
+
     public function test_operator_cannot_access_accountant_reports(): void
     {
         $company = $this->createCompany();

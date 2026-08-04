@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Audit;
-use App\Models\Client;
 use App\Models\Invoice;
 use App\Services\ActiveCompanyService;
 use Illuminate\Http\Request;
@@ -32,10 +31,6 @@ class ContabilController extends Controller
                 ->get()
             : collect();
 
-        $clients = $company
-            ? Client::where('company_id', $company->id)->orderBy('name')->get()
-            : collect();
-
         // Preview for the audit log card, the full screen lives in AuditLogController
         $audits = $company
             ? Audit::forCompany($company->id)
@@ -51,7 +46,6 @@ class ContabilController extends Controller
             'company',
             'companyName',
             'invoices',
-            'clients',
             'audits'
         ));
     }

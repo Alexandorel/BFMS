@@ -4,6 +4,10 @@ return [
 
     'enabled' => env('AUDITING_ENABLED', true),
 
+    // Audit timestamps stay in UTC in storage and are converted only when
+    // rendered. Europe/Bucharest also applies daylight-saving time correctly.
+    'display_timezone' => env('AUDIT_DISPLAY_TIMEZONE', 'Europe/Bucharest'),
+
     /*
     |--------------------------------------------------------------------------
     | Audit Implementation
