@@ -11,6 +11,7 @@ use App\Models\DocumentSeries;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -51,6 +52,23 @@ class AuditLogAccessTest extends TestCase
             ->withSession(['active_company_id' => $company->id])
             ->get(route('audit-log.index'))
             ->assertOk();
+    }
+
+    public function test_audit_timestamps_are_displayed_in_bucharest_time(): void
+    {
+        [$contabil, $company] = $this->userWithCompany('contabil');
+        $this->makeProduct($company, 'Produs cu oră locală');
+
+        $audit = Audit::forCompany($company->id)->latest('id')->firstOrFail();
+        $audit->forceFill([
+            'created_at' => CarbonImmutable::parse('2026-08-04 12:00:00', 'UTC'),
+        ])->saveQuietly();
+
+        $this->actingAs($contabil)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('audit-log.index'))
+            ->assertOk()
+            ->assertSee('04.08.2026 15:00');
     }
 
     public function test_an_operator_cannot_open_the_audit_log(): void
