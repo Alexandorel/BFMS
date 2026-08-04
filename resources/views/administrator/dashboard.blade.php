@@ -40,10 +40,10 @@
                 @endif
 
                 {{-- Invoices --}}
-                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 gap-6">
 
                     {{-- Recent Invoices --}}
-                    <div class="xl:col-span-2">
+                    <div>
                         <div class="ui-card overflow-hidden">
                             <div class="ui-card-header">
                                 <h2 class="ui-section-title">Facturi recente</h2>
@@ -101,38 +101,6 @@
                                         aria-controls="invoices-scroll">Vezi toate</button>
                                 </div>
                             @endif
-                        </div>
-                    </div>
-
-                    {{-- Jurnal de audit — preview, ecranul complet e la audit-log.index (F-101) --}}
-                    <div class="ui-card self-start overflow-hidden">
-                        <div class="ui-card-header">
-                            <h2 class="ui-section-title">Activitate recentă</h2>
-                        </div>
-                        <ul class="divide-y divide-slate-100 text-sm">
-                            @forelse ($audits as $entry)
-                                <li class="px-5 py-3">
-                                    <p class="text-slate-800">
-                                        <span class="font-medium">
-                                            {{ $entry->user ? trim($entry->user->first_name . ' ' . $entry->user->last_name) : 'Sistem' }}
-                                        </span>
-                                        {{ mb_strtolower($entry->eventLabel()) }}
-                                        {{ mb_strtolower($entry->entityLabel()) }}
-                                        {{ $entry->entityName() }}
-                                    </p>
-                                    <p class="text-xs text-slate-400 mt-0.5">
-                                        {{ $entry->created_at?->diffForHumans() }}
-                                    </p>
-                                </li>
-                            @empty
-                                <li class="px-5 py-3 text-slate-500">
-                                    Nicio modificare înregistrată încă.
-                                </li>
-                            @endforelse
-                        </ul>
-                        <div class="px-5 py-4 border-t border-slate-200">
-                            <a href="{{ route('audit-log.index') }}"
-                                class="ui-action-link">Vezi jurnalul complet</a>
                         </div>
                     </div>
                 </div>
