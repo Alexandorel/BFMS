@@ -43,9 +43,9 @@
     @error('vat_rate') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
 </div>
 
-<div class="flex min-h-11 items-center gap-3 rounded-lg border border-app-border bg-slate-50 px-3">
+<div class="flex min-h-11 items-center gap-3 rounded-lg border border-app-border bg-slate-50 px-3 dark:border-slate-700 dark:bg-slate-800">
     <input type="checkbox" name="is_vat_exempt" id="is_vat_exempt" value="1"
-           class="size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+           class="size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-700"
            @checked(old('is_vat_exempt', $product->is_vat_exempt ?? false))>
     <label for="is_vat_exempt" class="text-sm text-slate-700 dark:text-slate-300">Produs scutit de TVA</label>
 </div>
