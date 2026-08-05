@@ -18,10 +18,19 @@
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                     Înapoi
                 </a>
-                {{-- pe o ciorna editabila eticheta ar contrazice butoanele de mai jos --}}
-                @unless ($invoice->status->isDraft() && in_array(auth()->user()->role, ['administrator', 'operator'], true))
-                    <span class="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium">Doar vizualizare</span>
-                @endunless
+                <div class="flex items-center gap-2">
+                    <x-button :href="route('invoices.pdf', $invoice)" variant="secondary">
+                        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14" />
+                        </svg>
+                        Descarcă PDF
+                    </x-button>
+
+                    {{-- pe o ciorna editabila eticheta ar contrazice butoanele de mai jos --}}
+                    @unless ($invoice->status->isDraft() && in_array(auth()->user()->role, ['administrator', 'operator'], true))
+                        <span class="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium">Doar vizualizare</span>
+                    @endunless
+                </div>
             </header>
 
             {{-- Content --}}

@@ -115,6 +115,10 @@ Route::middleware('auth')->group (function () {
 
     // Factură — vizualizare. Operatorul emite facturi, deci trebuie sa le si vada.
     Route::middleware('role:administrator,contabil,operator')->group(function () {
+        Route::get('/facturi/{invoice}/pdf', [InvoiceController::class, 'downloadPdf'])
+            ->whereNumber('invoice')
+            ->name('invoices.pdf');
+
         Route::get('/facturi/{invoice}', [InvoiceController::class, 'show'])
             ->whereNumber('invoice')
             ->name('invoices.show');
