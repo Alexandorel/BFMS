@@ -14,7 +14,7 @@
             font-family: "DejaVu Sans", sans-serif;
             font-size: 10px;
             line-height: 1.6;
-            font-weight: 300;
+            font-weight: normal;
         }
 
         .header, .parties, .summary { width: 100%; border-collapse: collapse; }
