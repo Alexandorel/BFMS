@@ -91,16 +91,6 @@
                     <p class="truncate text-xs capitalize text-slate-500 dark:text-slate-400">{{ $currentUser->role }}</p>
                 </div>
             </div>
-            <button type="button" data-theme-toggle aria-label="Comută tema" title="Comută tema"
-                    class="mt-2 flex min-h-11 w-full items-center justify-center gap-3 rounded-xl px-3 text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors hover:bg-slate-50 hover:text-ink-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white xl:justify-start">
-                <svg class="size-5 shrink-0 text-slate-400 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-                <svg class="hidden size-5 shrink-0 text-amber-400 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <span class="hidden xl:inline">Comută tema</span>
-            </button>
             <form method="POST" action="{{ route('logout') }}" class="mt-2">
                 @csrf
                 <button type="submit" aria-label="Deconectare" title="Deconectare"
@@ -166,15 +156,6 @@
                         <p class="text-xs capitalize text-slate-500 dark:text-slate-400">{{ $currentUser->role }}</p>
                     </div>
                 </div>
-                <button type="button" data-theme-toggle class="ui-btn ui-btn-secondary w-full mb-2">
-                    <svg class="size-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                    </svg>
-                    <svg class="hidden size-5 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                    Comută tema
-                </button>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="ui-btn ui-btn-secondary w-full">

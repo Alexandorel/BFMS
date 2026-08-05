@@ -52,10 +52,7 @@
                                         {{ $invoices->count() === 1 ? 'factură' : 'facturi' }}</span>
                                 @endif
                             </div>
-                            <div id="invoices-scroll"
-                                class="ui-table-wrap overflow-y-auto transition-[max-height] duration-300 ease-out"
-                                tabindex="0" role="region" aria-label="Facturi recente"
-                                style="max-height: 17rem;">
+                            <div class="ui-table-wrap" tabindex="0" role="region" aria-label="Facturi recente">
                                 <table class="ui-table">
                                     <thead class="sticky top-0 z-10">
                                         <tr>
@@ -94,13 +91,9 @@
                                     </tbody>
                                 </table>
                             </div>
-                            @if ($invoices->count() > 5)
-                                <div class="px-5 py-4 border-t border-slate-200">
-                                    <button type="button" id="invoices-toggle"
-                                        class="ui-action-link" aria-expanded="false"
-                                        aria-controls="invoices-scroll">Vezi toate</button>
-                                </div>
-                            @endif
+                            <div class="border-t border-app-border px-5 py-4">
+                                <a href="{{ route('invoices.index') }}" class="ui-action-link">Vezi mai multe</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -108,27 +101,5 @@
             </main>
     </x-app-shell>
 
-<script>
-    // extend/ shorten invoices list
-    const invoicesToggle = document.getElementById('invoices-toggle');
-    const invoicesScroll = document.getElementById('invoices-scroll');
-
-    if (invoicesToggle && invoicesScroll) {
-        const COLLAPSED = '17rem';
-        const EXPANDED = '32rem';
-
-        invoicesToggle.addEventListener('click', function() {
-            const expanded = invoicesScroll.style.maxHeight === EXPANDED;
-
-            invoicesScroll.style.maxHeight = expanded ? COLLAPSED : EXPANDED;
-            invoicesToggle.textContent = expanded ? 'Vezi toate' : 'Vezi mai puține';
-            invoicesToggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-
-            if (expanded) {
-                invoicesScroll.scrollTop = 0;
-            }
-        });
-    }
-</script>
 </body>
 </html>
