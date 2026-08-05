@@ -46,11 +46,14 @@ class InvoiceController extends Controller
             ->latest()
             ->get();
 
-        return view('contabil.invoices', compact(
-            'invoices',
-            'paymentMode',
-            'filterStatuses'
-        ));
+        return view('contabil.invoices', [
+            'user' => $request->user(),
+            'company' => $company,
+            'companies' => $request->user()->companies,
+            'invoices' => $invoices,
+            'paymentMode' => $paymentMode,
+            'filterStatuses' => $filterStatuses,
+        ]);
     }
     public function show(Invoice $invoice)
     {
