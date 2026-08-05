@@ -52,6 +52,15 @@ Route::middleware('auth')->group (function () {
     Route::middleware('role:administrator')->group(function () {
         Route::get('/dashboard/administrator', [AdministratorController::class, 'dashboard'])
             ->name('dashboard.administrator');
+
+        Route::prefix('administrator/reports')->name('administrator.reports.')->group(function () {
+            Route::get('/', [ReportController::class, 'index'])
+                ->name('index');
+            Route::get('/client-sheet', [ReportController::class, 'clientSheet'])
+                ->name('client-sheet');
+            Route::get('/month-close', [ReportController::class, 'monthClose'])
+                ->name('month-close');
+        });
     });
 
     // Dashboard Operator

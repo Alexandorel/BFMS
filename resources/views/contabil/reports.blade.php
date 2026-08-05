@@ -11,7 +11,7 @@
         <header class="app-page-toolbar">
             <x-company-switcher :companies="$companies" :active-company="$company">
                 <x-slot:meta>
-                    <span class="ui-badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Doar vizualizare</span>
+                    <span class="ui-badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">{{ $accessLabel }}</span>
                 </x-slot:meta>
             </x-company-switcher>
         </header>
@@ -48,7 +48,7 @@
                             </div>
                         </div>
 
-                        <form action="{{ route('dashboard.contabil.reports.client-sheet') }}" method="GET" class="mt-5 space-y-4">
+                        <form action="{{ route($clientSheetRoute) }}" method="GET" class="mt-5 space-y-4">
                             <label class="block">
                                 <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Client</span>
                                 <select name="client_id" required @disabled($clients->isEmpty())
@@ -94,7 +94,7 @@
                             </div>
                         </div>
 
-                        <form action="{{ route('dashboard.contabil.reports.month-close') }}" method="GET" class="mt-5 space-y-4">
+                        <form action="{{ route($monthCloseRoute) }}" method="GET" class="mt-5 space-y-4">
                             <label class="block">
                                 <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Luna raportată</span>
                                 <input type="month" name="month" value="{{ old('month', $defaultMonth) }}" required

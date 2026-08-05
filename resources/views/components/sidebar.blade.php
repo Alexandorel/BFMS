@@ -30,6 +30,7 @@
         ],
         default => [
             ['label' => 'Dashboard', 'url' => route('dashboard.administrator'), 'match' => 'dashboard.administrator', 'icon' => $icons['dashboard']],
+            ['label' => 'Rapoarte', 'url' => route('administrator.reports.index'), 'match' => 'administrator.reports.*', 'icon' => $icons['reports']],
             ['label' => 'Clienți', 'url' => route('clients.index'), 'match' => 'clients.*', 'icon' => $icons['clients']],
             ['label' => 'Facturi', 'url' => route('invoices.index'), 'match' => 'invoices.*', 'icon' => $icons['invoices']],
             ['label' => 'Produse', 'url' => route('products.index'), 'match' => 'products.*', 'icon' => $icons['products']],
@@ -40,6 +41,15 @@
     $initials = mb_strtoupper(
         mb_substr($currentUser->first_name ?? 'U', 0, 1)
         . mb_substr($currentUser->last_name ?? 'N', 0, 1)
+    );
+
+    $administratorSettingsActive = request()->routeIs(
+        'administrator.settings.*',
+        'administrator.companies.*',
+        'administrator.team.*',
+        'administrator.series.*',
+        'administrator.bank-accounts.*',
+        'administrator.profile.*',
     );
 @endphp
 
@@ -71,8 +81,8 @@
             <a href="{{ route('administrator.settings.company') }}"
                aria-label="Setări"
                title="Setări"
-               @if (request()->routeIs('administrator.settings.*') || request()->routeIs('administrator.*')) aria-current="page" @endif
-               class="group flex min-h-11 items-center justify-center gap-3 rounded-xl px-3 transition-colors xl:justify-start {{ request()->routeIs('administrator.settings.*') || request()->routeIs('administrator.*') ? 'bg-brand-50 font-semibold text-brand-800 dark:bg-brand-950/50 dark:text-brand-200' : 'text-slate-600 hover:bg-slate-50 hover:text-ink-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white' }}">
+               @if ($administratorSettingsActive) aria-current="page" @endif
+               class="group flex min-h-11 items-center justify-center gap-3 rounded-xl px-3 transition-colors xl:justify-start {{ $administratorSettingsActive ? 'bg-brand-50 font-semibold text-brand-800 dark:bg-brand-950/50 dark:text-brand-200' : 'text-slate-600 hover:bg-slate-50 hover:text-ink-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white' }}">
                 <svg class="size-5 shrink-0 text-slate-400 group-hover:text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icons['settings'] }}" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -137,7 +147,7 @@
 
             @if (($currentUser->role ?? null) === 'administrator')
                 <a href="{{ route('administrator.settings.company') }}"
-                   class="flex min-h-11 items-center gap-3 rounded-xl px-3 {{ request()->routeIs('administrator.*') ? 'bg-brand-50 font-semibold text-brand-800 dark:bg-brand-950/50 dark:text-brand-200' : 'text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }}">
+                   class="flex min-h-11 items-center gap-3 rounded-xl px-3 {{ $administratorSettingsActive ? 'bg-brand-50 font-semibold text-brand-800 dark:bg-brand-950/50 dark:text-brand-200' : 'text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }}">
                     <svg class="size-5 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icons['settings'] }}" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
