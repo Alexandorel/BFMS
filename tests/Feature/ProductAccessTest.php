@@ -100,6 +100,7 @@ class ProductAccessTest extends TestCase
                 'sku' => 'CONS-1',
                 'unit_measure' => 'oră',
                 'unit_price' => 250,
+                'quantity' => 10,
                 'vat_rate' => 19,
             ])
             ->assertRedirect(route('products.index'));
