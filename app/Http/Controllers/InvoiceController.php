@@ -77,12 +77,19 @@ class InvoiceController extends Controller
         return view('invoices.show', compact('invoice'));
     }
 
-    public function downloadPdf(Invoice $invoice)
+    /** Temele PDF disponibile (F-601). */
+    private const PDF_THEMES = ['classic', 'modern', 'minimalist'];
+
+    public function downloadPdf(Request $request, Invoice $invoice)
     {
         abort_unless(
             Auth::user()->companies()->whereKey($invoice->company_id)->exists(),
             403
         );
+
+        // tema selectată de utilizator; fallback pe modern daca lipseste/e invalida
+        $theme = $request->query('tema');
+        $theme = in_array($theme, self::PDF_THEMES, true) ? $theme : 'modern';
 
         $invoice->load([
             'client',
@@ -94,7 +101,7 @@ class InvoiceController extends Controller
             ? $invoice->series.'-'.$invoice->number
             : 'ciorna-'.$invoice->id;
 
-        return Pdf::loadView('invoices.pdf', compact('invoice'))
+        return Pdf::loadView('invoices.pdf.'.$theme, compact('invoice'))
             ->setPaper('a4')
             ->setOption('isPhpEnabled', true)
             ->download('factura-'.$documentNumber.'.pdf');

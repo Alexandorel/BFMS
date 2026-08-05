@@ -19,12 +19,27 @@
                     Înapoi
                 </a>
                 <div class="flex items-center gap-2">
-                    <x-button :href="route('invoices.pdf', $invoice)" variant="secondary">
-                        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14" />
-                        </svg>
-                        Descarcă PDF
-                    </x-button>
+                    {{-- Descarcare PDF cu alegere tema (F-601). <details> = dropdown fara JS. --}}
+                    <details class="relative inline-block">
+                        <summary class="ui-btn ui-btn-secondary cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14" />
+                            </svg>
+                            Descarcă PDF
+                            <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+                        <div class="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-lg border border-app-border bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
+                            <p class="px-3 py-1 text-xs font-medium text-slate-400">Alege tema</p>
+                            @foreach (['classic' => 'Clasic', 'modern' => 'Modern', 'minimalist' => 'Minimalist'] as $value => $label)
+                                <a href="{{ route('invoices.pdf', ['invoice' => $invoice, 'tema' => $value]) }}"
+                                   class="block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+                                    {{ $label }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </details>
 
                     {{-- pe o ciorna editabila eticheta ar contrazice butoanele de mai jos --}}
                     @unless ($invoice->status->isDraft() && in_array(auth()->user()->role, ['administrator', 'operator'], true))
