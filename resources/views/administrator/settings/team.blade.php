@@ -146,11 +146,59 @@
                                     placeholder="Nume" class="form-input" required>
                                 <input type="email" name="email" value="{{ old('email') }}" placeholder="Email"
                                     class="form-input sm:col-span-2" required>
-                                <input type="password" name="password" placeholder="Parolă" class="form-input" required>
-                                <input type="password" name="password_confirmation" placeholder="Confirmă parola"
-                                    class="form-input" required>
+                                <div class="relative">
+                                    <input id="password" type="password" name="password" placeholder="Parolă"
+                                        class="form-input pr-10" required>
+
+                                    <button type="button" id="toggle-password"
+                                        class="absolute inset-y-0 right-3 flex items-center text-slate-500 hover:text-slate-700">
+
+                                        <svg id="password-eye-open" xmlns="http://www.w3.org/2000/svg"
+                                            class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9.27-3.11-11-7 1.01-2.273 2.77-4.143 4.98-5.286M9.88 9.88a3 3 0 104.24 4.24M6.228 6.228A9.956 9.956 0 0112 5c5 0 9.27 3.11 11 7a11.05 11.05 0 01-4.223 5.592M3 3l18 18" />
+                                        </svg>
+
+                                        <svg id="password-eye-closed" xmlns="http://www.w3.org/2000/svg"
+                                            class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7S3.732 16.057 2.458 12z" />
+                                        </svg>
+
+                                    </button>
+                                </div>
+                                <div class="relative">
+                                    <input id="password_confirmation" type="password" name="password_confirmation"
+                                        placeholder="Confirmă parola" class="form-input pr-10" required>
+
+                                    <button type="button" id="toggle-password-confirmation"
+                                        class="absolute inset-y-0 right-3 flex items-center text-slate-500 hover:text-slate-700">
+
+                                        <svg id="password-confirmation-eye-open" xmlns="http://www.w3.org/2000/svg"
+                                            class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9.27-3.11-11-7 1.01-2.273 2.77-4.143 4.98-5.286M9.88 9.88a3 3 0 104.24 4.24M6.228 6.228A9.956 9.956 0 0112 5c5 0 9.27 3.11 11 7a11.05 11.05 0 01-4.223 5.592M3 3l18 18" />
+                                        </svg>
+
+                                        <svg id="password-confirmation-eye-closed" xmlns="http://www.w3.org/2000/svg"
+                                            class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7S3.732 16.057 2.458 12z" />
+                                        </svg>
+
+                                    </button>
+                                </div>
 
                                 <select name="role" class="form-input">
+                                    <option value="" disabled selected>Alege rol</option>
                                     <option value="operator" @selected(old('role') === 'operator')>Operator</option>
                                     <option value="contabil" @selected(old('role') === 'contabil')>Contabil</option>
                                 </select>
@@ -163,7 +211,8 @@
                                     @endforeach
                                 </select>
 
-                                <button type="submit" class="ui-btn ui-btn-primary sm:col-span-2">Salvează</button>
+                                <button type="submit"
+                                    class="ui-btn ui-btn-primary sm:col-span-2">Înregistrează</button>
                             </form>
                         </div>
                     </div>
@@ -215,6 +264,38 @@
         if (banner) {
             setTimeout(() => banner.remove(), 4000);
         }
+    </script>
+
+    <script>
+        function setupPasswordToggle(inputId, buttonId, openId, closedId) {
+            const input = document.getElementById(inputId);
+            const button = document.getElementById(buttonId);
+            const eyeOpen = document.getElementById(openId);
+            const eyeClosed = document.getElementById(closedId);
+
+            button.addEventListener('click', () => {
+                const visible = input.type === 'text';
+
+                input.type = visible ? 'password' : 'text';
+
+                eyeOpen.classList.toggle('hidden', visible);
+                eyeClosed.classList.toggle('hidden', !visible);
+            });
+        }
+
+        setupPasswordToggle(
+            'password',
+            'toggle-password',
+            'password-eye-open',
+            'password-eye-closed'
+        );
+
+        setupPasswordToggle(
+            'password_confirmation',
+            'toggle-password-confirmation',
+            'password-confirmation-eye-open',
+            'password-confirmation-eye-closed'
+        );
     </script>
 
 </body>
