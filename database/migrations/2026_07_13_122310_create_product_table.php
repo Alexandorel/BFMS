@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('sku', 100);
             $table->string('unit_measure', 50);
             $table->decimal('unit_price', 10, 2);
+            $table->decimal('quantity', 10, 2)->default(0);
             $table->decimal('vat_rate', 5, 2);
             $table->timestamps();
 

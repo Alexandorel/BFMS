@@ -22,6 +22,7 @@ class Product extends Model implements Auditable
         'sku',
         'unit_measure',
         'unit_price',
+        'quantity',
         'vat_rate',
         'is_vat_exempt',
     ];
@@ -30,6 +31,7 @@ class Product extends Model implements Auditable
     {
         return [
             'unit_price' => 'decimal:2',
+            'quantity' => 'decimal:2',
             'vat_rate' => 'decimal:2',
             'is_vat_exempt' => 'boolean',
         ];
