@@ -266,7 +266,6 @@
                         // NFR-1: contabilul vede platile, dar nu le gestioneaza
                         $canRecordPayments = $invoice->status->acceptsPayments()
                             && in_array(auth()->user()->role, ['administrator', 'operator'], true);
-                        $canDeletePayments = auth()->user()->role === 'administrator';
                     @endphp
 
                     <div class="ui-table-wrap" tabindex="0" role="region" aria-label="Plățile facturii">
@@ -278,11 +277,6 @@
                                     <th class="px-5 py-3 font-medium">Referință</th>
                                     <th class="px-5 py-3 font-medium">Chitanță</th>
                                     <th class="px-5 py-3 font-medium text-right">Sumă</th>
-                                    @if ($canDeletePayments)
-                                        <th class="px-5 py-3 font-medium text-right">
-                                            <span class="sr-only">Acțiuni</span>
-                                        </th>
-                                    @endif
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
@@ -303,41 +297,10 @@
                                         <td class="px-5 py-3 text-right font-medium text-slate-900 dark:text-slate-100">
                                             {{ number_format($payment->amount, 2, ',', '.') }} {{ $payment->currency }}
                                         </td>
-                                        @if ($canDeletePayments)
-                                            <td class="px-5 py-3 text-right whitespace-nowrap">
-                                                {{-- confirmare in doi pasi: NFR-3 interzice confirm() nativ --}}
-                                                <div class="inline-flex items-center gap-2" data-delete-cell>
-                                                    <button type="button"
-                                                            data-delete-trigger
-                                                            class="ui-action-danger">
-                                                        Șterge
-                                                    </button>
-
-                                                    <span class="hidden items-center gap-2" data-delete-confirm>
-                                                        <span class="text-xs text-slate-500 dark:text-slate-400">Sigur?</span>
-                                                        <form action="{{ route('invoices.payments.destroy', $payment) }}"
-                                                              method="POST"
-                                                              class="inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit"
-                                                                    class="ui-btn ui-btn-danger">
-                                                                Da
-                                                            </button>
-                                                        </form>
-                                                        <button type="button"
-                                                                data-delete-cancel
-                                                                class="ui-btn ui-btn-secondary">
-                                                            Nu
-                                                        </button>
-                                                    </span>
-                                                </div>
-                                            </td>
-                                        @endif
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="{{ $canDeletePayments ? 6 : 5 }}" class="px-5 py-8 text-center text-slate-400">
+                                        <td colspan="5" class="px-5 py-8 text-center text-slate-400">
                                             Nicio plată înregistrată.
                                         </td>
                                     </tr>
@@ -444,26 +407,6 @@
     </x-app-shell>
 
     <script>
-        // Confirmare de stergere in doi pasi. NFR-3 interzice confirm() nativ,
-        // deci butonul isi schimba starea in loc sa blocheze firul de executie.
-        document.querySelectorAll('[data-delete-cell]').forEach(function (cell) {
-            const trigger = cell.querySelector('[data-delete-trigger]');
-            const confirm = cell.querySelector('[data-delete-confirm]');
-            const cancel = cell.querySelector('[data-delete-cancel]');
-
-            trigger?.addEventListener('click', function () {
-                trigger.classList.add('hidden');
-                confirm.classList.remove('hidden');
-                confirm.classList.add('inline-flex');
-            });
-
-            cancel?.addEventListener('click', function () {
-                confirm.classList.add('hidden');
-                confirm.classList.remove('inline-flex');
-                trigger.classList.remove('hidden');
-            });
-        });
-
         // Referinta e obligatorie doar la ordin de plata (vezi StorePaymentRequest).
         const methodSelect = document.getElementById('payment_method');
         const referenceInput = document.getElementById('reference');
