@@ -14,13 +14,17 @@
 
         {{-- Top Bar --}}
         <header class="app-page-toolbar">
-            <x-company-switcher :companies="$companies" :active-company="$company" :add-href="route('administrator.settings.addcompany')" />
+            <x-company-switcher :companies="$companies" :active-company="$company">
+                <x-slot:meta>
+        <x-role-badge :role="auth()->user()->role" />
+    </x-slot:meta>
+                </x-company-switcher>
         </header>
 
         {{-- Content --}}
         <main class="app-page-content space-y-6">
 
-            <x-page-header title="Setări" :description="'Configurările firmei ' . ($company?->name ?? '—')" />
+            <x-page-header title="Setări" description="Contul tău și configurările firmei" />
 
             @if (session('status'))
                 <div id="status-banner"

@@ -13,13 +13,16 @@
     <x-app-shell>
 
         <header class="app-page-toolbar">
-            <x-company-switcher :companies="$companies" :active-company="$companies->first()"
-                                :add-href="route('administrator.settings.addcompany')" />
+            <x-company-switcher :companies="$companies" :active-company="$companies->first()">
+                <x-slot:meta>
+                    <x-role-badge :role="auth()->user()->role" />
+                </x-slot:meta>
+            </x-company-switcher>
         </header>
 
         <main class="app-page-content space-y-6">
 
-            <x-page-header title="Editează cont" :description="'Modifică datele pentru '.$user->first_name.' '.$user->last_name" />
+            <x-page-header title="Editează cont" :description="'Modifică datele pentru ' . $user->first_name . ' ' . $user->last_name" />
 
             @if ($errors->any())
                 <div class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 space-y-1">
@@ -40,13 +43,18 @@
                         </div>
 
                         <div class="px-5 py-4">
-                            <form method="POST" action="{{ route('administrator.team.update', $user) }}" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <form method="POST" action="{{ route('administrator.team.update', $user) }}"
+                                class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 @csrf
                                 @method('PUT')
 
-                                <input type="text" name="first_name" value="{{ old('first_name', $user->first_name) }}" placeholder="Prenume" class="form-input" required>
-                                <input type="text" name="last_name" value="{{ old('last_name', $user->last_name) }}" placeholder="Nume" class="form-input" required>
-                                <input type="email" name="email" value="{{ old('email', $user->email) }}" placeholder="Email" class="form-input sm:col-span-2" required>
+                                <input type="text" name="first_name"
+                                    value="{{ old('first_name', $user->first_name) }}" placeholder="Prenume"
+                                    class="form-input" required>
+                                <input type="text" name="last_name" value="{{ old('last_name', $user->last_name) }}"
+                                    placeholder="Nume" class="form-input" required>
+                                <input type="email" name="email" value="{{ old('email', $user->email) }}"
+                                    placeholder="Email" class="form-input sm:col-span-2" required>
 
                                 <select name="role" class="form-input">
                                     <option value="operator" @selected(old('role', $user->role) === 'operator')>Operator</option>
@@ -55,12 +63,14 @@
 
                                 <select name="company_id" class="form-input" required>
                                     @foreach ($companies as $c)
-                                        <option value="{{ $c->id }}" @selected((int) old('company_id', $user->companies->first()?->id) === $c->id)>{{ $c->name }}</option>
+                                        <option value="{{ $c->id }}" @selected((int) old('company_id', $user->companies->first()?->id) === $c->id)>
+                                            {{ $c->name }}</option>
                                     @endforeach
                                 </select>
 
                                 <div class="sm:col-span-2 flex items-center justify-between gap-3 mt-2">
-                                    <a href="{{ route('administrator.settings.team') }}" class="text-sm text-slate-500 hover:text-slate-700">Anulează</a>
+                                    <a href="{{ route('administrator.settings.team') }}"
+                                        class="text-sm text-slate-500 hover:text-slate-700">Anulează</a>
                                     <button type="submit" class="ui-btn ui-btn-primary">Salvează</button>
                                 </div>
                             </form>
@@ -74,4 +84,5 @@
     </x-app-shell>
 
 </body>
+
 </html>
