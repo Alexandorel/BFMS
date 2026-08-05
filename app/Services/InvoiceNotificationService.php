@@ -46,7 +46,22 @@ class InvoiceNotificationService
 
     protected function send(Invoice $invoice, string $type, $mailable, ?int $paymentId = null): void
     {
-        $email = $invoice->client->email;
+        $email = $invoice->client?->email;
+
+        // Emailul clientului este opțional. Lipsa lui nu trebuie să anuleze
+        // operațiunea financiară ce a declanșat notificarea (de exemplu plata).
+        if (blank($email)) {
+            InvoiceNotification::create([
+                'invoice_id' => $invoice->id,
+                'payment_id' => $paymentId,
+                'type' => $type,
+                'sent_to' => 'fara-email@client.com',
+                'status' => 'failed',
+                'error_message' => 'Clientul nu are adresă de email definită.',
+            ]);
+
+            return;
+        }
 
         $notification = InvoiceNotification::create([
             'invoice_id' => $invoice->id,

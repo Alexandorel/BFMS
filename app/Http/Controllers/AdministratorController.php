@@ -25,13 +25,13 @@ class AdministratorController extends Controller
 
         $companyName = $company?->name ?? " - ";
 
-        // Facturile firmei active, cu clientul atașat (eager loading).
-        // Cardul din dashboard afișează primele câteva, restul devin vizibile
-        // prin extindere + scroll, fără navigare către altă pagină.
+        // Dashboard-ul afișează doar cele mai recente facturi.
+        // Lista completă rămâne disponibilă în pagina dedicată facturilor.
         $invoices = $company
             ? Invoice::with('client')
                 ->where('company_id', $company->id)
                 ->latest()
+                ->take(5)
                 ->get()
             : collect();
 

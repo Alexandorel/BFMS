@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Services\ActiveCompanyService;
 use App\Services\BNRExchange;
 use App\Services\InvoiceService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use RuntimeException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -71,6 +72,29 @@ class InvoiceController extends Controller
         ]);
 
         return view('invoices.show', compact('invoice'));
+    }
+
+    public function downloadPdf(Invoice $invoice)
+    {
+        abort_unless(
+            Auth::user()->companies()->whereKey($invoice->company_id)->exists(),
+            403
+        );
+
+        $invoice->load([
+            'client',
+            'company.bankAccounts',
+            'lines' => fn ($query) => $query->orderBy('position'),
+        ]);
+
+        $documentNumber = $invoice->number
+            ? $invoice->series.'-'.$invoice->number
+            : 'ciorna-'.$invoice->id;
+
+        return Pdf::loadView('invoices.pdf', compact('invoice'))
+            ->setPaper('a4')
+            ->setOption('isPhpEnabled', true)
+            ->download('factura-'.$documentNumber.'.pdf');
     }
 
     public function create(Request $request, ActiveCompanyService $activeCompanyService)

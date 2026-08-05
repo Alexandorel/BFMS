@@ -51,6 +51,22 @@ class PaymentServiceTest extends TestCase
         $this->assertSame(0.0, $invoice->fresh()->balance());
     }
 
+    public function test_a_missing_client_email_does_not_block_the_payment(): void
+    {
+        [$invoice, $user] = $this->createInvoice(1000.00);
+
+        $payment = $this->service->record($invoice, $this->paymentData(400.00), $user);
+
+        $this->assertDatabaseHas('payments', ['id' => $payment->id]);
+        $this->assertDatabaseHas('invoice_notifications', [
+            'invoice_id' => $invoice->id,
+            'payment_id' => $payment->id,
+            'type' => 'payment_confirmation',
+            'status' => 'failed',
+            'error_message' => 'Clientul nu are adresă de email definită.',
+        ]);
+    }
+
     public function test_several_partial_payments_add_up_to_fully_paid(): void
     {
         [$invoice, $user] = $this->createInvoice(600.60);

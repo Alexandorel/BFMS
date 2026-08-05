@@ -83,7 +83,7 @@
     }
 
     .app-page-toolbar {
-        @apply flex min-h-16 items-center justify-between gap-3 border-b border-app-border bg-white px-4 sm:px-6 dark:border-slate-800 dark:bg-slate-900;
+        @apply flex min-h-16 items-center justify-between gap-3 border-b border-app-border bg-white px-4 sm:px-6 md:pr-20 dark:border-slate-800 dark:bg-slate-900;
     }
 
     .app-page-content {
