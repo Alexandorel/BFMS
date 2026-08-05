@@ -13,6 +13,9 @@
 
         <header class="app-page-toolbar">
             <x-company-switcher :companies="$companies" :active-company="$company">
+                <x-slot:meta>
+                    <x-role-badge :role="auth()->user()->role" />
+                </x-slot:meta>
             </x-company-switcher>
         </header>
 

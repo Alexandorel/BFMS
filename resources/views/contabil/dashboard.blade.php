@@ -16,7 +16,7 @@
             <header class="app-page-toolbar">
                 <x-company-switcher :companies="$companies" :active-company="$company">
                     <x-slot:meta>
-                        <span class="ui-badge bg-emerald-50 text-emerald-700">Plătitor TVA</span>
+                        <x-role-badge :role="auth()->user()->role" />
                         <span class="ui-badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Doar vizualizare</span>
                     </x-slot:meta>
                 </x-company-switcher>
