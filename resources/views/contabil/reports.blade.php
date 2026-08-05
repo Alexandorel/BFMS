@@ -33,7 +33,7 @@
                 @endif
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                    <section class="ui-card p-5 sm:p-6">
+                    <section class="ui-card p-5 sm:p-6 flex flex-col">
                         <div class="flex items-start justify-between gap-4">
                             <div>
                                 <h2 class="font-semibold text-slate-900 dark:text-slate-100">Fișă client</h2>
@@ -48,11 +48,10 @@
                             </div>
                         </div>
 
-                        <form action="{{ route($clientSheetRoute) }}" method="GET" class="mt-5 space-y-4">
-                            <label class="block">
+                        <form action="{{ route($clientSheetRoute) }}" method="GET"class="mt-5 flex flex-col flex-1">
+                            <label class="block mt-5">
                                 <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Client</span>
-                                <select name="client_id" required @disabled($clients->isEmpty())
-                                class="form-input mt-1.5">
+                                <select name="client_id" required @disabled($clients->isEmpty()) class="form-input mt-1.5">
                                     <option value="">Selectează clientul</option>
                                     @foreach ($clients as $client)
                                         <option value="{{ $client->id }}" @selected((string) old('client_id') === (string) $client->id)>
@@ -63,19 +62,24 @@
                             </label>
 
                             @if ($clients->isEmpty())
-                                <p class="text-xs text-amber-700">Firma activă nu are clienți înregistrați.</p>
-                            @endif
+    <p class="text-xs text-amber-700">
+        Firma activă nu are clienți înregistrați.
+    </p>
+@endif
 
-                            <div class="grid grid-cols-2 gap-3">
-                                <button type="submit" name="format" value="pdf" @disabled($clients->isEmpty())
-                                class="ui-btn ui-btn-secondary w-full">
-                                    Descarcă PDF
-                                </button>
-                                <button type="submit" name="format" value="xlsx" @disabled($clients->isEmpty())
-                                class="ui-btn ui-btn-primary w-full">
-                                    Descarcă Excel
-                                </button>
-                            </div>
+<div class="mt-auto pt-4 grid grid-cols-2 gap-3">
+    <button type="submit" name="format" value="pdf"
+            @disabled($clients->isEmpty())
+            class="ui-btn ui-btn-secondary w-full">
+        Descarcă PDF
+    </button>
+
+    <button type="submit" name="format" value="xlsx"
+            @disabled($clients->isEmpty())
+            class="ui-btn ui-btn-primary w-full">
+        Descarcă Excel
+    </button>
+</div>
                         </form>
                     </section>
 
