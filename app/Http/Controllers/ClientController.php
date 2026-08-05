@@ -26,6 +26,18 @@ class ClientController extends Controller
         return $company->id;
     }
 
+    /**
+     * Method to verify client. (DoD#3)
+     */
+    private function authorizeClient(Client $client): void
+    {
+        abort_unless(
+            $client->company_id === $this->activeCompanyId(),
+            403,
+            'Clientul nu aparține firmei active.'
+        );
+    }
+
     public function index(): View
     {
         $companyController = new CompanyController();
@@ -77,11 +89,15 @@ class ClientController extends Controller
 
     public function edit(Client $client): View
     {
+        $this->authorizeClient($client);
+
         return view('clients.edit', compact('client'));
     }
 
     public function update(Request $request, Client $client): RedirectResponse
     {
+        $this->authorizeClient($client);
+
         $validated = $this->validateClient($request);
 
         return DB::transaction(function () use ($validated, $request, $client) {
@@ -117,6 +133,8 @@ class ClientController extends Controller
 
     public function destroy(Client $client): RedirectResponse
     {
+        $this->authorizeClient($client);
+
         try {
             $client->delete();
         } catch (QueryException $e) {

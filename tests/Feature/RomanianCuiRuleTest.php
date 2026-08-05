@@ -67,10 +67,33 @@ final class RomanianCuiRuleTest extends TestCase
         }
     }
 
+    public function test_it_accepts_cuis_without_the_ro_prefix(): void
+    {
+        // Prefixul RO e optional: neplatitorii de TVA au CUI fara RO (F-102).
+        $validNonVatCuis = [
+            '795',
+            '1973096',
+            '14837428',
+            '1234567897',
+        ];
+
+        foreach ($validNonVatCuis as $cui) {
+            $validator = $this->makeValidator($cui);
+
+            $this->assertTrue(
+                $validator->passes(),
+                sprintf(
+                    'CUI-ul %s (fara RO) trebuia sa fie valid. Erori: %s',
+                    $cui,
+                    $validator->errors()->first('cui')
+                )
+            );
+        }
+    }
+
     public function test_it_rejects_invalid_formats(): void
     {
         $invalidValues = [
-            '14837428',       // lipseste prefixul RO
             'FR14837428',     // prefix incorect
             'RO',             // lipsesc cifrele
             'RO1',            // prea putine cifre
