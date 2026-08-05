@@ -96,6 +96,7 @@ class TeamController extends Controller
         $company = $companies->firstWhere('id', session('active_company_id')) ?? $companies->first();
 
         $allUsers = $company->users()
+            ->where('role', '!=', 'administrator')
             ->orderByDesc('created_at')
             ->get()
             ->map(fn ($u) => [
