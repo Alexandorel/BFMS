@@ -40,6 +40,7 @@
                                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                                     SKU: {{ $product->sku }} &nbsp;•&nbsp; {{ $product->unit_measure }} &nbsp;•&nbsp;
                                     {{ number_format($product->unit_price, 2) }} RON &nbsp;•&nbsp;
+                                    Stoc: {{ number_format($product->quantity, 2) }} {{ $product->unit_measure }} &nbsp;•&nbsp;
                                     {{ $product->is_vat_exempt ? 'Scutit' : $product->vat_rate.'%' }}
                                 </p>
                             </div>

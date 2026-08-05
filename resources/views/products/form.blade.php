@@ -34,6 +34,13 @@
 </div>
 
 <div>
+    <label for="quantity" class="form-label">Cantitate (stoc)</label>
+    <input id="quantity" type="number" step="0.01" min="0" name="quantity" value="{{ old('quantity', $product->quantity ?? '0') }}"
+           class="form-input">
+    @error('quantity') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
+</div>
+
+<div>
     <label for="vat_rate" class="form-label">Cota TVA</label>
     <select id="vat_rate" name="vat_rate" class="form-input">
         @foreach ($vatOptions as $rate)
