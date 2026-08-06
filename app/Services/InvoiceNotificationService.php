@@ -11,6 +11,7 @@ use App\Models\Payment;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Mail;
 
+
 class InvoiceNotificationService
 {
     public function sendInvoice(Invoice $invoice): void
@@ -19,7 +20,7 @@ class InvoiceNotificationService
             return;
         }
 
-        $this->queue($invoice, 'issued', new InvoiceMail($invoice));
+        $this->send($invoice, 'issued', new InvoiceMail($invoice));
     }
 
     public function sendReminder(Invoice $invoice, string $type): void
@@ -28,12 +29,12 @@ class InvoiceNotificationService
             return;
         }
 
-        $this->queue($invoice, $type, new InvoiceReminderMail($invoice, $type));
+        $this->send($invoice, $type, new InvoiceReminderMail($invoice, $type));
     }
 
     public function sendPaymentConfirmation(Payment $payment): void
     {
-        $this->queue(
+        $this->send(
             $payment->invoice,
             'payment_confirmation',
             new PaymentConfirmationMail($payment),
