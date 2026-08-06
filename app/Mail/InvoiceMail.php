@@ -15,9 +15,8 @@ class InvoiceMail extends Mailable
 
     public function __construct(
         public Invoice $invoice,
-        public string $type = 'issued' // 'issued', 'reminder_before_due', 'reminder_due', 'reminder_overdue'
+        public string $type = 'issued' // 'issued', 'reminder_before_due', 'reminder_due', 'overdue_1', 'overdue_2'
     ) {
-        // Încarcă articolele, clientul și compania
         $this->invoice->loadMissing(['lines', 'client', 'company']);
     }
 
@@ -26,7 +25,8 @@ class InvoiceMail extends Mailable
         $subject = match ($this->type) {
             'reminder_before_due' => "Reamintire: Factura {$this->invoice->series}{$this->invoice->number} scadență în curând",
             'reminder_due'        => "Factura {$this->invoice->series}{$this->invoice->number} este scadentă astăzi",
-            'reminder_overdue'    => "NOTIFICARE: Factura {$this->invoice->series}{$this->invoice->number} este restantă",
+            'overdue_1',
+            'overdue_2'           => "NOTIFICARE: Factura {$this->invoice->series}{$this->invoice->number} este restantă",
             default               => "Factura {$this->invoice->series}{$this->invoice->number}",
         };
 
@@ -35,23 +35,22 @@ class InvoiceMail extends Mailable
 
     public function content(): Content
     {
-        // Selectează șablonul Blade potrivit
         $view = $this->type === 'issued'
             ? 'emails.invoice'
-            : 'emails.invoice_reminder';
+            : 'emails.invoice-reminder';
 
         return new Content(
             markdown: $view,
             with: [
-                'client' => $this->invoice->client,
-                'type'   => $this->type,
+                'invoice' => $this->invoice,
+                'client'  => $this->invoice->client,
+                'type'    => $this->type,
             ],
         );
     }
 
     public function attachments(): array
     {
-        // Niciun PDF atașat
         return [];
     }
 }

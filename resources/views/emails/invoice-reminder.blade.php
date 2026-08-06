@@ -1,7 +1,7 @@
 @component('mail::message')
 # Reamintire Factura {{ $invoice->series }}{{ $invoice->number }}
 
-Bună ziua, {{ $client->name }},
+Bună ziua, {{ $client->name ?? 'Client' }},
 
 @if($type === 'reminder_before_due')
 Vă reamintim că factura de mai jos are scadența în **{{ now()->diffInDays($invoice->due_date) }} zile** (pe data de {{ $invoice->due_date?->format('d.m.Y') }}).
@@ -27,12 +27,12 @@ Factura de mai jos este **restantă de {{ $invoice->due_date?->diffInDays(now())
 @component('mail::table')
 | Descriere | Cant. | Preț un. | Total |
 | :--- | :---: | :---: | :---: |
-@foreach($invoice->items as $item)
-| {{ $item->name ?? $item->description }} | {{ $item->quantity }} | {{ number_format($item->price, 2) }} | {{ number_format($item->total, 2) }} |
+@foreach(($invoice->lines ?? []) as $item)
+| {{ $item->product_name_snapshot }} | {{ $item->quantity }} | {{ number_format($item->unit_price_snapshot, 2) }} | {{ number_format($item->line_total, 2) }} |
 @endforeach
 | **TOTAL DE PLATĂ** | | | **{{ number_format($invoice->total, 2) }} {{ $invoice->currency }}** |
 @endcomponent
 
 Vă mulțumim,<br>
-**{{ $invoice->company->name }}**
+**{{ optional($invoice->company)->name ?? config('app.name') }}**
 @endcomponent
