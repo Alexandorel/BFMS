@@ -60,7 +60,7 @@ class ClientController extends Controller
     {
         $validated = $this->validateClient($request);
 
-        return DB::transaction(function () use ($validated, $request) {
+        return DB::transaction(function () use ($validated) {
             $client = Client::create([
                 'company_id' => $this->activeCompanyId(),
                 'client_type' => $validated['client_type'],
@@ -79,8 +79,9 @@ class ClientController extends Controller
                 'phone' => $validated['phone'] ?? null,
             ]);
 
-            if ($request->boolean('add_contact') && $request->filled('contacts.0.name')) {
-                $client->contacts()->create($validated['contacts'][0]);
+            // F-202: salvam toate persoanele de contact trimise (0..N)
+            foreach ($validated['contacts'] ?? [] as $contact) {
+                $client->contacts()->create($contact);
             }
 
             return redirect()->route('clients.index')->with('status', 'Client adaugat cu succes.');
@@ -98,9 +99,9 @@ class ClientController extends Controller
     {
         $this->authorizeClient($client);
 
-        $validated = $this->validateClient($request);
+        $validated = $this->validateClient($request, $client);
 
-        return DB::transaction(function () use ($validated, $request, $client) {
+        return DB::transaction(function () use ($validated, $client) {
             $client->update([
                 'client_type' => $validated['client_type'],
                 'name' => $validated['name'] ?? null,
@@ -118,13 +119,10 @@ class ClientController extends Controller
                 'phone' => $validated['phone'] ?? null,
             ]);
 
-            if ($request->boolean('add_contact') && $request->filled('contacts.0.name')) {
-                $client->contacts()->updateOrCreate(
-                    ['id' => $client->contacts()->first()?->id],
-                    $validated['contacts'][0]
-                );
-            } else {
-                $client->contacts()->delete();
+            // F-202: sincronizam lista de contacte — stergem tot si recreem din formular
+            $client->contacts()->delete();
+            foreach ($validated['contacts'] ?? [] as $contact) {
+                $client->contacts()->create($contact);
             }
 
             return redirect()->route('clients.index')->with('status', 'Client actualizat cu succes.');
@@ -152,8 +150,17 @@ class ClientController extends Controller
     }
 
 
-    private function validateClient(Request $request): array
+    private function validateClient(Request $request, ?Client $client = null): array
     {
+        $companyId = $this->activeCompanyId();
+        $ignoreId = $client?->id;
+
+        // Unicitate pe firma (constrangeri DB), ignorand clientul curent la editare.
+        // Pe valori null (ex. cnp la persoana juridica) regula 'nullable' o sare.
+        $uniqueInCompany = fn (string $column) => Rule::unique('clients', $column)
+            ->where('company_id', $companyId)
+            ->ignore($ignoreId);
+
         return $request->validate([
             'client_type' => 'required|in:individual,company',
 
@@ -162,16 +169,22 @@ class ClientController extends Controller
             // F-201: validare format CNP (13 cifre + cifra de control) doar pt persoane fizice
             'cnp' => [
                 'nullable', 'string', 'max:20',
-                Rule::when($request->input('client_type') === 'individual', [new RomanianCnpRule()]),
+                Rule::when($request->input('client_type') === 'individual', [
+                    new RomanianCnpRule(),
+                    $uniqueInCompany('cnp'),
+                ]),
             ],
 
             'name' => 'required_if:client_type,company|nullable|string|max:255',
             // F-201: validare format CUI (prefix RO + cifra de control) doar pt persoane juridice
             'cui' => [
                 'nullable', 'string', 'max:20', 'required_if:client_type,company',
-                Rule::when($request->input('client_type') === 'company', [new RomanianCuiRule()]),
+                Rule::when($request->input('client_type') === 'company', [
+                    new RomanianCuiRule(),
+                    $uniqueInCompany('cui'),
+                ]),
             ],
-            'trade_registry_number' => 'nullable|string|max:20',
+            'trade_registry_number' => ['nullable', 'string', 'max:20', $uniqueInCompany('trade_registry_number')],
             'vat_number' => 'nullable|string|max:20',
 
             'county' => 'required|string|max:255',
@@ -181,12 +194,17 @@ class ClientController extends Controller
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
 
-            'add_contact' => 'nullable|boolean',
-            'contacts' => 'nullable|array|max:1',
-            'contacts.0.name' => 'required_if:add_contact,1|nullable|string|max:255',
-            'contacts.0.role' => 'required_if:add_contact,1|nullable|string|max:100',
-            'contacts.0.email' => 'required_if:add_contact,1|nullable|email|max:255',
-            'contacts.0.phone' => 'required_if:add_contact,1|nullable|string|max:20',
+            // F-202: relație 1:N
+            'contacts' => 'nullable|array',
+            'contacts.*.name' => 'required|string|max:255',
+            'contacts.*.role' => 'required|string|max:100',
+            // email unic pe client
+            'contacts.*.email' => 'required|email|max:255|distinct',
+            'contacts.*.phone' => 'required|string|max:20',
+        ], [
+            'cnp.unique' => 'Există deja un client cu acest CNP.',
+            'cui.unique' => 'Există deja un client cu acest CUI.',
+            'trade_registry_number.unique' => 'Există deja un client cu acest număr de registru al comerțului.',
         ]);
     }
 }

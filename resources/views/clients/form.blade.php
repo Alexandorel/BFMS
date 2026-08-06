@@ -1,6 +1,11 @@
 @php
     $client = $client ?? new \App\Models\Client();
-    $existingContact = $client->exists ? $client->contacts->first() : null;
+    // F-202: toate persoanele de contact (din old() la eroare de validare, altfel din model)
+    $contactRows = old('contacts', $client->exists
+        ? $client->contacts->map(fn ($c) => [
+            'name' => $c->name, 'role' => $c->role, 'email' => $c->email, 'phone' => $c->phone,
+        ])->all()
+        : []);
 
     $counties = [
         'Alba', 'Arad', 'Argeș', 'Bacău', 'Bihor', 'Bistrița-Năsăud', 'Botoșani',
@@ -149,58 +154,95 @@
     </div>
 </div>
 
-{{-- Toggle persoană de contact — doar la companie, afișat după câmpurile comune --}}
-<div id="contact_toggle_wrapper" class="flex items-center gap-2" style="display: none;">
-    <input type="checkbox" name="add_contact" id="add_contact" value="1"
-           @checked(old('add_contact', $existingContact ? 1 : 0))>
-    <label for="add_contact" class="text-sm text-slate-700 dark:text-slate-300">Adaugă persoană de contact</label>
-</div>
-
+{{-- F-202: persoane de contact (relație 1:N) — doar la companie --}}
 <div id="contact_person_fields" class="space-y-4" style="display: none;">
-    <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Persoană de contact</p>
-
-    <div class="grid grid-cols-2 gap-4">
-        <div>
-            <label for="contact_name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nume</label>
-            <input type="text" name="contacts[0][name]" id="contact_name"
-                   value="{{ old('contacts.0.name', $existingContact->name ?? '') }}"
-                   class="form-input">
-            @error('contacts.0.name') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
-        </div>
-
-        <div>
-            <label for="contact_role" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Rol</label>
-            <input type="text" name="contacts[0][role]" id="contact_role" maxlength="100"
-                   value="{{ old('contacts.0.role', $existingContact->role ?? '') }}"
-                   class="form-input">
-            @error('contacts.0.role') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
-        </div>
+    <div class="flex items-center justify-between">
+        <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Persoane de contact</p>
+        <button type="button" id="add_contact_row" class="ui-btn ui-btn-secondary text-xs">
+            + Adaugă contact
+        </button>
     </div>
 
-    <div class="grid grid-cols-2 gap-4">
-        <div>
-            <label for="contact_phone" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Telefon</label>
-            <input type="text" name="contacts[0][phone]" id="contact_phone" maxlength="20"
-                   value="{{ old('contacts.0.phone', $existingContact->phone ?? '') }}"
-                   class="form-input">
-            @error('contacts.0.phone') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
-        </div>
+    @error('contacts') <p class="text-xs text-rose-600">{{ $message }}</p> @enderror
 
-        <div>
-            <label for="contact_email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
-            <input type="email" name="contacts[0][email]" id="contact_email"
-                   value="{{ old('contacts.0.email', $existingContact->email ?? '') }}"
-                   class="form-input">
-            @error('contacts.0.email') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
-        </div>
+    <div id="contacts_container" class="space-y-4">
+        @foreach ($contactRows as $i => $contact)
+            <div class="rounded-lg border border-app-border p-4 space-y-4 dark:border-slate-700" data-contact-row>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-medium text-slate-500">Contact #{{ $i + 1 }}</span>
+                    <button type="button" class="text-xs text-rose-600 hover:underline" data-remove-contact>Șterge</button>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nume</label>
+                        <input type="text" name="contacts[{{ $i }}][name]" value="{{ $contact['name'] ?? '' }}"
+                               class="form-input" data-contact-input>
+                        @error("contacts.$i.name") <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Rol</label>
+                        <input type="text" name="contacts[{{ $i }}][role]" maxlength="100" value="{{ $contact['role'] ?? '' }}"
+                               class="form-input" data-contact-input>
+                        @error("contacts.$i.role") <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Telefon</label>
+                        <input type="text" name="contacts[{{ $i }}][phone]" maxlength="20" value="{{ $contact['phone'] ?? '' }}"
+                               class="form-input" data-contact-input>
+                        @error("contacts.$i.phone") <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                        <input type="email" name="contacts[{{ $i }}][email]" value="{{ $contact['email'] ?? '' }}"
+                               class="form-input" data-contact-input>
+                        @error("contacts.$i.email") <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+            </div>
+        @endforeach
     </div>
 </div>
+
+{{-- Șablon pentru un rând nou de contact (clonat din JS; __INDEX__ e înlocuit cu poziția) --}}
+<template id="contact_row_template">
+    <div class="rounded-lg border border-app-border p-4 space-y-4 dark:border-slate-700" data-contact-row>
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-slate-500">Contact nou</span>
+            <button type="button" class="text-xs text-rose-600 hover:underline" data-remove-contact>Șterge</button>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nume</label>
+                <input type="text" name="contacts[__INDEX__][name]" class="form-input" data-contact-input>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Rol</label>
+                <input type="text" name="contacts[__INDEX__][role]" maxlength="100" class="form-input" data-contact-input>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Telefon</label>
+                <input type="text" name="contacts[__INDEX__][phone]" maxlength="20" class="form-input" data-contact-input>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                <input type="email" name="contacts[__INDEX__][email]" class="form-input" data-contact-input>
+            </div>
+        </div>
+    </div>
+</template>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const clientType = document.getElementById('client_type');
-        const addContact = document.getElementById('add_contact');
-        const contactToggleWrapper = document.getElementById('contact_toggle_wrapper');
+        const contactsContainer = document.getElementById('contacts_container');
+        const addContactBtn = document.getElementById('add_contact_row');
+        const contactTemplate = document.getElementById('contact_row_template');
+        let contactIndex = {{ count($contactRows) }};
+
         const groups = {
             individual: document.getElementById('individual_fields'),
             company: document.getElementById('company_fields'),
@@ -210,7 +252,7 @@
 
         function setRequired(container, isRequired) {
             container.querySelectorAll('input, select').forEach(el => {
-            if (el.hasAttribute('data-optional')) return;
+                if (el.hasAttribute('data-optional')) return;
                 if (isRequired) {
                     el.setAttribute('required', 'required');
                 } else {
@@ -219,21 +261,21 @@
             });
         }
 
-        function toggleContactFields() {
-            if (clientType.value === 'company' && addContact.checked) {
-                groups.contact.style.display = 'block';
-                setRequired(groups.contact, true);
-            } else {
-                groups.contact.style.display = 'none';
-                setRequired(groups.contact, false);
-            }
+        // Contactele sunt doar pentru companie. Cand nu-s vizibile, dezactivam
+        // inputurile ca sa NU fie trimise (si sa nu blocheze submit-ul cu required ascuns).
+        function syncContactSection() {
+            const isCompany = clientType.value === 'company';
+            groups.contact.style.display = isCompany ? 'block' : 'none';
+            groups.contact.querySelectorAll('[data-contact-input]').forEach(el => {
+                el.disabled = !isCompany;
+                el.required = isCompany;
+            });
         }
 
         function toggleFields() {
             groups.individual.style.display = 'none';
             groups.company.style.display = 'none';
             groups.common.style.display = 'none';
-            contactToggleWrapper.style.display = 'none';
             setRequired(groups.individual, false);
             setRequired(groups.company, false);
             setRequired(groups.common, false);
@@ -246,18 +288,34 @@
             if (clientType.value === 'individual') {
                 groups.individual.style.display = 'block';
                 setRequired(groups.individual, true);
-                addContact.checked = false;
             } else if (clientType.value === 'company') {
                 groups.company.style.display = 'block';
-                contactToggleWrapper.style.display = 'flex';
                 setRequired(groups.company, true);
             }
 
-            toggleContactFields();
+            syncContactSection();
         }
 
+        addContactBtn.addEventListener('click', function () {
+            const clone = contactTemplate.content.cloneNode(true);
+            clone.querySelectorAll('[name]').forEach(el => {
+                el.name = el.name.replace('__INDEX__', contactIndex);
+            });
+            contactsContainer.appendChild(clone);
+            contactIndex++;
+            syncContactSection();
+            contactsContainer.lastElementChild?.querySelector('input')?.focus();
+        });
+
+        // Stergerea unui rand (delegare de eveniment)
+        contactsContainer.addEventListener('click', function (event) {
+            const removeBtn = event.target.closest('[data-remove-contact]');
+            if (removeBtn) {
+                removeBtn.closest('[data-contact-row]').remove();
+            }
+        });
+
         clientType.addEventListener('change', toggleFields);
-        addContact.addEventListener('change', toggleContactFields);
         toggleFields();
     });
 </script>
