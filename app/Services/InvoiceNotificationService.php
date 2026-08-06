@@ -8,6 +8,7 @@ use App\Mail\PaymentConfirmationMail;
 use App\Models\Invoice;
 use App\Models\InvoiceNotification;
 use App\Models\Payment;
+use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Mail;
 
 
@@ -15,6 +16,10 @@ class InvoiceNotificationService
 {
     public function sendInvoice(Invoice $invoice): void
     {
+        if ($this->alreadySent($invoice, 'issued')) {
+            return;
+        }
+
         $this->send($invoice, 'issued', new InvoiceMail($invoice));
     }
 
@@ -45,7 +50,7 @@ class InvoiceNotificationService
             ->exists();
     }
 
-    protected function send(Invoice $invoice, string $type, $mailable, ?int $paymentId = null): void
+    protected function queue(Invoice $invoice, string $type, Mailable $mailable, ?int $paymentId = null): void
     {
         $email = $invoice->client?->email;
 

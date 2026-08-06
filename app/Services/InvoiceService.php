@@ -7,17 +7,14 @@ use App\Enums\InvoiceStatus;
 use App\Models\DocumentSeries;
 use App\Models\Invoice;
 use App\Models\User;
-use App\Mail\IssuedMail;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use RuntimeException;
 
 class InvoiceService
 {
     public function __construct(
         private DocumentSeriesService $seriesService
-    ) {
-    }
+    ) {}
 
     /**
      * Ciorna -> Emisa. Numarul fiscal se aloca abia aici, o singura data,
@@ -31,9 +28,9 @@ class InvoiceService
                 .mb_strtolower($invoice->status->label()).'.'
             );
         }
-        $invoice = DB::transaction(function() use($invoice){
+        $invoice = DB::transaction(function () use ($invoice) {
             $series = $invoice->documentSeries;
-            if(! $series){
+            if (! $series) {
                 throw new RuntimeException('Ciorna nu are o serie asociată.');
             }
             $number = $this->seriesService->allocateNumber($series);
@@ -42,12 +39,11 @@ class InvoiceService
                 'number' => $number,
                 'status' => InvoiceStatus::Issued,
             ]);
+
             return $invoice;
         });
 
-        if($invoice->client?->email){
-            Mail::to($invoice->client->email)->queue(new IssuedMail($invoice));
-        }
+        // InvoiceObserver queues the notification after this transaction commits.
         return $invoice;
     }
 

@@ -25,8 +25,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $company = Company::create([
-            'name' => 'Test Company',
-            'juridical_form' => 'SRL',
+            'name' => 'Holisun SA',
+            'juridical_form' => 'SA',
             'cui' => '12345678',
             'trade_registry_number' => 'J40/1234/2020',
             'county' => 'Test County',
@@ -39,8 +39,8 @@ class DatabaseSeeder extends Seeder
         $company->users()->attach($user->id);
 
         $secondCompany = Company::create([
-            'name' => 'Second Company',
-            'juridical_form' => 'SA',
+            'name' => 'BFMS SRL',
+            'juridical_form' => 'SRL',
             'cui' => '87654321',
             'trade_registry_number' => 'J40/4321/2021',
             'county' => 'Second County',
