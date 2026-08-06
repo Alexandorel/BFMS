@@ -100,6 +100,34 @@ class ClientContactsTest extends TestCase
         $this->assertSame(0, Client::where('company_id', $company->id)->count());
     }
 
+    public function test_a_duplicate_cui_is_rejected_with_a_validation_error(): void
+    {
+        [$operator, $company] = $this->userWithCompany();
+
+        // primul client cu CUI-ul din payload (RO14837428)
+        Client::create($this->baseClient($company) + ['name' => 'Primul SRL']);
+
+        $this->actingAs($operator)
+            ->withSession(['active_company_id' => $company->id])
+            ->post(route('clients.store'), $this->payload([]))
+            ->assertSessionHasErrors('cui'); // mesaj de validare, nu excepție 500
+
+        $this->assertSame(1, Client::where('company_id', $company->id)->count());
+    }
+
+    public function test_a_client_can_keep_its_own_cui_on_edit(): void
+    {
+        [$operator, $company] = $this->userWithCompany();
+        $client = Client::create($this->baseClient($company) + ['name' => 'Acme SRL']);
+
+        $this->actingAs($operator)
+            ->withSession(['active_company_id' => $company->id])
+            ->put(route('clients.update', $client), array_merge($this->payload([]), ['name' => 'Acme Redenumit SRL']))
+            ->assertRedirect(route('clients.index'));
+
+        $this->assertDatabaseHas('clients', ['id' => $client->id, 'name' => 'Acme Redenumit SRL']);
+    }
+
     /**
      * @param array<int, array<string, string>> $contacts
      * @return array<string, mixed>

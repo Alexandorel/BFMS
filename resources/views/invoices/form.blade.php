@@ -376,17 +376,47 @@
             clientSuggestions.classList.add('hidden');
         }
     });
+    // NFR-3: navigare rapida din tastatura pe liniile de factura.
+    // Enter nu trimite formularul din interiorul liniilor; avanseaza prin campuri
+    // si, la capatul ultimei linii, adauga automat o linie noua.
     container.addEventListener('keydown', function(e) {
-        if(e.key === 'Enter' && e.target.classList.contains('vat-input') === false){
-            const row = e.target.closest('.invoice-line-row');
-            const isLastR =row === container.lastElementChild;
-            const isLastFi = e.target.classList.contains('price-input') || e.target === row.querySelector('.line-total');
-            if(isLastR && isLastFi){
-                e.preventDefault();
-                addBtn.click();
-                const newRow = container.lastElementChild;
-                newRow.querySelector('input[name="product_name[]"]').focus();
+        if (e.key !== 'Enter') return;
+
+        // butoanele (ex. Elimina linia) isi pastreaza comportamentul nativ la Enter
+        if (e.target.tagName === 'BUTTON') return;
+
+        const row = e.target.closest('.invoice-line-row');
+        if (!row) return;
+
+        e.preventDefault();
+
+        // Daca lista de produse e deschisa, Enter alege prima sugestie.
+        if (e.target.classList.contains('product-input')) {
+            const box = row.querySelector('.product-suggestions');
+            const first = box && !box.classList.contains('hidden') ? box.querySelector('.product-option') : null;
+            if (first) {
+                first.click();
+                return;
             }
+        }
+
+        // Campurile completabile ale randului, in ordinea din DOM (fara hidden/readonly).
+        const fields = Array.from(row.querySelectorAll('input:not([type=hidden]):not([readonly]), select'));
+        const index = fields.indexOf(e.target);
+
+        // avanseaza la urmatorul camp din rand
+        if (index > -1 && index < fields.length - 1) {
+            fields[index + 1].focus();
+            return;
+        }
+
+        // ultimul camp: mergem pe linia urmatoare sau adaugam una noua
+        const nextRow = row.nextElementSibling;
+        if (nextRow) {
+            nextRow.querySelector('input[name="product_name[]"]').focus();
+        } else {
+            addBtn.click();
+            container.lastElementChild.querySelector('input[name="product_name[]"]').focus();
         }
     });
 
