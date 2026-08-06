@@ -61,7 +61,7 @@ class InvoiceObserver
         $email = $invoice->client->email;
 
         try {
-            Mail::to($email)->send(new InvoiceMail($invoice, 'issued'));
+            Mail::to($email)->queue(new InvoiceMail($invoice, 'issued'));
 
             InvoiceNotification::create([
                 'invoice_id' => $invoice->id,
