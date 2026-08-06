@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Mail\InvoiceMail;
+use App\Mail\InvoiceReminderMail; // ✅ Am importat clasa corectă
 use App\Models\Invoice;
 use App\Models\InvoiceNotification;
 use Illuminate\Console\Command;
@@ -67,7 +67,8 @@ class SendInvoiceReminders extends Command
             $email = $invoice->client->email;
 
             try {
-                Mail::to($email)->send(new InvoiceMail($invoice, $type));
+
+                Mail::to($email)->send(new InvoiceReminderMail($invoice, $type));
 
                 InvoiceNotification::create([
                     'invoice_id' => $invoice->id,

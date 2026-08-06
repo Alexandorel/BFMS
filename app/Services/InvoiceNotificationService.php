@@ -14,7 +14,7 @@ class InvoiceNotificationService
 {
     public function sendInvoice(Invoice $invoice): void
     {
-        $this->send($invoice, 'issued', new InvoiceMail($invoice));
+        $this->queue($invoice, 'issued', new InvoiceMail($invoice));
     }
 
     public function sendReminder(Invoice $invoice, string $type): void
@@ -23,12 +23,12 @@ class InvoiceNotificationService
             return;
         }
 
-        $this->send($invoice, $type, new InvoiceReminderMail($invoice, $type));
+        $this->queue($invoice, $type, new InvoiceReminderMail($invoice, $type));
     }
 
     public function sendPaymentConfirmation(Payment $payment): void
     {
-        $this->send(
+        $this->queue(
             $payment->invoice,
             'payment_confirmation',
             new PaymentConfirmationMail($payment),
@@ -72,7 +72,7 @@ class InvoiceNotificationService
         ]);
 
         try {
-            Mail::to($email)->send($mailable);
+            Mail::to($email)->queue($mailable);
             $notification->update(['status' => 'sent', 'sent_at' => now()]);
         } catch (\Throwable $e) {
             $notification->update(['status' => 'failed', 'error_message' => $e->getMessage()]);
