@@ -60,7 +60,7 @@ class ClientController extends Controller
     {
         $validated = $this->validateClient($request);
 
-        return DB::transaction(function () use ($validated, $request) {
+        return DB::transaction(function () use ($validated) {
             $client = Client::create([
                 'company_id' => $this->activeCompanyId(),
                 'client_type' => $validated['client_type'],
@@ -79,8 +79,9 @@ class ClientController extends Controller
                 'phone' => $validated['phone'] ?? null,
             ]);
 
-            if ($request->boolean('add_contact') && $request->filled('contacts.0.name')) {
-                $client->contacts()->create($validated['contacts'][0]);
+            // F-202: salvam toate persoanele de contact trimise (0..N)
+            foreach ($validated['contacts'] ?? [] as $contact) {
+                $client->contacts()->create($contact);
             }
 
             return redirect()->route('clients.index')->with('status', 'Client adaugat cu succes.');
@@ -100,7 +101,7 @@ class ClientController extends Controller
 
         $validated = $this->validateClient($request);
 
-        return DB::transaction(function () use ($validated, $request, $client) {
+        return DB::transaction(function () use ($validated, $client) {
             $client->update([
                 'client_type' => $validated['client_type'],
                 'name' => $validated['name'] ?? null,
@@ -118,13 +119,10 @@ class ClientController extends Controller
                 'phone' => $validated['phone'] ?? null,
             ]);
 
-            if ($request->boolean('add_contact') && $request->filled('contacts.0.name')) {
-                $client->contacts()->updateOrCreate(
-                    ['id' => $client->contacts()->first()?->id],
-                    $validated['contacts'][0]
-                );
-            } else {
-                $client->contacts()->delete();
+            // F-202: sincronizam lista de contacte — stergem tot si recreem din formular
+            $client->contacts()->delete();
+            foreach ($validated['contacts'] ?? [] as $contact) {
+                $client->contacts()->create($contact);
             }
 
             return redirect()->route('clients.index')->with('status', 'Client actualizat cu succes.');
@@ -181,12 +179,13 @@ class ClientController extends Controller
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
 
-            'add_contact' => 'nullable|boolean',
-            'contacts' => 'nullable|array|max:1',
-            'contacts.0.name' => 'required_if:add_contact,1|nullable|string|max:255',
-            'contacts.0.role' => 'required_if:add_contact,1|nullable|string|max:100',
-            'contacts.0.email' => 'required_if:add_contact,1|nullable|email|max:255',
-            'contacts.0.phone' => 'required_if:add_contact,1|nullable|string|max:20',
+            // F-202: relație 1:N 
+            'contacts' => 'nullable|array',
+            'contacts.*.name' => 'required|string|max:255',
+            'contacts.*.role' => 'required|string|max:100',
+            // email unic pe client
+            'contacts.*.email' => 'required|email|max:255|distinct',
+            'contacts.*.phone' => 'required|string|max:20',
         ]);
     }
 }
