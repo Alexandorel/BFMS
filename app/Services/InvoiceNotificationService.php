@@ -50,7 +50,7 @@ class InvoiceNotificationService
             ->exists();
     }
 
-    protected function queue(Invoice $invoice, string $type, Mailable $mailable, ?int $paymentId = null): void
+    protected function send(Invoice $invoice, string $type, Mailable $mailable, ?int $paymentId = null): void
     {
         $email = $invoice->client?->email;
 
