@@ -30,6 +30,7 @@
         ],
         default => [
             ['label' => 'Dashboard', 'url' => route('dashboard.administrator'), 'match' => 'dashboard.administrator', 'icon' => $icons['dashboard']],
+            ['label' => 'Rapoarte', 'url' => route('administrator.reports.index'), 'match' => 'administrator.reports.*', 'icon' => $icons['reports']],
             ['label' => 'Clienți', 'url' => route('clients.index'), 'match' => 'clients.*', 'icon' => $icons['clients']],
             ['label' => 'Facturi', 'url' => route('invoices.index'), 'match' => 'invoices.*', 'icon' => $icons['invoices']],
             ['label' => 'Produse', 'url' => route('products.index'), 'match' => 'products.*', 'icon' => $icons['products']],
@@ -40,6 +41,15 @@
     $initials = mb_strtoupper(
         mb_substr($currentUser->first_name ?? 'U', 0, 1)
         . mb_substr($currentUser->last_name ?? 'N', 0, 1)
+    );
+
+    $administratorSettingsActive = request()->routeIs(
+        'administrator.settings.*',
+        'administrator.companies.*',
+        'administrator.team.*',
+        'administrator.series.*',
+        'administrator.bank-accounts.*',
+        'administrator.profile.*',
     );
 @endphp
 
@@ -71,8 +81,8 @@
             <a href="{{ route('administrator.settings.company') }}"
                aria-label="Setări"
                title="Setări"
-               @if (request()->routeIs('administrator.settings.*') || request()->routeIs('administrator.*')) aria-current="page" @endif
-               class="group flex min-h-11 items-center justify-center gap-3 rounded-xl px-3 transition-colors xl:justify-start {{ request()->routeIs('administrator.settings.*') || request()->routeIs('administrator.*') ? 'bg-brand-50 font-semibold text-brand-800 dark:bg-brand-950/50 dark:text-brand-200' : 'text-slate-600 hover:bg-slate-50 hover:text-ink-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white' }}">
+               @if ($administratorSettingsActive) aria-current="page" @endif
+               class="group flex min-h-11 items-center justify-center gap-3 rounded-xl px-3 transition-colors xl:justify-start {{ $administratorSettingsActive ? 'bg-brand-50 font-semibold text-brand-800 dark:bg-brand-950/50 dark:text-brand-200' : 'text-slate-600 hover:bg-slate-50 hover:text-ink-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white' }}">
                 <svg class="size-5 shrink-0 text-slate-400 group-hover:text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icons['settings'] }}" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -91,16 +101,6 @@
                     <p class="truncate text-xs capitalize text-slate-500 dark:text-slate-400">{{ $currentUser->role }}</p>
                 </div>
             </div>
-            <button type="button" data-theme-toggle aria-label="Comută tema" title="Comută tema"
-                    class="mt-2 flex min-h-11 w-full items-center justify-center gap-3 rounded-xl px-3 text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors hover:bg-slate-50 hover:text-ink-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white xl:justify-start">
-                <svg class="size-5 shrink-0 text-slate-400 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-                <svg class="hidden size-5 shrink-0 text-amber-400 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <span class="hidden xl:inline">Comută tema</span>
-            </button>
             <form method="POST" action="{{ route('logout') }}" class="mt-2">
                 @csrf
                 <button type="submit" aria-label="Deconectare" title="Deconectare"
@@ -147,7 +147,7 @@
 
             @if (($currentUser->role ?? null) === 'administrator')
                 <a href="{{ route('administrator.settings.company') }}"
-                   class="flex min-h-11 items-center gap-3 rounded-xl px-3 {{ request()->routeIs('administrator.*') ? 'bg-brand-50 font-semibold text-brand-800 dark:bg-brand-950/50 dark:text-brand-200' : 'text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }}">
+                   class="flex min-h-11 items-center gap-3 rounded-xl px-3 {{ $administratorSettingsActive ? 'bg-brand-50 font-semibold text-brand-800 dark:bg-brand-950/50 dark:text-brand-200' : 'text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800' }}">
                     <svg class="size-5 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icons['settings'] }}" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -166,15 +166,6 @@
                         <p class="text-xs capitalize text-slate-500 dark:text-slate-400">{{ $currentUser->role }}</p>
                     </div>
                 </div>
-                <button type="button" data-theme-toggle class="ui-btn ui-btn-secondary w-full mb-2">
-                    <svg class="size-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                    </svg>
-                    <svg class="hidden size-5 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                    Comută tema
-                </button>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="ui-btn ui-btn-secondary w-full">

@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Services\ActiveCompanyService;
 use App\Services\BNRExchange;
 use App\Services\InvoiceService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use RuntimeException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -45,11 +46,14 @@ class InvoiceController extends Controller
             ->latest()
             ->get();
 
-        return view('contabil.invoices', compact(
-            'invoices',
-            'paymentMode',
-            'filterStatuses'
-        ));
+        return view('contabil.invoices', [
+            'user' => $request->user(),
+            'company' => $company,
+            'companies' => $request->user()->companies,
+            'invoices' => $invoices,
+            'paymentMode' => $paymentMode,
+            'filterStatuses' => $filterStatuses,
+        ]);
     }
     public function show(Invoice $invoice)
     {
@@ -71,6 +75,36 @@ class InvoiceController extends Controller
         ]);
 
         return view('invoices.show', compact('invoice'));
+    }
+
+    /** Temele PDF disponibile (F-601). */
+    private const PDF_THEMES = ['classic', 'modern', 'minimalist'];
+
+    public function downloadPdf(Request $request, Invoice $invoice)
+    {
+        abort_unless(
+            Auth::user()->companies()->whereKey($invoice->company_id)->exists(),
+            403
+        );
+
+        // tema selectată de utilizator; fallback pe modern daca lipseste/e invalida
+        $theme = $request->query('tema');
+        $theme = in_array($theme, self::PDF_THEMES, true) ? $theme : 'modern';
+
+        $invoice->load([
+            'client',
+            'company.bankAccounts',
+            'lines' => fn ($query) => $query->orderBy('position'),
+        ]);
+
+        $documentNumber = $invoice->number
+            ? $invoice->series.'-'.$invoice->number
+            : 'ciorna-'.$invoice->id;
+
+        return Pdf::loadView('invoices.pdf.'.$theme, compact('invoice'))
+            ->setPaper('a4')
+            ->setOption('isPhpEnabled', true)
+            ->download('factura-'.$documentNumber.'.pdf');
     }
 
     public function create(Request $request, ActiveCompanyService $activeCompanyService)

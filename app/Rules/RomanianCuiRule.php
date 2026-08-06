@@ -20,21 +20,22 @@ final class RomanianCuiRule implements ValidationRule
         $cui = strtoupper(trim($value));
 
         /*
-         * Format:
-         * - prefixul RO obligatoriu
+         * Prefixul RO este optional: il au doar platitorii de TVA, iar
+         * caietul de sarcini prevede si entitati neplatitoare (F-102).
+         * Il eliminam inainte de validare — nu participa la cifra de control.
+         */
+        $numericCui = preg_replace('/^RO/', '', $cui);
+
+        /*
+         * Format numeric:
          * - intre 2 si 10 cifre
          * - prima cifra nu poate fi zero.
          */
-        if (!preg_match('/^RO[1-9][0-9]{1,9}$/D', $cui)) {
-            $fail('Campul :attribute trebuie sa inceapa cu RO si '
-                . 'sa contina intre 2 si 10 cifre.');
+        if (!preg_match('/^[1-9][0-9]{1,9}$/D', $numericCui)) {
+            $fail('Campul :attribute trebuie sa contina intre 2 si 10 cifre '
+                . '(optional precedate de RO).');
             return;
         }
-
-        /*
-         * Prefixul RO nu participa la calcularea cifrei de control.
-         */
-        $numericCui = substr($cui, 2);
 
         if (!$this->hasValidChecksum($numericCui)) {
             $fail('Campul :attribute nu contine un CUI valid.');

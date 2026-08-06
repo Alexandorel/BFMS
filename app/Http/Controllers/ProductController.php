@@ -53,6 +53,7 @@ class ProductController extends Controller
             'sku' => 'required|string|max:100',
             'unit_measure' => 'required|string|max:50',
             'unit_price' => 'required|numeric|min:0',
+            'quantity' => 'required|numeric|min:0',
             'vat_rate' => 'required|numeric|min:0|max:100',
             'is_vat_exempt' => 'nullable|boolean',
         ]);
@@ -84,6 +85,7 @@ class ProductController extends Controller
             'sku' => 'required|string|max:100',
             'unit_measure' => 'required|string|max:50',
             'unit_price' => 'required|numeric|min:0',
+            'quantity' => 'required|numeric|min:0',
             'vat_rate' => 'required|numeric|min:0|max:100',
             'is_vat_exempt' => 'nullable|boolean',
         ]);

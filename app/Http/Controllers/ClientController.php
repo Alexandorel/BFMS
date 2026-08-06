@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Rules\RomanianCnpRule;
+use App\Rules\RomanianCuiRule;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Illuminate\Database\QueryException;
 
@@ -21,6 +24,18 @@ class ClientController extends Controller
         $company = $companies->firstWhere('id', $activeCompanyId) ?? $companies->first();
 
         return $company->id;
+    }
+
+    /**
+     * Method to verify client. (DoD#3)
+     */
+    private function authorizeClient(Client $client): void
+    {
+        abort_unless(
+            $client->company_id === $this->activeCompanyId(),
+            403,
+            'Clientul nu aparține firmei active.'
+        );
     }
 
     public function index(): View
@@ -74,11 +89,15 @@ class ClientController extends Controller
 
     public function edit(Client $client): View
     {
+        $this->authorizeClient($client);
+
         return view('clients.edit', compact('client'));
     }
 
     public function update(Request $request, Client $client): RedirectResponse
     {
+        $this->authorizeClient($client);
+
         $validated = $this->validateClient($request);
 
         return DB::transaction(function () use ($validated, $request, $client) {
@@ -114,6 +133,8 @@ class ClientController extends Controller
 
     public function destroy(Client $client): RedirectResponse
     {
+        $this->authorizeClient($client);
+
         try {
             $client->delete();
         } catch (QueryException $e) {
@@ -138,10 +159,18 @@ class ClientController extends Controller
 
             'first_name' => 'required_if:client_type,individual|nullable|string|max:255',
             'last_name' => 'required_if:client_type,individual|nullable|string|max:255',
-            'cnp' => 'nullable|string|max:20',
+            // F-201: validare format CNP (13 cifre + cifra de control) doar pt persoane fizice
+            'cnp' => [
+                'nullable', 'string', 'max:20',
+                Rule::when($request->input('client_type') === 'individual', [new RomanianCnpRule()]),
+            ],
 
             'name' => 'required_if:client_type,company|nullable|string|max:255',
-            'cui' => 'required_if:client_type,company|nullable|string|max:20',
+            // F-201: validare format CUI (prefix RO + cifra de control) doar pt persoane juridice
+            'cui' => [
+                'nullable', 'string', 'max:20', 'required_if:client_type,company',
+                Rule::when($request->input('client_type') === 'company', [new RomanianCuiRule()]),
+            ],
             'trade_registry_number' => 'nullable|string|max:20',
             'vat_number' => 'nullable|string|max:20',
 

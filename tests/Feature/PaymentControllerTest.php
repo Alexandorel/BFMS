@@ -295,21 +295,28 @@ class PaymentControllerTest extends TestCase
             ->assertDontSee('Înregistrează o încasare');
     }
 
-    public function test_only_an_administrator_sees_the_delete_control(): void
+    public function test_the_payment_delete_control_is_hidden_for_every_role(): void
     {
         [$invoice, $company] = $this->createInvoice(1000.00);
         $operator = $this->createUser('operator', $company);
         $administrator = $this->createUser('administrator', $company);
 
-        $this->actingAs($operator)
-            ->post(route('invoices.payments.store', $invoice), $this->payload(400.00));
-
-        $payment = Payment::where('invoice_id', $invoice->id)->firstOrFail();
+        $payment = Payment::withoutEvents(fn () => Payment::create([
+            'invoice_id' => $invoice->id,
+            'company_id' => $company->id,
+            'payment_date' => '2026-08-01',
+            'amount' => 400.00,
+            'currency' => 'RON',
+            'exchange_rate' => 1,
+            'payment_method' => 'bank_transfer',
+            'reference' => 'OP-4471',
+            'created_by' => $operator->id,
+        ]));
         $deleteRoute = route('invoices.payments.destroy', $payment);
 
         $this->actingAs($administrator)
             ->get(route('invoices.show', $invoice))
-            ->assertSee($deleteRoute);
+            ->assertDontSee($deleteRoute);
 
         $this->actingAs($operator)
             ->get(route('invoices.show', $invoice))

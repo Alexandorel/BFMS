@@ -18,10 +18,34 @@
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                     Înapoi
                 </a>
-                {{-- pe o ciorna editabila eticheta ar contrazice butoanele de mai jos --}}
-                @unless ($invoice->status->isDraft() && in_array(auth()->user()->role, ['administrator', 'operator'], true))
-                    <span class="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium">Doar vizualizare</span>
-                @endunless
+                <div class="flex items-center gap-2">
+                    {{-- Descarcare PDF cu alegere tema (F-601). <details> = dropdown fara JS. --}}
+                    <details class="relative inline-block">
+                        <summary class="ui-btn ui-btn-secondary cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14" />
+                            </svg>
+                            Descarcă PDF
+                            <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+                        <div class="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-lg border border-app-border bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
+                            <p class="px-3 py-1 text-xs font-medium text-slate-400">Alege tema</p>
+                            @foreach (['classic' => 'Clasic', 'modern' => 'Modern', 'minimalist' => 'Minimalist'] as $value => $label)
+                                <a href="{{ route('invoices.pdf', ['invoice' => $invoice, 'tema' => $value]) }}"
+                                   class="block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+                                    {{ $label }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </details>
+
+                    {{-- pe o ciorna editabila eticheta ar contrazice butoanele de mai jos --}}
+                    @unless ($invoice->status->isDraft() && in_array(auth()->user()->role, ['administrator', 'operator'], true))
+                        <span class="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium">Doar vizualizare</span>
+                    @endunless
+                </div>
             </header>
 
             {{-- Content --}}
@@ -266,7 +290,6 @@
                         // NFR-1: contabilul vede platile, dar nu le gestioneaza
                         $canRecordPayments = $invoice->status->acceptsPayments()
                             && in_array(auth()->user()->role, ['administrator', 'operator'], true);
-                        $canDeletePayments = auth()->user()->role === 'administrator';
                     @endphp
 
                     <div class="ui-table-wrap" tabindex="0" role="region" aria-label="Plățile facturii">
@@ -278,11 +301,6 @@
                                     <th class="px-5 py-3 font-medium">Referință</th>
                                     <th class="px-5 py-3 font-medium">Chitanță</th>
                                     <th class="px-5 py-3 font-medium text-right">Sumă</th>
-                                    @if ($canDeletePayments)
-                                        <th class="px-5 py-3 font-medium text-right">
-                                            <span class="sr-only">Acțiuni</span>
-                                        </th>
-                                    @endif
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
@@ -303,41 +321,10 @@
                                         <td class="px-5 py-3 text-right font-medium text-slate-900 dark:text-slate-100">
                                             {{ number_format($payment->amount, 2, ',', '.') }} {{ $payment->currency }}
                                         </td>
-                                        @if ($canDeletePayments)
-                                            <td class="px-5 py-3 text-right whitespace-nowrap">
-                                                {{-- confirmare in doi pasi: NFR-3 interzice confirm() nativ --}}
-                                                <div class="inline-flex items-center gap-2" data-delete-cell>
-                                                    <button type="button"
-                                                            data-delete-trigger
-                                                            class="ui-action-danger">
-                                                        Șterge
-                                                    </button>
-
-                                                    <span class="hidden items-center gap-2" data-delete-confirm>
-                                                        <span class="text-xs text-slate-500 dark:text-slate-400">Sigur?</span>
-                                                        <form action="{{ route('invoices.payments.destroy', $payment) }}"
-                                                              method="POST"
-                                                              class="inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit"
-                                                                    class="ui-btn ui-btn-danger">
-                                                                Da
-                                                            </button>
-                                                        </form>
-                                                        <button type="button"
-                                                                data-delete-cancel
-                                                                class="ui-btn ui-btn-secondary">
-                                                            Nu
-                                                        </button>
-                                                    </span>
-                                                </div>
-                                            </td>
-                                        @endif
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="{{ $canDeletePayments ? 6 : 5 }}" class="px-5 py-8 text-center text-slate-400">
+                                        <td colspan="5" class="px-5 py-8 text-center text-slate-400">
                                             Nicio plată înregistrată.
                                         </td>
                                     </tr>
@@ -444,26 +431,6 @@
     </x-app-shell>
 
     <script>
-        // Confirmare de stergere in doi pasi. NFR-3 interzice confirm() nativ,
-        // deci butonul isi schimba starea in loc sa blocheze firul de executie.
-        document.querySelectorAll('[data-delete-cell]').forEach(function (cell) {
-            const trigger = cell.querySelector('[data-delete-trigger]');
-            const confirm = cell.querySelector('[data-delete-confirm]');
-            const cancel = cell.querySelector('[data-delete-cancel]');
-
-            trigger?.addEventListener('click', function () {
-                trigger.classList.add('hidden');
-                confirm.classList.remove('hidden');
-                confirm.classList.add('inline-flex');
-            });
-
-            cancel?.addEventListener('click', function () {
-                confirm.classList.add('hidden');
-                confirm.classList.remove('inline-flex');
-                trigger.classList.remove('hidden');
-            });
-        });
-
         // Referinta e obligatorie doar la ordin de plata (vezi StorePaymentRequest).
         const methodSelect = document.getElementById('payment_method');
         const referenceInput = document.getElementById('reference');

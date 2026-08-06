@@ -29,6 +29,37 @@ class ReportAccessTest extends TestCase
             ->assertSee($client->full_name);
     }
 
+    public function test_administrator_can_open_reports_from_the_administrator_area(): void
+    {
+        $company = $this->createCompany();
+        $administrator = $this->createUser('administrator', $company);
+        $client = $this->createClient($company);
+
+        $this->withoutVite()
+            ->actingAs($administrator)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('administrator.reports.index'))
+            ->assertOk()
+            ->assertSee('Rapoarte financiare')
+            ->assertSee('Administrator')
+            ->assertSee($client->full_name)
+            ->assertSee(route('administrator.reports.client-sheet'), false)
+            ->assertSee(route('administrator.reports.month-close'), false);
+    }
+
+    public function test_administrator_sidebar_links_to_the_reports_page(): void
+    {
+        $company = $this->createCompany();
+        $administrator = $this->createUser('administrator', $company);
+
+        $this->withoutVite()
+            ->actingAs($administrator)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('dashboard.administrator'))
+            ->assertOk()
+            ->assertSee(route('administrator.reports.index'), false);
+    }
+
     public function test_report_forms_are_not_duplicated_on_the_accountant_dashboard(): void
     {
         $company = $this->createCompany();
@@ -51,6 +82,16 @@ class ReportAccessTest extends TestCase
 
         $this->actingAs($operator)
             ->get(route('dashboard.contabil.reports.index'))
+            ->assertForbidden();
+    }
+
+    public function test_operator_cannot_access_administrator_reports(): void
+    {
+        $company = $this->createCompany();
+        $operator = $this->createUser('operator', $company);
+
+        $this->actingAs($operator)
+            ->get(route('administrator.reports.index'))
             ->assertForbidden();
     }
 

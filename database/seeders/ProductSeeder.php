@@ -33,6 +33,7 @@ class ProductSeeder extends Seeder
                 'name' => 'Servicii de consultanță',
                 'unit_measure' => 'oră',
                 'unit_price' => 250.00,
+                'quantity' => 120.00,
                 'vat_rate' => 19.00,
             ]
         );
@@ -43,6 +44,7 @@ class ProductSeeder extends Seeder
                 'name' => 'Dezvoltare software',
                 'unit_measure' => 'oră',
                 'unit_price' => 300.00,
+                'quantity' => 80.00,
                 'vat_rate' => 19.00,
             ]
         );
@@ -53,6 +55,7 @@ class ProductSeeder extends Seeder
                 'name' => 'Licență software anuală',
                 'unit_measure' => 'buc',
                 'unit_price' => 1200.00,
+                'quantity' => 50.00,
                 'vat_rate' => 19.00,
             ]
         );
