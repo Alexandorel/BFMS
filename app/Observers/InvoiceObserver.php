@@ -2,87 +2,37 @@
 
 namespace App\Observers;
 
-use App\Models\Invoice;
-use App\Models\InvoiceNotification;
 use App\Enums\InvoiceStatus;
-use App\Mail\InvoiceMail;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
-use Throwable;
+use App\Models\Invoice;
+use App\Services\InvoiceNotificationService;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
-class InvoiceObserver
+class InvoiceObserver implements ShouldHandleEventsAfterCommit
 {
-    /**
-     * Când creezi o factură NOUĂ direct cu statusul 'emisa'
-     */
+    public function __construct(
+        private readonly InvoiceNotificationService $notifications,
+    ) {}
+
     public function created(Invoice $invoice): void
     {
-        $statusValue = $invoice->status instanceof InvoiceStatus ? $invoice->status->value : $invoice->status;
-
-        if ($statusValue === 'issued' || $statusValue === 'emisa') {
-            // Așteptăm salvarea liniilor facturii (afterCommit)
-            DB::afterCommit(function () use ($invoice) {
-                $this->processNotification($invoice);
-            });
+        if ($invoice->status === InvoiceStatus::Issued) {
+            $this->notify($invoice);
         }
     }
 
-    /**
-     * Când editezi o factură EXISTENTĂ și statusul devine 'emisa'
-     */
-    public function updating(Invoice $invoice): void
+    public function updated(Invoice $invoice): void
     {
-        $statusValue = $invoice->status instanceof InvoiceStatus ? $invoice->status->value : $invoice->status;
-
-        if ($invoice->isDirty('status') && ($statusValue === 'issued' || $statusValue === 'emisa')) {
-            $this->processNotification($invoice);
+        if ($invoice->wasChanged('status') && $invoice->status === InvoiceStatus::Issued) {
+            $this->notify($invoice);
         }
     }
 
-    private function processNotification(Invoice $invoice): void
+    private function notify(Invoice $invoice): void
     {
-        // Reîncărcăm complet factura din DB împreună cu liniile salvate
-        $invoice = $invoice->fresh(['lines', 'client', 'company']);
+        $freshInvoice = $invoice->fresh(['client', 'company']);
 
-        if (!$invoice->client || !$invoice->client->email) {
-            Log::warning("Observer: Factura ID {$invoice->id} nu are client cu email valid.");
-
-            InvoiceNotification::create([
-                'invoice_id'    => $invoice->id,
-                'type'          => 'issued',
-                'sent_to'       => $invoice->client->email ?? 'fara-email@client.com',
-                'status'        => 'failed',
-                'error_message' => 'Clientul nu are adresă de email definită.',
-            ]);
-            return;
-        }
-
-        $email = $invoice->client->email;
-
-        try {
-            Mail::to($email)->send(new InvoiceMail($invoice, 'issued'));
-
-            InvoiceNotification::create([
-                'invoice_id' => $invoice->id,
-                'type'       => 'issued',
-                'sent_at'    => now(),
-                'sent_to'    => $email,
-                'status'     => 'sent',
-            ]);
-
-            Log::info("Observer: Mail trimis cu succes pentru factura ID {$invoice->id}");
-
-        } catch (Throwable $e) {
-            Log::error("Observer: Eroare la trimiterea mail-ului: " . $e->getMessage());
-
-            InvoiceNotification::create([
-                'invoice_id'    => $invoice->id,
-                'type'          => 'issued',
-                'sent_to'       => $email,
-                'status'        => 'failed',
-                'error_message' => $e->getMessage(),
-            ]);
+        if ($freshInvoice !== null) {
+            $this->notifications->sendInvoice($freshInvoice);
         }
     }
 }

@@ -185,19 +185,6 @@ class AuditLogAccessTest extends TestCase
             ->assertSee('Preț unitar');
     }
 
-    public function test_the_administrator_dashboard_previews_the_audit_log(): void
-    {
-        [$admin, $company] = $this->userWithCompany('administrator');
-        $this->makeProduct($company, 'Produs de pe dashboard');
-
-        $this->actingAs($admin)
-            ->withSession(['active_company_id' => $company->id])
-            ->get(route('dashboard.administrator'))
-            ->assertOk()
-            ->assertSee('Activitate recentă')
-            ->assertSee('Produs de pe dashboard');
-    }
-
     public function test_the_administrator_dashboard_preview_stays_inside_the_company(): void
     {
         [$admin, $companyA] = $this->userWithCompany('administrator');

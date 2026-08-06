@@ -24,6 +24,7 @@
         ],
         'operator' => [
             ['label' => 'Dashboard', 'url' => route('operator.dashboard'), 'match' => 'operator.dashboard', 'icon' => $icons['dashboard']],
+            ['label' => 'Rapoarte', 'url' => route('operator.reports.index'), 'match' => 'operator.reports.*', 'icon' => $icons['reports']],
             ['label' => 'Facturi', 'url' => route('invoices.index'), 'match' => 'invoices.*', 'icon' => $icons['invoices']],
             ['label' => 'Clienți', 'url' => route('clients.index'), 'match' => 'clients.*', 'icon' => $icons['clients']],
             ['label' => 'Produse', 'url' => route('products.index'), 'match' => 'products.*', 'icon' => $icons['products']],
