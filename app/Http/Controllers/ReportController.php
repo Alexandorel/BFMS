@@ -19,7 +19,11 @@ class ReportController extends Controller
     {
         $user = $request->user();
         $company = $activeCompanyService->require($user, $request);
-        $isAdministrator = $user->role === 'administrator';
+        $routePrefix = match ($user->role) {
+            'administrator' => 'administrator.reports',
+            'operator' => 'operator.reports',
+            default => 'dashboard.contabil.reports',
+        };
 
         return view('contabil.reports', [
             'user' => $user,
@@ -27,13 +31,13 @@ class ReportController extends Controller
             'company' => $company,
             'clients' => $company->clients()->orderBy('name')->orderBy('last_name')->get(),
             'defaultMonth' => now()->format('Y-m'),
-            'accessLabel' => $isAdministrator ? 'Administrator' : 'Doar vizualizare',
-            'clientSheetRoute' => $isAdministrator
-                ? 'administrator.reports.client-sheet'
-                : 'dashboard.contabil.reports.client-sheet',
-            'monthCloseRoute' => $isAdministrator
-                ? 'administrator.reports.month-close'
-                : 'dashboard.contabil.reports.month-close',
+            'accessLabel' => match ($user->role) {
+                'administrator' => 'Administrator',
+                'operator' => 'Operator',
+                default => 'Doar vizualizare',
+            },
+            'clientSheetRoute' => $routePrefix.'.client-sheet',
+            'monthCloseRoute' => $routePrefix.'.month-close',
         ]);
     }
 

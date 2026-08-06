@@ -49,6 +49,9 @@ Route::middleware('auth')->group(function () {
     // Operator
     Route::middleware('role:operator')->prefix('dashboard/operator')->name('operator.')->group(function () {
         Route::get('/', [OperatorController::class, 'dashboard'])->name('dashboard');
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/client-sheet', [ReportController::class, 'clientSheet'])->name('reports.client-sheet');
+        Route::get('/reports/month-close', [ReportController::class, 'monthClose'])->name('reports.month-close');
     });
 
     // Accountant (read-only dashboard + its invoices & reports)
