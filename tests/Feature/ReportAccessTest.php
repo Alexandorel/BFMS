@@ -60,6 +60,37 @@ class ReportAccessTest extends TestCase
             ->assertSee(route('administrator.reports.index'), false);
     }
 
+    public function test_operator_can_open_reports_from_the_operator_area(): void
+    {
+        $company = $this->createCompany();
+        $operator = $this->createUser('operator', $company);
+        $client = $this->createClient($company);
+
+        $this->withoutVite()
+            ->actingAs($operator)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('operator.reports.index'))
+            ->assertOk()
+            ->assertSee('Rapoarte financiare')
+            ->assertSee('Operator')
+            ->assertSee($client->full_name)
+            ->assertSee(route('operator.reports.client-sheet'), false)
+            ->assertSee(route('operator.reports.month-close'), false);
+    }
+
+    public function test_operator_sidebar_links_to_the_reports_page(): void
+    {
+        $company = $this->createCompany();
+        $operator = $this->createUser('operator', $company);
+
+        $this->withoutVite()
+            ->actingAs($operator)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('operator.dashboard'))
+            ->assertOk()
+            ->assertSee(route('operator.reports.index'), false);
+    }
+
     public function test_report_forms_are_not_duplicated_on_the_accountant_dashboard(): void
     {
         $company = $this->createCompany();

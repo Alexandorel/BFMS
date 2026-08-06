@@ -12,28 +12,27 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ReportTableSheet implements
-    FromArray,
-    ShouldAutoSize,
-    WithColumnFormatting,
-    WithStyles,
-    WithTitle
+class ReportTableSheet implements FromArray, ShouldAutoSize, WithColumnFormatting, WithStyles, WithTitle
 {
     /**
-     * @param array<int, array<int, mixed>> $rows
-     * @param array<int, string> $moneyColumns
+     * @param  array<int, array<int, mixed>>  $rows
+     * @param  array<int, string>  $moneyColumns
      */
     public function __construct(
         private readonly string $sheetTitle,
         private readonly array $rows,
         private readonly ?int $headerRow = null,
         private readonly array $moneyColumns = [],
-    ) {
-    }
+    ) {}
 
     public function array(): array
     {
-        return $this->rows;
+        // Laravel Excel drops empty arrays while flattening rows. A null cell
+        // keeps intentional spacer rows and preserves the declared header row.
+        return array_map(
+            static fn (array $row): array => $row === [] ? [null] : $row,
+            $this->rows,
+        );
     }
 
     public function title(): string
