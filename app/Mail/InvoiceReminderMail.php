@@ -9,6 +9,8 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Mail\Mailables\Address;
+
 
 class InvoiceReminderMail extends Mailable implements ShouldQueue
 {
@@ -22,6 +24,7 @@ class InvoiceReminderMail extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
+        $company = $this->invoice->company;
         $subjects = [
             'reminder_before_due' => "Factura {$this->invoice->series}{$this->invoice->number} - scadentă în curând",
             'reminder_due' => "Factura {$this->invoice->series}{$this->invoice->number} - scadentă astăzi",
@@ -29,7 +32,10 @@ class InvoiceReminderMail extends Mailable implements ShouldQueue
             'overdue_2' => "Factura {$this->invoice->series}{$this->invoice->number} - restantă, urgent",
         ];
 
-        return new Envelope(subject: $subjects[$this->type] ?? 'Notificare factură');
+        return new Envelope(
+            from: new Address($company->email, $company->name),
+            subject: $subjects[$this->type] ?? 'Notificare factură'
+        );
     }
 
     public function content(): Content

@@ -73,6 +73,7 @@ class CompanyController extends Controller
                 'address',
                 'social_capital',
                 'vat_payer',
+                'email',
             ]));
 
             $company->users()->attach($request->user()->id);

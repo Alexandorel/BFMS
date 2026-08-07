@@ -17,15 +17,15 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $user = User::create([
-            'first_name' => 'user',
+            'first_name' => 'admin',
             'last_name' => 'test',
-            'email' => 'user@example.com',
-            'password' => bcrypt('user123'),
+            'email' => 'admin@gmail.com',
+            'password' => bcrypt('admin123'),
             'role' => 'administrator',
         ]);
 
         $company = Company::create([
-            'name' => 'Holisun SA',
+            'name' => 'Companie Test SRL',
             'juridical_form' => 'SA',
             'cui' => '12345678',
             'trade_registry_number' => 'J40/1234/2020',
@@ -34,28 +34,15 @@ class DatabaseSeeder extends Seeder
             'address' => '123 Test Street',
             'social_capital' => 10000.00,
             'vat_payer' => true,
+            'email' => 'companietest332@gmail.com',
         ]);
 
         $company->users()->attach($user->id);
 
-        $secondCompany = Company::create([
-            'name' => 'BFMS SRL',
-            'juridical_form' => 'SRL',
-            'cui' => '87654321',
-            'trade_registry_number' => 'J40/4321/2021',
-            'county' => 'Second County',
-            'city' => 'Second City',
-            'address' => '456 Second Street',
-            'social_capital' => 25000.00,
-            'vat_payer' => false,
-        ]);
-
-        $secondCompany->users()->attach($user->id);
-
         $user = User::create([
             'first_name' => 'operator',
             'last_name' => 'test',
-            'email' => 'operator@example.com',
+            'email' => 'operator@gmail.com',
             'password' => bcrypt('operator123'),
             'role' => 'operator',
         ]);
@@ -65,13 +52,12 @@ class DatabaseSeeder extends Seeder
         $user = User::create([
             'first_name' => 'contabil',
             'last_name' => 'test',
-            'email' => 'contabil@example.com',
+            'email' => 'contabil@gmail.com',
             'password' => bcrypt('contabil123'),
             'role' => 'contabil',
         ]);
 
         $company->users()->attach($user->id);
-        $secondCompany->users()->attach($user->id);
 
         $this->call([
             ClientSeeder::class,

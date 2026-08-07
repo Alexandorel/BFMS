@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('address', 255);
             $table->decimal('social_capital', 15, 2);
             $table->boolean('vat_payer')->default(false);
+            $table->string ('email', 255)->nullable();
             $table->timestamps();
         });
     }

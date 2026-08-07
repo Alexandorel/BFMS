@@ -11,6 +11,7 @@ use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Mail\Mailables\Address;
 
 class InvoiceMail extends Mailable implements ShouldQueue
 {
@@ -26,6 +27,8 @@ class InvoiceMail extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
+        $company = $this->invoice->company;
+
         $documentNumber = $this->invoice->number
             ? $this->invoice->series . '-' . $this->invoice->number
             : 'ciorna-' . $this->invoice->id;
@@ -38,7 +41,10 @@ class InvoiceMail extends Mailable implements ShouldQueue
             default               => "Factura {$documentNumber}",
         };
 
-        return new Envelope(subject: $subject);
+        return new Envelope(
+            from: new Address($company->email, $company->name),
+            subject: 'Factura ta',
+        );
     }
 
     public function content(): Content
