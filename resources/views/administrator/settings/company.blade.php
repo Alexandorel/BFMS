@@ -151,6 +151,16 @@
                                     @enderror
                                 </div>
 
+                                <div>
+                                    <label for="email"
+                                        class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                                    <input type="email" id="email" name="email" required maxlength="255"
+                                        value="{{ old('email', $company->email) }}" class="form-input">
+                                    @error('email')
+                                        <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
                                 <div class="flex justify-end pt-1">
                                     <button type="submit" class="ui-btn ui-btn-primary">
                                         Salvează modificările

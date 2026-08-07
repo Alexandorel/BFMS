@@ -34,6 +34,7 @@ class Company extends Model implements Auditable
         'address',
         'social_capital',
         'vat_payer',
+        'email',
     ];
 
     protected function casts(): array
