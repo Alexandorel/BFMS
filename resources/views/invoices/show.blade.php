@@ -280,7 +280,7 @@
                     <div class="ui-card-header">
                         <h2 class="ui-section-title">Plăți</h2>
                         <span class="text-sm text-slate-500 dark:text-slate-400">
-                            Rest de plată:
+                            {{ $invoice->isCreditNote() ? 'Valoare storno:' : 'Rest de plată:' }}
                             <span class="font-semibold {{ $invoice->balance() > 0 ? 'text-amber-700' : 'text-emerald-700' }}">
                                 {{ number_format($invoice->balance(), 2, ',', '.') }} {{ $invoice->currency }}
                             </span>
@@ -288,7 +288,7 @@
                     </div>
                     @php
                         // NFR-1: contabilul vede platile, dar nu le gestioneaza
-                        $canRecordPayments = $invoice->status->acceptsPayments()
+                        $canRecordPayments = $invoice->canAcceptPayments()
                             && in_array(auth()->user()->role, ['administrator', 'operator'], true);
                     @endphp
 
@@ -333,7 +333,12 @@
                         </table>
                     </div>
 
-                    @if ($canRecordPayments)
+                    @if ($invoice->isCreditNote())
+                        <div class="ui-alert ui-alert-info m-5" role="note">
+                            Facturile de storno nu primesc încasări. Dacă factura originală a fost deja plătită,
+                            suma se tratează printr-o restituire sau compensare separată.
+                        </div>
+                    @elseif ($canRecordPayments)
                         <div class="px-5 py-5 border-t border-slate-200 bg-slate-50/60">
                             <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-3">Înregistrează o încasare</h3>
 

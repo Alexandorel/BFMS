@@ -3,29 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ProductController extends Controller
 {
-    //Get the id of the company active in the current session. If no company is active -> uses the 1'st company of the user
+    // Get the id of the company active in the current session. If no company is active -> uses the 1'st company of the user
     private function activeCompanyId(): int
     {
-        $companyController = new CompanyController();
+        $companyController = new CompanyController;
         $companies = $companyController->getUserCompanies();
         $activeCompanyId = Session::get('active_company_id');
         $company = $companies->firstWhere('id', $activeCompanyId) ?? $companies->first();
 
         return $company->id;
     }
+
     /**
      * //Display a listing of the resource.
      */
     public function index(): View
     {
-        $companyController = new CompanyController();
+        $companyController = new CompanyController;
         $companies = $companyController->getUserCompanies();
         $activeCompanyId = Session::get('active_company_id');
         $company = $companies->firstWhere('id', $activeCompanyId) ?? $companies->first();
@@ -54,7 +56,7 @@ class ProductController extends Controller
             'unit_measure' => 'required|string|max:50',
             'unit_price' => 'required|numeric|min:0',
             'quantity' => 'required|numeric|min:0',
-            'vat_rate' => 'required|numeric|min:0|max:100',
+            'vat_rate' => ['required', 'numeric', Rule::in([21, 11, 0])],
             'is_vat_exempt' => 'nullable|boolean',
         ]);
 
@@ -86,7 +88,7 @@ class ProductController extends Controller
             'unit_measure' => 'required|string|max:50',
             'unit_price' => 'required|numeric|min:0',
             'quantity' => 'required|numeric|min:0',
-            'vat_rate' => 'required|numeric|min:0|max:100',
+            'vat_rate' => ['required', 'numeric', Rule::in([21, 11, 0])],
             'is_vat_exempt' => 'nullable|boolean',
         ]);
 
@@ -103,6 +105,7 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $product->delete();
+
         return redirect()->route('products.index')->with('status', 'Produs sters cu succes.');
     }
 }

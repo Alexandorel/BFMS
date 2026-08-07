@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Concerns\AuditsCompany;
 use App\Enums\DocumentType;
 use App\Enums\InvoiceStatus;
-use App\Concerns\AuditsCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +15,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 class Invoice extends Model implements Auditable
 {
     // our transformAudit() replaces the package no-op, stamping company_id
-    use HasFactory, \OwenIt\Auditing\Auditable, AuditsCompany {
+    use AuditsCompany, HasFactory, \OwenIt\Auditing\Auditable {
         AuditsCompany::transformAudit insteadof \OwenIt\Auditing\Auditable;
     }
 
@@ -150,6 +150,18 @@ class Invoice extends Model implements Auditable
     public function balance(): float
     {
         return round((float) $this->total - $this->paidAmount(), 2);
+    }
+
+    /**
+     * Only positive, regular invoices can receive incoming payments.
+     * A credit note represents a reduction/refund and must be settled through
+     * a dedicated refund or compensation flow, not as a positive collection.
+     */
+    public function canAcceptPayments(): bool
+    {
+        return ! $this->isCreditNote()
+            && $this->status->acceptsPayments()
+            && $this->balance() > 0;
     }
 
     public function isFullyPaid(): bool

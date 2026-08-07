@@ -2,22 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Invoice;
-use App\Services\DocumentSeriesService;
 use App\Enums\DocumentType;
 use App\Enums\InvoiceStatus;
 use App\Models\Client;
 use App\Models\DocumentSeries;
+use App\Models\Invoice;
 use App\Models\Product;
 use App\Services\ActiveCompanyService;
 use App\Services\BNRExchange;
+use App\Services\DocumentSeriesService;
 use App\Services\InvoiceService;
 use Barryvdh\DomPDF\Facade\Pdf;
-use RuntimeException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use RuntimeException;
 
 class InvoiceController extends Controller
 {
@@ -41,7 +41,10 @@ class InvoiceController extends Controller
             ->where('company_id', $company->id)
             ->when(
                 $paymentMode,
-                fn ($query) => $query->whereIn('status', $filterStatuses->map->value)
+                fn ($query) => $query
+                    ->whereIn('status', $filterStatuses->map->value)
+                    ->whereNull('credited_invoice_id')
+                    ->where('total', '>', 0)
             )
             ->latest()
             ->get();
@@ -55,6 +58,7 @@ class InvoiceController extends Controller
             'filterStatuses' => $filterStatuses,
         ]);
     }
+
     public function show(Invoice $invoice)
     {
         // The invoice must be issued to a company.
@@ -120,12 +124,12 @@ class InvoiceController extends Controller
             'seriesByType' => $this->seriesOptionsFor($company->id),
         ]);
     }
+
     public function store(
         Request $request,
         DocumentSeriesService $seriesService,
         ActiveCompanyService $activeCompanyService
-    )
-    {
+    ) {
         $company = $activeCompanyService->require(
             $request->user(),
             $request
@@ -135,8 +139,7 @@ class InvoiceController extends Controller
 
         $isDraft = $validated['action'] === 'draft';
 
-        $invoice = DB::transaction(function () use($validated,$companyId,$seriesService,$isDraft)
-        {
+        $invoice = DB::transaction(function () use ($validated, $companyId, $seriesService, $isDraft) {
             // validarea a confirmat deja firma, tipul si starea activa
             $series = DocumentSeries::findOrFail($validated['document_series_id']);
             // ciorna nu consuma numar din serie, altfel raman gauri in numerotare
@@ -145,23 +148,24 @@ class InvoiceController extends Controller
             $totals = $this->buildLines($validated);
 
             $invoice = Invoice::create([
-                'company_id'=>$companyId,
-                'client_id'=>$validated['client_id'],
-                'document_series_id'=>$series->id,
-                'document_type'=>DocumentType::from($validated['document_type']),
-                'series'=> $isDraft ? null : $series->prefix,
-                'number'=>$number,
-                'status'=>$isDraft ? InvoiceStatus::Draft : InvoiceStatus::Issued,
-                'issue_date'=> $validated['issue_date'],
-                'due_date'=>$validated['due_date'],
-                'currency'=> $validated['currency'],
-                'exchange_rate'=>$validated['exchange_rate'] ?? 1,
-                'subtotal'=>$totals['subtotal'],
-                'vat_total'=> $totals['vat_total'],
-                'total'=>$totals['total'],
-                'created_by'=>Auth::id(),
+                'company_id' => $companyId,
+                'client_id' => $validated['client_id'],
+                'document_series_id' => $series->id,
+                'document_type' => DocumentType::from($validated['document_type']),
+                'series' => $isDraft ? null : $series->prefix,
+                'number' => $number,
+                'status' => $isDraft ? InvoiceStatus::Draft : InvoiceStatus::Issued,
+                'issue_date' => $validated['issue_date'],
+                'due_date' => $validated['due_date'],
+                'currency' => $validated['currency'],
+                'exchange_rate' => $validated['exchange_rate'] ?? 1,
+                'subtotal' => $totals['subtotal'],
+                'vat_total' => $totals['vat_total'],
+                'total' => $totals['total'],
+                'created_by' => Auth::id(),
             ]);
             $invoice->lines()->createMany($totals['lines']);
+
             return $invoice;
         });
         $message = $isDraft
@@ -252,6 +256,7 @@ class InvoiceController extends Controller
             ->route(Auth::user()->dashboardRoute())
             ->with('success', 'Ciorna a fost ștearsă.');
     }
+
     /**
      * Emiterea unei ciorne: aloca numarul si trece factura in starea Emisa.
      */
@@ -369,7 +374,7 @@ class InvoiceController extends Controller
             'unit_price' => ['required', 'array'],
             'unit_price.*' => ['required', 'numeric', 'min:0'],
             'vat_rate' => ['required', 'array'],
-            'vat_rate.*' => ['required', 'numeric', 'min:0', 'max:100'],
+            'vat_rate.*' => ['required', 'numeric', Rule::in([21, 11, 0])],
             // butonul apasat: ciorna sau emitere
             'action' => ['required', 'in:draft,issue'],
         ];
@@ -447,34 +452,38 @@ class InvoiceController extends Controller
         );
     }
 
-    public function exchangeRate(Request $request, BNRExchange $bnrService){
+    public function exchangeRate(Request $request, BNRExchange $bnrService)
+    {
         $currency = $request->query('currency');
         $rate = $bnrService->getRate($currency);
-        return response()->json(['rate'=>$rate]);
+
+        return response()->json(['rate' => $rate]);
     }
+
     public function searchClients(
         Request $request,
         ActiveCompanyService $activeCompanyService
-    ){
+    ) {
         $companyId = $activeCompanyService
             ->require($request->user(), $request)
             ->id;
         $query = $request->query('q', '');
         $clients = Client::where('company_id', $companyId)
             ->where('name', 'like', "%{$query}%")
-            ->orWhere(function($q) use ($companyId, $query) {
+            ->orWhere(function ($q) use ($companyId, $query) {
                 $q->where('company_id', $companyId)
-                    -> where('first_name', 'like', "%{$query}%");
+                    ->where('first_name', 'like', "%{$query}%");
             })
-            ->orWhere(function($q) use ($companyId, $query) {
-                $q->where('company_id',$companyId)
+            ->orWhere(function ($q) use ($companyId, $query) {
+                $q->where('company_id', $companyId)
                     ->where('last_name', 'like', "%{$query}%");
             })
             ->limit(10)
             ->get(['id', 'name', 'first_name', 'last_name', 'client_type']);
+
         return response()->json(
-            $clients->map(fn($c) => [
-                'id' => $c->id, 'name'=> $c->full_name,
+            $clients->map(fn ($c) => [
+                'id' => $c->id, 'name' => $c->full_name,
             ])
         );
     }
@@ -482,8 +491,7 @@ class InvoiceController extends Controller
     public function searchProducts(
         Request $request,
         ActiveCompanyService $activeCompanyService
-    )
-    {
+    ) {
         $companyId = $activeCompanyService
             ->require($request->user(), $request)
             ->id;

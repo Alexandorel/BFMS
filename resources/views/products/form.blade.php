@@ -1,5 +1,5 @@
 @php
-    $vatOptions = [19, 9, 5, 0];
+    $vatOptions = [21, 11, 0];
 @endphp
 
 <div>

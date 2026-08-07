@@ -53,6 +53,13 @@ class PaymentControllerTest extends TestCase
             'status' => InvoiceStatus::FullyPaid,
         ]);
         $fullyPaid->save();
+        $creditNote = $issued->replicate()->fill([
+            'number' => 104,
+            'credited_invoice_id' => $issued->id,
+            'subtotal' => -1000.00,
+            'total' => -1000.00,
+        ]);
+        $creditNote->save();
         $draft = $issued->replicate()->fill([
             'series' => null,
             'number' => null,
@@ -69,6 +76,7 @@ class PaymentControllerTest extends TestCase
             ->assertSee('FCT-101')
             ->assertSee('FCT-102')
             ->assertDontSee('FCT-103')
+            ->assertDontSee('FCT-104')
             ->assertDontSee('<option value="fully_paid">', false)
             ->assertSee('appearance-none');
     }
@@ -141,6 +149,34 @@ class PaymentControllerTest extends TestCase
         $this->actingAs($operator)
             ->post(route('invoices.payments.store', $invoice), $this->payload(100.00))
             ->assertSessionHasErrors('amount');
+    }
+
+    public function test_a_credit_note_is_not_payable_from_the_ui_or_a_direct_request(): void
+    {
+        [$original, $company] = $this->createInvoice(1000.00);
+        $operator = $this->createUser('operator', $company);
+
+        $creditNote = $original->replicate()->fill([
+            'number' => 999,
+            'credited_invoice_id' => $original->id,
+            'subtotal' => -1000.00,
+            'total' => -1000.00,
+        ]);
+        $creditNote->save();
+
+        $this->withoutVite()
+            ->actingAs($operator)
+            ->get(route('invoices.show', $creditNote))
+            ->assertOk()
+            ->assertSee('Valoare storno')
+            ->assertSee('Facturile de storno nu primesc încasări')
+            ->assertDontSee('Înregistrează o încasare');
+
+        $this->actingAs($operator)
+            ->post(route('invoices.payments.store', $creditNote), $this->payload(100.00))
+            ->assertSessionHasErrors('amount');
+
+        $this->assertSame(0, Payment::where('invoice_id', $creditNote->id)->count());
     }
 
     public function test_a_bank_transfer_requires_a_reference(): void
