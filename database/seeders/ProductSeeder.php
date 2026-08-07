@@ -2,28 +2,22 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use App\Models\Product;
-use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
 {
     /**
-     * produse pentru compania user-ului user@example.com.
+     * Produse pentru compania de test comună tuturor celor trei conturi.
      */
     public function run(): void
     {
-        $user = User::where('email', 'user@example.com')->first();
-
-        if (! $user) {
-            $this->command->warn('User-ul user@example.com nu există. Rulează mai întâi DatabaseSeeder.');
-            return;
-        }
-
-        $company = $user->companies()->first();
+        $company = Company::where('cui', '12345678')->first();
 
         if (! $company) {
-            $this->command->warn('User-ul user@example.com nu are nicio companie asociată.');
+            $this->command->warn('Compania de test nu există. Rulează mai întâi DatabaseSeeder.');
+
             return;
         }
 
@@ -60,6 +54,6 @@ class ProductSeeder extends Seeder
             ]
         );
 
-        $this->command->info('Produse create pentru compania user@example.com.');
+        $this->command->info('Produse create pentru compania de test comună celor trei conturi.');
     }
 }

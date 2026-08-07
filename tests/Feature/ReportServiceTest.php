@@ -13,6 +13,7 @@ use App\Models\InvoiceLines;
 use App\Models\Payment;
 use App\Models\User;
 use App\Services\ReportService;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -95,6 +96,22 @@ class ReportServiceTest extends TestCase
 
         $this->assertIsFloat($summaryRows[9][1]);
         $this->assertIsFloat($historyRows[3][5]);
+    }
+
+    public function test_report_generation_time_uses_the_bucharest_timezone(): void
+    {
+        $this->travelTo(CarbonImmutable::parse('2026-08-07 07:05:00', 'UTC'));
+
+        try {
+            [$company, , $client] = $this->reportContext();
+
+            $report = app(ReportService::class)->clientStatement($company, $client->id);
+
+            $this->assertSame('Europe/Bucharest', $report['generated_at']->getTimezone()->getName());
+            $this->assertSame('07.08.2026 10:05', $report['generated_at']->format('d.m.Y H:i'));
+        } finally {
+            $this->travelBack();
+        }
     }
 
     /**

@@ -93,6 +93,7 @@ class InvoiceNotificationFlowTest extends TestCase
             'county' => 'Cluj',
             'city' => 'Cluj-Napoca',
             'address' => 'Strada Test nr. 1',
+            'email' => 'firma@example.com',
             'social_capital' => 200.00,
             'vat_payer' => true,
         ]);

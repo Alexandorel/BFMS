@@ -39,7 +39,7 @@ class ReportService
         return [
             'company' => $company,
             'client' => $client,
-            'generated_at' => now(),
+            'generated_at' => now(config('app.display_timezone')),
             'summary' => [
                 'invoice_count' => $rows->count(),
                 'invoiced_ron' => $this->money($rows->sum('total_ron')),
@@ -92,8 +92,8 @@ class ReportService
 
         $outstandingAtEnd = $openAtMonthEnd->sum(function (Invoice $invoice): float {
             return $this->invoiceAmountRon($invoice) - $invoice->payments->sum(
-                    fn (Payment $payment): float => $this->paymentAmountRon($payment)
-                );
+                fn (Payment $payment): float => $this->paymentAmountRon($payment)
+            );
         });
 
         return [
@@ -102,7 +102,7 @@ class ReportService
             'month_label' => ucfirst($start->locale('ro')->translatedFormat('F Y')),
             'period_start' => $start,
             'period_end' => $end,
-            'generated_at' => now(),
+            'generated_at' => now(config('app.display_timezone')),
             'summary' => [
                 'invoice_count' => $invoiceRows->count(),
                 'invoiced_ron' => $this->money($invoiceRows->sum('total_ron')),
@@ -179,7 +179,7 @@ class ReportService
     }
 
     /**
-     * @param Collection<int, Invoice> $invoices
+     * @param  Collection<int, Invoice>  $invoices
      * @return Collection<int, array<string, float>>
      */
     private function vatBreakdown(Collection $invoices): Collection

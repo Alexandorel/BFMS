@@ -7,11 +7,9 @@ use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 class ClientStatementExport implements WithMultipleSheets
 {
     /**
-     * @param array<string, mixed> $report
+     * @param  array<string, mixed>  $report
      */
-    public function __construct(private readonly array $report)
-    {
-    }
+    public function __construct(private readonly array $report) {}
 
     /**
      * @return array<int, ReportTableSheet>
@@ -53,7 +51,13 @@ class ClientStatementExport implements WithMultipleSheets
         ];
 
         return [
-            new ReportTableSheet('Sumar', $summaryRows, 8, ['B']),
+            new ReportTableSheet(
+                'Sumar',
+                $summaryRows,
+                8,
+                ['B'],
+                ['B5' => (string) $this->report['client']->tax_id],
+            ),
             new ReportTableSheet('Istoric facturi', $historyRows, 3, ['E', 'F', 'G', 'H', 'I']),
         ];
     }

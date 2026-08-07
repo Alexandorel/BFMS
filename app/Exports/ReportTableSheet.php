@@ -7,6 +7,7 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
@@ -17,12 +18,14 @@ class ReportTableSheet implements FromArray, ShouldAutoSize, WithColumnFormattin
     /**
      * @param  array<int, array<int, mixed>>  $rows
      * @param  array<int, string>  $moneyColumns
+     * @param  array<string, string>  $textCells
      */
     public function __construct(
         private readonly string $sheetTitle,
         private readonly array $rows,
         private readonly ?int $headerRow = null,
         private readonly array $moneyColumns = [],
+        private readonly array $textCells = [],
     ) {}
 
     public function array(): array
@@ -57,6 +60,13 @@ class ReportTableSheet implements FromArray, ShouldAutoSize, WithColumnFormattin
             ->getFont()
             ->setBold(true)
             ->setSize(14);
+
+        foreach ($this->textCells as $coordinate => $value) {
+            $sheet->getCell($coordinate)->setValueExplicit($value, DataType::TYPE_STRING);
+            $sheet->getStyle($coordinate)
+                ->getNumberFormat()
+                ->setFormatCode(NumberFormat::FORMAT_TEXT);
+        }
 
         if ($this->headerRow !== null) {
             $lastColumn = $sheet->getHighestColumn();
