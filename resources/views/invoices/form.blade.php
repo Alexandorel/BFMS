@@ -152,7 +152,6 @@
                                 <select name="vat_rate[]" required class="form-input vat-input">
                                     <option value="21" @selected($row['vat_rate'] == 21)>21%</option>
                                     <option value="11" @selected($row['vat_rate'] == 11)>11%</option>
-                                    <option value="5" @selected($row['vat_rate'] == 5)>5%</option>
                                     <option value="0" @selected($row['vat_rate'] == 0)>0%</option>
                                 </select>
                             </div>
@@ -251,7 +250,6 @@
                     <select name="vat_rate[]" required class="form-input vat-input">
                         <option value="21">21%</option>
                         <option value="11">11%</option>
-                        <option value="5">5%</option>
                         <option value="0">0%</option>
                     </select>
                 </div>
