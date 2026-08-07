@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Company;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -16,18 +16,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::create([
+        $administrator = User::updateOrCreate([
+            'email' => 'admin@gmail.com',
+        ], [
             'first_name' => 'admin',
             'last_name' => 'test',
-            'email' => 'admin@gmail.com',
             'password' => bcrypt('admin123'),
             'role' => 'administrator',
         ]);
 
-        $company = Company::create([
+        $company = Company::updateOrCreate([
+            'cui' => '12345678',
+        ], [
             'name' => 'Companie Test SRL',
             'juridical_form' => 'SA',
-            'cui' => '12345678',
             'trade_registry_number' => 'J40/1234/2020',
             'county' => 'Test County',
             'city' => 'Test City',
@@ -37,27 +39,29 @@ class DatabaseSeeder extends Seeder
             'email' => 'companietest332@gmail.com',
         ]);
 
-        $company->users()->attach($user->id);
+        $company->users()->syncWithoutDetaching([$administrator->id]);
 
-        $user = User::create([
+        $operator = User::updateOrCreate([
+            'email' => 'operator@gmail.com',
+        ], [
             'first_name' => 'operator',
             'last_name' => 'test',
-            'email' => 'operator@gmail.com',
             'password' => bcrypt('operator123'),
             'role' => 'operator',
         ]);
 
-        $company->users()->attach($user->id);
+        $company->users()->syncWithoutDetaching([$operator->id]);
 
-        $user = User::create([
+        $accountant = User::updateOrCreate([
+            'email' => 'contabil@gmail.com',
+        ], [
             'first_name' => 'contabil',
             'last_name' => 'test',
-            'email' => 'contabil@gmail.com',
             'password' => bcrypt('contabil123'),
             'role' => 'contabil',
         ]);
 
-        $company->users()->attach($user->id);
+        $company->users()->syncWithoutDetaching([$accountant->id]);
 
         $this->call([
             ClientSeeder::class,

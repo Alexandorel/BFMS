@@ -9,7 +9,9 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Excel as ExcelWriter;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Tests\TestCase;
 
 class ReportExportFormattingTest extends TestCase
@@ -18,9 +20,10 @@ class ReportExportFormattingTest extends TestCase
     {
         $company = new Company(['name' => 'Firma Test SRL']);
         $client = new Client([
-            'client_type' => 'company',
-            'name' => 'Ion Popescu',
-            'cui' => 'RO12345678',
+            'client_type' => 'individual',
+            'first_name' => 'Ion',
+            'last_name' => 'Popescu',
+            'cnp' => '1900101223344',
         ]);
 
         $report = [
@@ -51,9 +54,18 @@ class ReportExportFormattingTest extends TestCase
         file_put_contents($path, $contents);
 
         try {
-            $sheet = IOFactory::load($path)->getSheetByName('Istoric facturi');
+            $workbook = IOFactory::load($path);
+            $sheet = $workbook->getSheetByName('Istoric facturi');
+            $summarySheet = $workbook->getSheetByName('Sumar');
 
             $this->assertNotNull($sheet);
+            $this->assertNotNull($summarySheet);
+            $this->assertSame('1900101223344', $summarySheet->getCell('B5')->getValue());
+            $this->assertSame(DataType::TYPE_STRING, $summarySheet->getCell('B5')->getDataType());
+            $this->assertSame(
+                NumberFormat::FORMAT_TEXT,
+                $summarySheet->getStyle('B5')->getNumberFormat()->getFormatCode(),
+            );
             $this->assertNull($sheet->getCell('A2')->getValue());
             $this->assertSame('Data', $sheet->getCell('A3')->getValue());
             $this->assertSame('4F46E5', $sheet->getStyle('A3')->getFill()->getStartColor()->getRGB());

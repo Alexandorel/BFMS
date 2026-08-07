@@ -4,38 +4,46 @@ namespace Database\Seeders;
 
 use App\Enums\DocumentType;
 use App\Models\Client;
+use App\Models\Company;
 use App\Models\DocumentSeries;
-use App\Services\DocumentSeriesService;
 use App\Models\Invoice;
 use App\Models\InvoiceLines;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\DocumentSeriesService;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class InvoiceSeeder extends Seeder
 {
+    use WithoutModelEvents;
+
     /**
-     * 5 invoices for user@example.com
+     * Cinci facturi pentru compania de test comună celor trei conturi.
      */
     public function run(): void
     {
-        $user = User::where('email', 'user@example.com')->first();
-
-        if (! $user) {
-            $this->command->warn('User-ul user@example.com nu există. Rulează mai întâi DatabaseSeeder.');
-            return;
-        }
-
-        $company = $user->companies()->first();
+        $company = Company::where('cui', '12345678')->first();
 
         if (! $company) {
-            $this->command->warn('User-ul user@example.com nu are nicio companie asociată.');
+            $this->command->warn('Compania de test nu există. Rulează mai întâi DatabaseSeeder.');
+
             return;
         }
 
-        // Clients 
+        $creator = User::where('email', 'admin@gmail.com')
+            ->whereHas('companies', fn ($query) => $query->whereKey($company->id))
+            ->first();
+
+        if (! $creator) {
+            $this->command->warn('Administratorul de test nu este asociat companiei. Rulează DatabaseSeeder.');
+
+            return;
+        }
+
+        // Clients
         $clientCompany = Client::where('company_id', $company->id)->where('cui', 'RO45678901')->first();
         $clientIndividual = Client::where('company_id', $company->id)->where('cnp', '1900101223344')->first();
 
@@ -46,10 +54,11 @@ class InvoiceSeeder extends Seeder
 
         if (! $clientCompany || ! $clientIndividual || ! $consultanta || ! $dezvoltare || ! $licenta) {
             $this->command->warn('Lipsesc clienți sau produse. Rulează ClientSeeder și ProductSeeder înainte.');
+
             return;
         }
 
-        DB::transaction(function () use ($user, $company, $clientCompany, $clientIndividual, $consultanta, $dezvoltare, $licenta) {
+        DB::transaction(function () use ($creator, $company, $clientCompany, $clientIndividual, $consultanta, $dezvoltare, $licenta) {
             // Document Serie for invoices
             $series = DocumentSeries::firstOrCreate(
                 [
@@ -109,6 +118,18 @@ class InvoiceSeeder extends Seeder
             ];
 
             foreach ($invoicesData as $data) {
+                $alreadySeeded = Invoice::query()
+                    ->where('company_id', $company->id)
+                    ->where('client_id', $data['client']->id)
+                    ->where('document_type', DocumentType::Invoice)
+                    ->whereDate('issue_date', $data['issue_date'])
+                    ->whereDate('due_date', $data['due_date'])
+                    ->exists();
+
+                if ($alreadySeeded) {
+                    continue;
+                }
+
                 $number = $data['status'] === 'draft'
                     ? null
                     : app(DocumentSeriesService::class)->allocateNumber($series);
@@ -128,7 +149,7 @@ class InvoiceSeeder extends Seeder
                     'subtotal' => 0,
                     'vat_total' => 0,
                     'total' => 0,
-                    'created_by' => $user->id,
+                    'created_by' => $creator->id,
                 ]);
 
                 $subtotal = 0;
@@ -169,14 +190,14 @@ class InvoiceSeeder extends Seeder
 
                 // Paymanents for invoices
                 if ($data['paid'] === 'full') {
-                    $this->createPayment($invoice, $company->id, $user->id, $total, $data['issue_date']);
+                    $this->createPayment($invoice, $company->id, $creator->id, $total, $data['issue_date']);
                 } elseif ($data['paid'] === 'partial') {
-                    $this->createPayment($invoice, $company->id, $user->id, round($total / 2, 2), $data['issue_date']);
+                    $this->createPayment($invoice, $company->id, $creator->id, round($total / 2, 2), $data['issue_date']);
                 }
             }
         });
 
-        $this->command->info('5 facturi create pentru user@example.com.');
+        $this->command->info('Facturile de test sunt disponibile celor trei conturi.');
     }
 
     private function createPayment(Invoice $invoice, int $companyId, int $userId, float $amount, string $date): void
@@ -189,7 +210,7 @@ class InvoiceSeeder extends Seeder
             'currency' => 'RON',
             'exchange_rate' => 1,
             'payment_method' => 'bank_transfer',
-            'reference' => 'OP-' . $invoice->series . $invoice->number,
+            'reference' => 'OP-'.$invoice->series.$invoice->number,
             'created_by' => $userId,
         ]);
     }
