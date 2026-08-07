@@ -13,7 +13,7 @@ class BNRExchange
         }
         return Cache::remember("bnr_rate_{$currency}_" . now()->format('Y-m-d'), now()->addHours(12), function () use($currency){
             try{
-                $response = Http::timeout(5)->get('https://www.bnr.ro/nbrfxrates.xml');
+                $response = Http::timeout(5)->get('https://curs.bnr.ro/nbrfxrates.xml');
                 if(! $response->ok()){
                     return null;
                 }

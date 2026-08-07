@@ -23,7 +23,7 @@
             'product_id' => old('product_id')[$i] ?? '',
             'quantity' => old('quantity')[$i] ?? '',
             'unit_price' => old('unit_price')[$i] ?? '',
-            'vat_rate' => old('vat_rate')[$i] ?? 19,
+            'vat_rate' => old('vat_rate')[$i] ?? 21,
         ])->all();
     } elseif ($isEdit) {
         $lineRows = $invoice->lines->map(fn ($line) => [
@@ -34,7 +34,7 @@
             'vat_rate' => $line->vat_rate_snapshot,
         ])->all();
     } else {
-        $lineRows = [['name' => '', 'product_id' => '', 'quantity' => 1, 'unit_price' => '', 'vat_rate' => 19]];
+        $lineRows = [['name' => '', 'product_id' => '', 'quantity' => 1, 'unit_price' => '', 'vat_rate' => 21]];
     }
 @endphp
 
@@ -150,9 +150,8 @@
                             </div>
                             <div class="sm:col-span-2">
                                 <select name="vat_rate[]" required class="form-input vat-input">
-                                    <option value="19" @selected($row['vat_rate'] == 19)>19%</option>
-                                    <option value="9" @selected($row['vat_rate'] == 9)>9%</option>
-                                    <option value="5" @selected($row['vat_rate'] == 5)>5%</option>
+                                    <option value="21" @selected($row['vat_rate'] == 21)>21%</option>
+                                    <option value="11" @selected($row['vat_rate'] == 11)>11%</option>
                                     <option value="0" @selected($row['vat_rate'] == 0)>0%</option>
                                 </select>
                             </div>
@@ -249,9 +248,8 @@
                 </div>
                 <div class="sm:col-span-2">
                     <select name="vat_rate[]" required class="form-input vat-input">
-                        <option value="19">19%</option>
-                        <option value="9">9%</option>
-                        <option value="5">5%</option>
+                        <option value="21">21%</option>
+                        <option value="11">11%</option>
                         <option value="0">0%</option>
                     </select>
                 </div>
