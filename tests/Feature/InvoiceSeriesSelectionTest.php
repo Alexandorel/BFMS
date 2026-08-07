@@ -88,7 +88,7 @@ class InvoiceSeriesSelectionTest extends TestCase
             'product_name' => ['Consultanta'],
             'quantity' => [2],
             'unit_price' => [100],
-            'vat_rate' => [19],
+            'vat_rate' => [21],
             'action' => 'issue',
         ], $overrides);
     }

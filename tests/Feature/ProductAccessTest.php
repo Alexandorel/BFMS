@@ -50,7 +50,7 @@ class ProductAccessTest extends TestCase
                 'sku' => 'X-999',
                 'unit_measure' => 'buc',
                 'unit_price' => 100,
-                'vat_rate' => 19,
+                'vat_rate' => 21,
             ])
             ->assertForbidden();
 
@@ -69,7 +69,7 @@ class ProductAccessTest extends TestCase
                 'sku' => $product->sku,
                 'unit_measure' => 'buc',
                 'unit_price' => 1,
-                'vat_rate' => 19,
+                'vat_rate' => 21,
             ])
             ->assertForbidden();
 
@@ -101,11 +101,40 @@ class ProductAccessTest extends TestCase
                 'unit_measure' => 'oră',
                 'unit_price' => 250,
                 'quantity' => 10,
-                'vat_rate' => 19,
+                'vat_rate' => 21,
             ])
             ->assertRedirect(route('products.index'));
 
         $this->assertSame(1, Product::where('sku', 'CONS-1')->count());
+    }
+
+    public function test_product_forms_and_validation_use_only_current_vat_rates(): void
+    {
+        [$operator, $company] = $this->userWithCompany('operator');
+
+        $this->actingAs($operator)
+            ->withSession(['active_company_id' => $company->id])
+            ->get(route('products.create'))
+            ->assertOk()
+            ->assertSee('<option value="21"', false)
+            ->assertSee('<option value="11"', false)
+            ->assertDontSee('<option value="19"', false)
+            ->assertDontSee('<option value="9"', false)
+            ->assertDontSee('<option value="5"', false);
+
+        $this->actingAs($operator)
+            ->withSession(['active_company_id' => $company->id])
+            ->post(route('products.store'), [
+                'name' => 'Produs cu TVA vechi',
+                'sku' => 'LEGACY-VAT',
+                'unit_measure' => 'buc',
+                'unit_price' => 100,
+                'quantity' => 1,
+                'vat_rate' => 19,
+            ])
+            ->assertSessionHasErrors('vat_rate');
+
+        $this->assertDatabaseMissing('products', ['sku' => 'LEGACY-VAT']);
     }
 
     /**
@@ -157,7 +186,7 @@ class ProductAccessTest extends TestCase
             'sku' => 'SKU-'.$this->sequence,
             'unit_measure' => 'buc',
             'unit_price' => 100.00,
-            'vat_rate' => 19.00,
+            'vat_rate' => 21.00,
         ]);
     }
 }

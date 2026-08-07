@@ -90,7 +90,16 @@ class StorePaymentRequest extends FormRequest
     private function amountFitsTheBalance(Invoice $invoice): Closure
     {
         return function (string $attribute, mixed $value, Closure $fail) use ($invoice): void {
-            if (! $invoice->status->acceptsPayments()) {
+            if ($invoice->isCreditNote()) {
+                $fail(
+                    'O factură de storno nu poate primi încasări. '
+                    .'Folosește un flux de restituire sau compensare.'
+                );
+
+                return;
+            }
+
+            if (! $invoice->canAcceptPayments()) {
                 $fail(
                     'Documentul este '.mb_strtolower($invoice->status->label())
                     .' și nu mai poate primi plăți.'

@@ -128,6 +128,24 @@ class PaymentServiceTest extends TestCase
         $this->service->record($invoice, $this->paymentData(100.00), $user);
     }
 
+    public function test_a_payment_on_an_issued_credit_note_is_rejected(): void
+    {
+        [$original, $user] = $this->createInvoice(1000.00);
+
+        $creditNote = $original->replicate()->fill([
+            'number' => $original->number + 1,
+            'credited_invoice_id' => $original->id,
+            'subtotal' => -1000.00,
+            'total' => -1000.00,
+        ]);
+        $creditNote->save();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('factura de storno nu poate primi incasari');
+
+        $this->service->record($creditNote, $this->paymentData(100.00), $user);
+    }
+
     public function test_a_payment_in_another_currency_is_rejected(): void
     {
         [$invoice, $user] = $this->createInvoice(1000.00, InvoiceStatus::Issued, 'EUR');

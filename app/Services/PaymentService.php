@@ -15,8 +15,7 @@ class PaymentService
 {
     public function __construct(
         private DocumentSeriesService $seriesService
-    ) {
-    }
+    ) {}
 
     /**
      * Records a payment and updates the invoice status.
@@ -29,7 +28,14 @@ class PaymentService
         return DB::transaction(function () use ($invoice, $data, $user) {
             $locked = $this->lockInvoice($invoice->getKey());
 
-            if (! $locked->status->acceptsPayments()) {
+            if (! $locked->canAcceptPayments()) {
+                if ($locked->isCreditNote()) {
+                    throw new RuntimeException(
+                        'O factura de storno nu poate primi incasari. '
+                        .'Foloseste un flux de restituire sau compensare.'
+                    );
+                }
+
                 throw new RuntimeException(
                     'Documentul este '.mb_strtolower($locked->status->label())
                     .' si nu mai poate primi plati.'
